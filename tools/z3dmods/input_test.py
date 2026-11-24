@@ -199,6 +199,11 @@ class Session:
         time.sleep(seconds)
         subprocess.run(["xdotool", "mouseup", button], env=self._env, check=True)
 
+    def mouse_held(self, verb: str, down: bool) -> None:
+        """The mouse button the app binds to the play verb `verb` put down or let go."""
+        button = str(self._keys.mouse_button(verb))
+        subprocess.run(["xdotool", "mousedown" if down else "mouseup", button], env=self._env, check=True)
+
     def mouse(self, dx: int, dy: int) -> None:
         """The mouse moved by (dx, dy) counts, x right and y down."""
         subprocess.run(["xdotool", "mousemove_relative", "--", str(dx), str(dy)], env=self._env, check=True)
@@ -306,8 +311,8 @@ OOT3D_AMMO = 20
 # Inventory.upgrades with a Bomb Bag and a Bullet Bag and room for the sticks and nuts: using ammo
 # clamps its count to the bag (decomp/oot3d/docs/item_buttons.md).
 OOT3D_BAGS = 0x8 | 0x4000 | 0x40000 | 0x100000
-# The Kokiri Sword, Tunic and Boots, as worn (ItemEquips.equipment) and as owned (Inventory.equipment).
-OOT3D_EQUIPMENT = 0x1101
+# The Kokiri Sword, Deku Shield, Tunic and Boots, as worn (ItemEquips.equipment) and as owned (Inventory.equipment).
+OOT3D_EQUIPMENT = 0x1111
 # Inside the Deku Tree: a file saved in a dungeon loads there, and the Slingshot is usable.
 OOT3D_DEKU_TREE = 0x0
 # What the slots file holds beside the ocarina, and the songs a child learns.
@@ -337,7 +342,7 @@ def _oot3d_slots_file(cfg: Config, user: Path, out: Path, aimed_on_y: bool = Fal
     child's six songs, written by the game's own save: the items and songs go into the
     inventory and autosave writes the file on a scene change. With `aimed_on_y` the Slingshot is
     on the game's Y and so on slot 1 (the patch's slots are made again from the game's buttons),
-    and the Kokiri Sword on B. With `master_quest` the file is a Master Quest one."""
+    the Kokiri Sword on B and the Deku Shield worn. With `master_quest` the file is a Master Quest one."""
     d = symbols.load(cfg.repo, "oot3d")
     inventory = symbols.global_(d, "gSaveContext") + symbols.offset(d, "SaveContext.inventory")
     items = inventory + symbols.offset(d, "Inventory.items")
@@ -866,9 +871,8 @@ def _aim(session: Session, pad: Gamepad) -> None:
     _aim_released(session)
 
 
-def _view_hold(session: Session, pad: Gamepad) -> None:
-    """OoT3D: the first-person key held in the Deku Tree keeps the view for as long as it is held,
-    and stays the first-person key: Link does not crouch behind his shield (the game's R)."""
+def _deku_tree(session: Session) -> None:
+    """OoT3D from boot to the file saved inside the Deku Tree, in play."""
     session.wait(20)
     session.key("name", "start")
     session.wait(3)
@@ -877,6 +881,30 @@ def _view_hold(session: Session, pad: Gamepad) -> None:
     session.key("name", "a")
     session.wait(10)
     session.shot("deku-tree")
+
+
+def _shield_key(session: Session, pad: Gamepad) -> None:
+    """OoT3D: the shield's key (C) held in the Deku Tree does what the shield's mouse button does,
+    and letting go ends it."""
+    _deku_tree(session)
+    session.mouse_held("shield", True)
+    session.wait(0.5)
+    session.shot("mouse-held")
+    session.mouse_held("shield", False)
+    session.wait(1)
+    session.shot("mouse-released")
+    session.key_held("play", "shield", True)
+    session.wait(0.5)
+    session.shot("key-held")
+    session.key_held("play", "shield", False)
+    session.wait(1)
+    session.shot("key-released")
+
+
+def _view_hold(session: Session, pad: Gamepad) -> None:
+    """OoT3D: the first-person key held in the Deku Tree keeps the view for as long as it is held,
+    and stays the first-person key: Link does not crouch behind his shield (the game's R)."""
+    _deku_tree(session)
     session.key_held("play", "first_person", True)
     session.wait(0.5)
     session.shot("held")
@@ -1499,7 +1527,7 @@ def _interp_scenes(session: Session, pad: Gamepad, file_1: Callable[[Session], N
 
 
 DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _gaps, "notebook-mm3d": _notebook_mm3d, "map-zoom-mm3d": _map_zoom_mm3d, "masks-mm3d": _masks_mm3d, "autosave-mm3d": _mm3d_reload, "camera": _camera, "camera-mm3d": _camera_mm3d, "hotswap": _hotswap, "slots": _slots, "slots-small": _slots,
-          "slots-mm3d": _slots_mm3d, "slots-mm3d-small": _slots_mm3d, "aim": _aim, "view-hold": _view_hold, "aim-mm3d": _aim_mm3d,
+          "slots-mm3d": _slots_mm3d, "slots-mm3d-small": _slots_mm3d, "aim": _aim, "view-hold": _view_hold, "shield-key": _shield_key, "aim-mm3d": _aim_mm3d,
           "aim-fast": _aim_fast, "camera-fast": _camera_fast, "camera-mq": _camera, "fire": _fire,
           "fire-mm3d": _fire_mm3d, "interp": lambda session, pad: _interp(session, "on", _oot3d_file_1),
           "interp-off": lambda session, pad: _interp(session, "off", _oot3d_file_1),
@@ -1513,7 +1541,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
                                                                     "mm3d-clock-town.json")}
 # The game a direct scenario launches, when it is not the scenario's name.
 DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slots-mm3d": "mm3d", "slots-mm3d-small": "mm3d",
-               "aim": "oot3d", "view-hold": "oot3d", "aim-mm3d": "mm3d", "verbs-mm3d": "mm3d", "gaps": "oot3d", "notebook-mm3d": "mm3d", "map-zoom-mm3d": "mm3d", "masks-mm3d": "mm3d",
+               "aim": "oot3d", "view-hold": "oot3d", "shield-key": "oot3d", "aim-mm3d": "mm3d", "verbs-mm3d": "mm3d", "gaps": "oot3d", "notebook-mm3d": "mm3d", "map-zoom-mm3d": "mm3d", "masks-mm3d": "mm3d",
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
@@ -1526,7 +1554,7 @@ RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-tu
 SIZES = {"slots-small": SMALL, "slots-mm3d-small": SMALL}
 # What a scenario puts in its user folder before the app starts.
 PREPARE = {"slots": _oot3d_slots_file, "slots-small": _oot3d_slots_file, "slots-mm3d": _mm3d_slots_file,
-           "slots-mm3d-small": _mm3d_slots_file, "aim": _oot3d_slots_file, "view-hold": _oot3d_slots_file, "aim-mm3d": _mm3d_slots_file, "verbs-mm3d": _mm3d_slots_file, "masks-mm3d": _mm3d_slots_file, "gaps": _oot3d_slots_file,
+           "slots-mm3d-small": _mm3d_slots_file, "aim": _oot3d_slots_file, "view-hold": _oot3d_slots_file, "shield-key": lambda cfg, user, out: _oot3d_slots_file(cfg, user, out, aimed_on_y=True), "aim-mm3d": _mm3d_slots_file, "verbs-mm3d": _mm3d_slots_file, "masks-mm3d": _mm3d_slots_file, "gaps": _oot3d_slots_file,
            "notebook-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, notebook=True),
            "map-zoom-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, maps=True),
            "autosave-mm3d": _mm3d_autosave_file, "camera": _oot3d_slots_file, "camera-mm3d": _mm3d_slots_file,

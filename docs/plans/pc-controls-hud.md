@@ -34,7 +34,7 @@ prints the keyboard's and the mouse's.
 | Mouse | Camera and aim |
 | E or Space | Context action |
 | Left mouse | Sword; while an item is aimed, fires it as RT does |
-| Right mouse | Shield |
+| Right mouse or C | Shield (C for a touchpad) |
 | Q or middle mouse | Target / recenter |
 | F | First person |
 | 1 to 8 | Item slots 1 to 8; 9 to 11, behind LB, are the pad's alone |

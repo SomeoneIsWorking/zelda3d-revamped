@@ -65,6 +65,8 @@ constexpr std::array kPlayKeys{
     PlayKey{SDL_SCANCODE_Q, Verb::Target},  PlayKey{SDL_SCANCODE_F, Verb::FirstPerson},
     PlayKey{SDL_SCANCODE_R, Verb::Ocarina}, PlayKey{SDL_SCANCODE_TAB, Verb::ItemScreen},
     PlayKey{SDL_SCANCODE_M, Verb::Map},     PlayKey{SDL_SCANCODE_ESCAPE, Verb::Pause},
+    // The shield (crouch) beside the right mouse button, which a touchpad makes awkward.
+    PlayKey{SDL_SCANCODE_C, Verb::Shield},
 };
 
 struct PlayMouse {
