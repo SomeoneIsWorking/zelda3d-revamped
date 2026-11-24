@@ -1499,6 +1499,34 @@ def _interp_turn(session: Session, file_1: Callable[[Session], None]) -> None:
         session.wait(FAST_TURN_EVERY)
 
 
+# A mouse at its polling rate: small moves, often.
+SMOOTH_AIM = (4, 0)
+SMOOTH_AIM_EVERY = 0.008
+SMOOTH_AIM_SECONDS = 3
+
+
+def _aim_smooth(session: Session, file_1: Callable[[Session], None]) -> None:
+    """OoT3D with every present recorded (--record): the mouse turns the free camera right at a
+    steady rate, as a mouse's polling sends it, then slot 1 aims the Slingshot and it turns the
+    aim the same way: the view should turn as steadily from present to present both times
+    (presents/)."""
+    session.expect("frame interpolation on", 60)
+    file_1(session)
+    _smooth_turn(session)
+    session.key("slot", "0")
+    session.expect("mouse aim:")
+    session.wait(1.5)
+    _smooth_turn(session)
+
+
+def _smooth_turn(session: Session) -> None:
+    end = time.monotonic() + SMOOTH_AIM_SECONDS
+    while time.monotonic() < end:
+        session.mouse(*SMOOTH_AIM)
+        time.sleep(SMOOTH_AIM_EVERY)
+    session.wait(1)
+
+
 # Routes through several scenes (tools/z3dmods/routes/): the circle pad a harness walk held from the
 # scenario's File 1, [x, y, seconds] each ([0, 0, s] a wait), and ["mouse", dx, seconds] turns.
 ROUTES = Path(__file__).parent / "routes"
@@ -1535,6 +1563,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
           "interp-textures": lambda session, pad: _interp_textures(session, _oot3d_file_1, 4),
           "interp-textures-mm3d": lambda session, pad: _interp_textures(session, _mm3d_file_1, 6),
           "interp-turn": lambda session, pad: _interp_turn(session, _oot3d_file_1),
+          "aim-smooth": lambda session, pad: _aim_smooth(session, _oot3d_file_1),
           "interp-turn-mm3d": lambda session, pad: _interp_turn(session, _mm3d_file_1),
           "interp-scenes": lambda session, pad: _interp_scenes(session, pad, _oot3d_file_1, "oot3d-kokiri.json"),
           "interp-scenes-mm3d": lambda session, pad: _interp_scenes(session, pad, _mm3d_file_1,
@@ -1545,10 +1574,10 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
-               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d",
+               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d",
                "interp-scenes": "oot3d", "interp-scenes-mm3d": "mm3d"}
 # The direct scenarios that record every present into presents/ (app --record).
-RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "interp-scenes",
+RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",
             "interp-scenes-mm3d")
 # The window of a scenario that is not WIDTH by HEIGHT.
 SIZES = {"slots-small": SMALL, "slots-mm3d-small": SMALL}
@@ -1565,6 +1594,7 @@ PREPARE = {"slots": _oot3d_slots_file, "slots-small": _oot3d_slots_file, "slots-
            "fire-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, aimed_on_y=True),
            "interp-off": lambda cfg, user, out: _store_options(cfg, user, "oot3d", {"frame_interpolation": 0}),
            "interp-mm3d": _mm3d_slots_file, "interp-textures-mm3d": _mm3d_slots_file, "interp-turn-mm3d": _mm3d_slots_file,
+           "aim-smooth": lambda cfg, user, out: _oot3d_slots_file(cfg, user, out, aimed_on_y=True),
            "interp-scenes-mm3d": _mm3d_slots_file,
            "setup": _without_set,
            "setup-wrong-dump": _without_set, "setup-missing-mod": _without_set, "setup-different-mod": _without_set,

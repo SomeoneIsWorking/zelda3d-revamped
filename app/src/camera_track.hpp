@@ -1,6 +1,7 @@
 // The camera track of frame interpolation (docs/plans/replay-interpolation.md): View_LookAt's
 // inputs in the play state's view, blended between two ticks without the quake, with the newer
-// tick's quake added back.
+// tick's quake added back, and the active camera's eye and at, which the draw's own camera update
+// starts from.
 #pragma once
 
 #include "core/section_replay.h"

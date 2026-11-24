@@ -65,8 +65,11 @@ cuts.
    tick k - 1's frame and drops it when tick k's frame shows (`RasterizerVulkan::TakeInBetween`),
    so the presents run k - 1, in-between, k at 60 Hz. Higher refresh is not built.
 6. **Motion tracks.** Camera from the inputs `View_LookAt` (0x2D77DC) takes (eye, at, up) and the
-   fov, blended unshaken with the new tick's quake added; actors by world position and rotation
-   keyed by their address and the actor list's liveness; skeletons by joint matrices after the
+   fov, blended unshaken with the new tick's quake added, and the active camera's eye and at; actors
+   by world position, rotation and focus keyed by their address and the actor list's liveness. In
+   first person and with an aimed item the draw updates the camera again (`View.updateCamera`,
+   decomp/oot3d `docs/camera.md`) from Link's focus and the camera's eye and at, so those are the
+   look's inputs there (`z3dmods inputtest aim-smooth`: the aim turns on every present); skeletons by joint matrices after the
    animation; then effects, particles and texture scroll as frames show them unblended.
 7. **Cuts.** From the game's own camera resets, scene changes, warps and cutscene shot changes,
    found per game; the N64 ports' call sites are where to look first.

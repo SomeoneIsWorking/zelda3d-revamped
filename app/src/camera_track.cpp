@@ -86,6 +86,9 @@ std::optional<std::vector<Core::SectionReplay::Input>> CameraTrack::inputs(float
       replayInput(to.play + addresses_.viewAt, shaken(from.cameraAt, to.cameraAt, to.viewAt)),
       replayInput(to.play + addresses_.viewUp, up),
       replayInput(to.play + addresses_.viewFovy, lerp(from.fovy, to.fovy, t)),
+      // The draw updates the camera again where the look sets the view: from the in-between camera.
+      replayInput(to.camera + addresses_.cameraEye, lerp(from.cameraEye, to.cameraEye, t)),
+      replayInput(to.camera + addresses_.cameraAt, lerp(from.cameraAt, to.cameraAt, t)),
   };
 }
 

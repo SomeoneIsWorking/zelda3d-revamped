@@ -28,6 +28,8 @@ void ActorTrack::sample(Core::SectionReplay &replay) {
           .id = readStart<int16_t>(replay, actor + addresses_.id),
           .position = readStart<Vec3>(replay, actor + addresses_.position),
           .shapeRotation = readStart<Vec3s>(replay, actor + addresses_.shapeRotation),
+          .focusPosition = readStart<Vec3>(replay, actor + addresses_.focusPosition),
+          .focusRotation = readStart<Vec3s>(replay, actor + addresses_.focusRotation),
       };
       if (addresses_.drawPhase && sample.id == addresses_.drawPhase->id) {
         sample.drawPhase = readStart<uint8_t>(replay, actor + addresses_.drawPhase->offset);
@@ -50,6 +52,10 @@ ActorTrack::Counts ActorTrack::inputs(float t, std::vector<Core::SectionReplay::
         replayInput(actor + addresses_.position, lerp(from->second.position, to.position, t)));
     out.push_back(replayInput(actor + addresses_.shapeRotation,
                               lerpAngles(from->second.shapeRotation, to.shapeRotation, t)));
+    out.push_back(replayInput(actor + addresses_.focusPosition,
+                              lerp(from->second.focusPosition, to.focusPosition, t)));
+    out.push_back(replayInput(actor + addresses_.focusRotation,
+                              lerpAngles(from->second.focusRotation, to.focusRotation, t)));
     if (addresses_.drawPhase && to.id == addresses_.drawPhase->id) {
       out.push_back(replayInput(actor + addresses_.drawPhase->offset,
                                 lerpTurn8(from->second.drawPhase, to.drawPhase, t)));

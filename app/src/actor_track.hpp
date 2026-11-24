@@ -1,6 +1,6 @@
 // The actor track of frame interpolation (docs/plans/replay-interpolation.md): each live actor's
-// world position and shape rotation, which Actor_Draw builds its model matrix from, blended
-// between two ticks. An actor pairs by its address and id while it is in an actor list in both.
+// world position and shape rotation, which Actor_Draw builds its model matrix from, and its focus,
+// which the draw's camera update reads in first person, blended between two ticks. An actor pairs by its address and id while it is in an actor list in both.
 #pragma once
 
 #include "core/section_replay.h"
@@ -24,6 +24,8 @@ struct ActorAddresses {
   uint32_t id;
   uint32_t position;
   uint32_t shapeRotation;
+  uint32_t focusPosition;
+  uint32_t focusRotation;
   // An 8-bit turn the draw of actors with this id steps itself (OoT3D's Player_Draw, its damage
   // flash): blended, then stepped once by the replay's draw.
   struct DrawPhase {
@@ -44,7 +46,7 @@ public:
     uint64_t paired = 0;
     uint64_t unpaired = 0;
   };
-  // The paired actors' positions and rotations a fraction `t` of the way from the previous tick.
+  // The paired actors' positions, rotations and focus a fraction `t` of the way from the previous tick.
   Counts inputs(float t, std::vector<Core::SectionReplay::Input> &out) const;
   // The live actors of this tick with that id, paired with the previous tick's.
   [[nodiscard]] std::vector<uint32_t> pairedWithId(int16_t id) const;
@@ -54,6 +56,8 @@ private:
     int16_t id = 0;
     Vec3 position{};
     Vec3s shapeRotation{};
+    Vec3 focusPosition{};
+    Vec3s focusRotation{};
     uint8_t drawPhase = 0;
   };
 

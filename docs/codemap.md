@@ -90,14 +90,14 @@
   - `term_signal`: SIGTERM and SIGINT: SDL's quit event for the window's loop, and the process ended when the loop cannot take it.
   - `slot_link`: the item slots' block in the running game's patch: the held slots written in, the pad table the game wants and each slot's content read out.
   - `frame_interpolation`: the game's draw section hooked through the core's `SectionReplay` (`patch/<game>/interpolation.toml`): census, t = 1 probes and the in-betweens with the tracks the table names, run through the core's `GPU::RunDetached`.
-  - `actor_track`: the actors' motion track for an in-between: each live actor's `world.pos` and `shape.rot` blended, paired by address and id, and an 8-bit turn the draw of one actor id steps itself (OoT3D's damage flash).
+  - `actor_track`: the actors' motion track for an in-between: each live actor's `world.pos`, `shape.rot` and `focus` blended, paired by address and id, and an 8-bit turn the draw of one actor id steps itself (OoT3D's damage flash).
   - `skeleton_track`: the skeletons' motion track: the joint tables of the skeletons the section drew (calls the core observed), blended joint by joint.
   - `effect_pool_track`: an actor's own effect array blended slot by slot (ObjectKankyo's fairies), in actors the actor track paired.
   - `fade_track`: the fades' motion track: the colour of the transition's fill while it is a fade, and of the fade flash, blended.
   - `material_track`: the material animations' track (texture scroll): each animation the draw steps, or the update steps before it (made again as the replay's lead call), started part of its step on, paired by address, animation and step.
   - `held_lock`: a lock another thread holds as the draw section starts (MM3D's GSP interrupt lock), written free for each replay.
   - `motion_blend`: the tracks' blends (floats, vectors, binary angles the short way, rigid 3x4 matrices); `section_memory`: typed reads of the section's start state and replay inputs.
-  - `camera_track`: the camera's motion track for an in-between: `View_LookAt`'s eye, at, up and fovy blended unshaken between two ticks, with the newer tick's quake, and the cuts.
+  - `camera_track`: the camera's motion track for an in-between: `View_LookAt`'s eye, at, up and fovy blended unshaken between two ticks, with the newer tick's quake, the active camera's eye and at, and the cuts.
   - `replay_leak_check`: `interp leakcheck`: the rasterizer cache's state and physical memory captured before and after a replay and compared.
   - `gx_cmdlist`: the bound nn::gx command list's requests and PICA lists, the draw section's output, read and compared.
   - `mouse_aim`: the mouse as the 3DS's gyroscope while the game's first-person look follows it (`patch/<game>/aim.toml`), and as the camera's turn through the link block in the rest of play.

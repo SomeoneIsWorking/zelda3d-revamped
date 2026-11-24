@@ -42,6 +42,9 @@ actor_next = ["Actor.next"]
 actor_id = ["Actor.id"]
 actor_position = ["Actor.world", "PosRot.pos"]
 actor_shape_rotation = ["Actor.shape", "ActorShape.rot"]
+# The focus: the draw's camera update reads it where the look sets the view (first person, aimed items).
+actor_focus_position = ["Actor.focus", "PosRot.pos"]
+actor_focus_rotation = ["Actor.focus", "PosRot.rot"]
 # The skeleton track: the skeletons SkelAnime_DrawOpa and SkelAnime_DrawOpaEx queue (r1 of their
 # queue call, decomp/mm3d docs/actors.md "Skeletons"), and their joint tables.
 skeleton_draw_calls = [
