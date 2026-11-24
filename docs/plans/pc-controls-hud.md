@@ -41,6 +41,20 @@ prints the keyboard's and the mouse's.
 | R | Ocarina |
 | Tab | Item screen; M map; Esc pause |
 
+User (2026-11-24): "I don't like that ESC opens save and tab opens inventory, in the game, these
+are the same thing, instead we can separate game's own inventory/save and custom port settings",
+and "I don't want these fake overlay things either, everything must be RE based". To build:
+
+- One key and one pad button for the game's own menu, which reaches both the items and the save
+  the way the game does; Esc and the pad's View open our own settings over the running game (the
+  options that today live only on the picker tile's X), not the game's save prompt.
+- Nothing composited that the game does not draw: the item screen's column of number-key slots
+  and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
+  extended through its code (decomp-named state), never a picture laid over them.
+- MM3D's title and file select still show the touch screen as an inset beside the top screen;
+  OoT3D's menus (Gear among them) keep the 3DS's 4:3 width inside a 16:9 window. Both are the
+  same work: the game's own menu laid out across the wide screen, found through the decomps.
+
 Menu is the item screen and not Pause as first decided: the game's Start in play is only OoT3D's
 "Save your progress?" and does nothing visible in MM3D (`ctl-pad1`), while the item screen is
 where slots are set. Outside play (menus, the ocarina, a text box) every host button is the 3DS
