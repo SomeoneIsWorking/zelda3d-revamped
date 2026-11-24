@@ -10,8 +10,9 @@
 
 namespace z3d::app {
 
-void Player::run() {
+Player::Left Player::run() {
   (void)window_.takeMenuRequest();
+  (void)window_.takeReportRequest();
   const bool interpolate = options_.frameInterpolation();
   const bool interpolating = interpolation_.setMode(interpolate ? FrameInterpolation::Mode::On
                                                                 : FrameInterpolation::Mode::Off);
@@ -19,7 +20,18 @@ void Player::run() {
   (void)emulator_.takePacing();
   auto report = std::chrono::steady_clock::now() + kPacingReport;
   // The core paces itself (frame limit) and reads the pad through the window's event pump.
-  while (!window_.closeRequested() && !window_.takeMenuRequest()) {
+  Left left = Left::Closed;
+  while (!window_.closeRequested()) {
+    if (window_.takeMenuRequest()) {
+      left = Left::Menu;
+      break;
+    }
+    if (window_.takeReportRequest()) {
+      // The frame the player is looking at, both screens, for the report.
+      emulator_.runFrames(1, Emulator::Capture::Screens);
+      left = Left::Report;
+      break;
+    }
     emulator_.runFrames(1, recorder_ ? Emulator::Capture::Top : Emulator::Capture::None);
     if (recorder_) {
       recorder_->add(emulator_.frame());
@@ -32,6 +44,7 @@ void Player::run() {
     }
   }
   interpolation_.setMode(FrameInterpolation::Mode::Off);
+  return left;
 }
 
 void Player::swapMods() {

@@ -153,6 +153,10 @@ public:
     slots_ = slots;
     chord_ = chord;
   }
+  // Whether readHost found a button, slot or the fire of play held: the game would read it.
+  [[nodiscard]] bool gameInputHeld() const {
+    return gameHeld_;
+  }
   [[nodiscard]] HostDevice lastDevice() const {
     return lastDevice_;
   }
@@ -212,6 +216,7 @@ private:
   uint16_t slots_ = 0;
   bool chord_ = false;
   HostDevice lastDevice_ = HostDevice::Pad;
+  bool gameHeld_ = false;
   double mouseScale_ = 1.0;
   bool itemAimed_ = false;
   // The slot last pressed in play: the one that took out the item in hand.

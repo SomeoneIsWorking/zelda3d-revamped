@@ -79,7 +79,7 @@ def launch_args(cfg: Config, name: str | None, user: Path) -> list[str]:
         return picker_args(app.binary(cfg), write_library(cfg, user), cfg.ui_font(), cfg.port_assets, user,
                            cfg.tool_command)
     return app.launch_args(cfg, GameSet.named(cfg.repo, name), user, None) + [
-        "--title", TITLES[name], "--app-id", DESKTOP_ID]
+        "--title", TITLES[name], "--app-id", DESKTOP_ID, "--font", str(cfg.ui_font())]
 
 
 def play(cfg: Config, name: str | None) -> int:

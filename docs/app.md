@@ -97,6 +97,15 @@ every key and mouse binding, a `<table>\t<name>\t<key>` line each; the tools rea
 from it (`tools/z3dmods/app_keys.py`). In the window F10 or Guide returns to the picker, F5
 reads the patch again, F6 takes it out or puts it back, F7 switches the textures, F11 or
 Alt+Enter switches fullscreen.
+F8 in a game holds it for a bug report (`BugReportScreen`): the menu canvas shows both screens
+as they were with a form for a one-line summary and what the player did; Ctrl+Enter or Start saves
+it, Escape or B drops it. The report is a `lucent::bug_report` folder under
+`<user>/bug-reports/<stamp>-<summary>/`: `report.json` and `README.md` (the words, the run's facts:
+game, title id, set inputs, patch and textures on or off, every option, frames run, window and
+frame sizes, platform), `screens.png`, `state.state` (the emulator's state at that frame, which
+the harness's `loadstate:` takes by path) and the core's `z3d_core.log`. A cancelled report leaves
+nothing; a draft left by a crash is pruned at the next report. The game plays on from the same
+frame. The input test `report` checks both ways.
 `PadInput::lastDevice()` is the device a button or key was last pressed on; the HUD's prompts
 and the menus' hints follow it.
 

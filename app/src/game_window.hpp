@@ -48,6 +48,8 @@ inline constexpr std::array kModKeys{
 // What asks for the menu: the picker from a game, the way out of a screen of the picker's.
 inline constexpr SDL_Scancode kMenuKey = SDL_SCANCODE_F10;
 inline constexpr SDL_GamepadButton kMenuButton = SDL_GAMEPAD_BUTTON_GUIDE;
+// Holds the game and opens a bug report on it (bug_report_screen.hpp).
+inline constexpr SDL_Scancode kReportKey = SDL_SCANCODE_F8;
 // Flips fullscreen, as Alt+Enter does.
 inline constexpr SDL_Scancode kFullscreenKey = SDL_SCANCODE_F11;
 
@@ -109,6 +111,11 @@ public:
     return std::exchange(menuRequested_, false);
   }
 
+  // kReportKey since the last call.
+  [[nodiscard]] bool takeReportRequest() {
+    return std::exchange(reportRequested_, false);
+  }
+
   // The mod key pressed since the last call, if any.
   [[nodiscard]] std::optional<ModKey> takeModKey() {
     return std::exchange(modKey_, std::nullopt);
@@ -138,6 +145,7 @@ private:
   bool menuPumps_ = false;
   bool closeRequested_ = false;
   bool menuRequested_ = false;
+  bool reportRequested_ = false;
   std::optional<ModKey> modKey_;
   bool touching_ = false;
   bool mouseCaptured_ = false;

@@ -10,7 +10,7 @@ reaches frame n), save:<name> (dump the save context),
 cs (print the cutscene context and script header),
 arena:<addr>[,<name>] (walk a game arena's blocks: used, free and the largest free block; with a
 name, the block list goes to <name>.arena.txt).
-Harness only: savestate:<name>, loadstate:<name>, watch:<addr>,<size>, hits, keydown:<button>,
+Harness only: savestate:<name>, loadstate:<name or state file>, watch:<addr>,<size>, hits, keydown:<button>,
 keyup:<button> (hold across other steps), stick:<x>,<y>,<s> (circle pad, -32767..32767, y down),
 cstick:<x>,<y>,<s> (the New 3DS C-stick, the same way),
 gyro:<x>,<y>,<z>,<s> (the 3DS turning, degrees a second on the core's axes),

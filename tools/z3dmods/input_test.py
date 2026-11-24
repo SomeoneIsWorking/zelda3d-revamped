@@ -192,6 +192,10 @@ class Session:
         or window."""
         self.press(self._keys.keysyms(table, name), seconds)
 
+    def type(self, text: str) -> None:
+        """Types `text` as the keyboard would, one key event per character."""
+        subprocess.run(["xdotool", "type", "--delay", "20", text], env=self._env, check=True)
+
     def mouse_button(self, verb: str, seconds: float = 0.15) -> None:
         """The mouse button the app binds to the play verb `verb`."""
         button = str(self._keys.mouse_button(verb))
@@ -1499,6 +1503,41 @@ def _interp_turn(session: Session, file_1: Callable[[Session], None]) -> None:
         session.wait(FAST_TURN_EVERY)
 
 
+def _report(session: Session, pad: Gamepad) -> None:
+    """OoT3D in play: the report key holds the game for the bug report form; Escape cancels and
+    leaves nothing; a second report typed and saved with Ctrl+Enter is a folder with the report,
+    both screens, the state and the core's log; any key then lets the game play on."""
+    _oot3d_file_1(session)
+    session.key("window", "report")
+    session.expect("[report] open", 10)
+    session.shot("form")
+    session.press(["Escape"])
+    session.expect("[report] cancelled", 10)
+    session.wait(1)
+    session.key("window", "report")
+    session.expect("[report] open", 10)
+    session.type("Link walks into the wall")
+    session.press(["Tab"])
+    session.type("Pressed F8 to test")
+    session.wait(0.5)
+    session.shot("typed")
+    session.press(["Control_L", "Return"])
+    line = session.expect("[report] saved", 10)
+    folder = Path(line.split("[report] saved ", 1)[1].strip())
+    session.shot("saved")
+    names = sorted(p.name for p in folder.iterdir())
+    if names != ["README.md", "report.json", "screens.png", "state.state", "z3d_core.log"]:
+        raise RuntimeError(f"the report holds {names}")
+    report = json.loads((folder / "report.json").read_text())
+    if report["summary"] != "Link walks into the wall" or report["description"] != "Pressed F8 to test":
+        raise RuntimeError(f"the report says {report['summary']!r} / {report['description']!r}")
+    if any(p.name.endswith(".draft") for p in folder.parent.iterdir()):
+        raise RuntimeError("a draft was left behind")
+    session.press(["space"])
+    session.wait(2)
+    session.shot("playing")
+
+
 # A mouse at its polling rate: small moves, often.
 SMOOTH_AIM = (4, 0)
 SMOOTH_AIM_EVERY = 0.008
@@ -1564,6 +1603,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
           "interp-textures-mm3d": lambda session, pad: _interp_textures(session, _mm3d_file_1, 6),
           "interp-turn": lambda session, pad: _interp_turn(session, _oot3d_file_1),
           "aim-smooth": lambda session, pad: _aim_smooth(session, _oot3d_file_1),
+          "report": _report,
           "interp-turn-mm3d": lambda session, pad: _interp_turn(session, _mm3d_file_1),
           "interp-scenes": lambda session, pad: _interp_scenes(session, pad, _oot3d_file_1, "oot3d-kokiri.json"),
           "interp-scenes-mm3d": lambda session, pad: _interp_scenes(session, pad, _mm3d_file_1,
@@ -1574,7 +1614,7 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
-               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d",
+               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d",
                "interp-scenes": "oot3d", "interp-scenes-mm3d": "mm3d"}
 # The direct scenarios that record every present into presents/ (app --record).
 RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",

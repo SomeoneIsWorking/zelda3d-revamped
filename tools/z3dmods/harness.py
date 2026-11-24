@@ -212,7 +212,9 @@ class HarnessSession:
         return self._send(f"savestate {self._states / name}.state") + " bytes"
 
     def loadstate(self, name: str) -> str:
-        return self._send(f"loadstate {self._states / name}.state")
+        """A state this run's savestate made by name, or a state file by its path (a bug report's)."""
+        file = Path(name)
+        return self._send(f"loadstate {file if file.is_file() else self._states / f'{name}.state'}")
 
     def touch(self, x: str, y: str, seconds: str = "0.15") -> str:
         """Holds the stylus at (x, y) of the 320x240 touch screen, then lifts it."""

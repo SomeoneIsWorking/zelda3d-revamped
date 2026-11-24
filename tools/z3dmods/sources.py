@@ -47,7 +47,7 @@ def _azahar(cfg: Config) -> Path:
 
 SOURCES = (
     Source("azahar", "https://github.com/SomeoneIsWorking/azahar", app.AZAHAR_REVISION, _azahar, submodules=True),
-    Source("lucent", "https://github.com/SomeoneIsWorking/lucent", "ab8ab32b88b7717581b0a442efb76790392159ad",
+    Source("lucent", "https://github.com/SomeoneIsWorking/lucent", "98e98bfd672ef768525d82489f3f42f1277f84b3",
            _home("lucent")),
     Source("setup-ui", "https://github.com/SomeoneIsWorking/setup-ui", "6798b0bf014a0e3c73a010566939bf44cb8259ed",
            _home("setup-ui")),

@@ -2,6 +2,7 @@
 // or, with --hidden, runs one frame by frame from stdin lines for the tools (repl.hpp).
 // Flags: app_config.hpp.
 #include "app_config.hpp"
+#include "bug_report_screen.hpp"
 #include "core_log.hpp"
 #include "core_settings.hpp"
 #include "emulator.hpp"
@@ -59,6 +60,24 @@ std::vector<GameOptions> loadAll(const AppConfig &config, const GameLibrary &lib
   return options;
 }
 
+// Plays until the window closes or the menu is asked for. A bug report holds the game for its
+// form on the menu canvas, then the same game plays on.
+void play(const AppConfig &config, Player &player, GameWindow &window, PadInput &pad,
+          Emulator &emulator, const ModSwap &mods, const ReportedRun &run) {
+  while (player.run() == Player::Left::Report) {
+    if (config.font.empty()) {
+      lucent::warn("report", "no menu font (--font): no report");
+      continue;
+    }
+    const MenuCanvas canvas(window, config.font, config.assets);
+    const ReportedRun now{run.title, run.game, run.options, mods.patchOn(), mods.texturesOn()};
+    (void)BugReportScreen(canvas, window, pad, emulator, config.userDir, now).run();
+    if (window.closeRequested()) {
+      return;
+    }
+  }
+}
+
 // The input tests' pad, when they ask for its channel; after the window, which starts SDL.
 std::unique_ptr<TestPad> testPad(const AppConfig &config) {
   return config.testPad ? std::make_unique<TestPad>() : nullptr;
@@ -89,7 +108,8 @@ int direct(const AppConfig &config, const GameSetup &game, PadInput &pad) {
     repl.serve(std::cin, std::cout);
     return 0;
   }
-  Player(emulator, window, mods, options, pad, interpolation, config.record).run();
+  Player player(emulator, window, mods, options, pad, interpolation, config.record);
+  play(config, player, window, pad, emulator, mods, {config.title, game, options});
   return 0;
 }
 
@@ -154,7 +174,8 @@ int picker(const AppConfig &config, PadInput &pad) {
                    options[*chosen].blockAddress());
       const MouseAim aim(window, emulator, pad, link, config.userDir / game.setup.options);
       FrameInterpolation interpolation(emulator, config.userDir / game.setup.options);
-      Player(emulator, window, mods, options[*chosen], pad, interpolation, config.record).run();
+      Player player(emulator, window, mods, options[*chosen], pad, interpolation, config.record);
+      play(config, player, window, pad, emulator, mods, {game.title, game.setup, options[*chosen]});
     }
     if (window.closeRequested()) {
       return 0;

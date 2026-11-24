@@ -24,6 +24,7 @@ add_executable(z3d
   src/game_library.cpp
   src/game_options.cpp
   src/options_menu.cpp
+  src/bug_report_screen.cpp
   src/title_picker.cpp
   src/menu_canvas.cpp
   src/prompt_art.cpp

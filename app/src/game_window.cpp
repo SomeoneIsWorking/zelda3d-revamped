@@ -146,6 +146,7 @@ Prompt GameWindow::menuPrompt() {
 void GameWindow::listKeys(std::ostream &out) {
   out << "window\tmenu\t" << SDL_GetScancodeName(kMenuKey) << '\n';
   out << "window\tfullscreen\t" << SDL_GetScancodeName(kFullscreenKey) << '\n';
+  out << "window\treport\t" << SDL_GetScancodeName(kReportKey) << '\n';
   for (const ModKeyBinding &binding : kModKeys) {
     out << "window\t" << binding.name << '\t' << SDL_GetScancodeName(binding.key) << '\n';
   }
@@ -174,6 +175,8 @@ void GameWindow::pump(bool inGame, const std::function<void(const SDL_Event &)> 
         setFullscreen(!mode_.fullscreen());
       } else if (event.key.scancode == kMenuKey) {
         menuRequested_ = true;
+      } else if (event.key.scancode == kReportKey && inGame) {
+        reportRequested_ = true;
       } else if (const auto *mod =
                      std::ranges::find(kModKeys, event.key.scancode, &ModKeyBinding::key);
                  mod != kModKeys.end()) {

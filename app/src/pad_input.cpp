@@ -493,7 +493,9 @@ void PadInput::readHost() {
   if (fire && lastSlot_) {
     slots |= static_cast<uint16_t>(1U << *lastSlot_);
   }
+  gameHeld_ = held != 0 || slots != 0;
   if (mode_ == PadMode::None) {
+    gameHeld_ = false;
     state.buttons = {};
     state.sticks = {};
     slots = 0;
