@@ -1503,6 +1503,22 @@ def _interp_turn(session: Session, file_1: Callable[[Session], None]) -> None:
         session.wait(FAST_TURN_EVERY)
 
 
+def _file_fade(session: Session, pad: Gamepad) -> None:
+    """OoT3D's file select on the widened top screen: A on File 1's Start fades the whole screen,
+    its sides and BACK with the middle."""
+    session.wait(20)
+    session.key("name", "start")
+    session.wait(3)
+    session.key("name", "a")
+    session.wait(2)
+    session.shot("file")
+    session.key("name", "a")
+    session.wait(0.4)
+    session.shot("fading")
+    session.wait(0.3)
+    session.shot("faded")
+
+
 def _option_row(session: Session, row: str, key: str) -> None:
     """Steps the open options with `key` (Up or Down) until `row` is selected."""
     for _ in range(32):
@@ -1656,6 +1672,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
           "aim-smooth": lambda session, pad: _aim_smooth(session, _oot3d_file_1),
           "report": _report,
           "settings": _settings,
+          "file-fade": _file_fade,
           "interp-turn-mm3d": lambda session, pad: _interp_turn(session, _mm3d_file_1),
           "interp-scenes": lambda session, pad: _interp_scenes(session, pad, _oot3d_file_1, "oot3d-kokiri.json"),
           "interp-scenes-mm3d": lambda session, pad: _interp_scenes(session, pad, _mm3d_file_1,
@@ -1666,7 +1683,7 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
-               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d", "settings": "oot3d",
+               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d", "settings": "oot3d", "file-fade": "oot3d",
                "interp-scenes": "oot3d", "interp-scenes-mm3d": "mm3d"}
 # The direct scenarios that record every present into presents/ (app --record).
 RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",

@@ -35,6 +35,7 @@ SECTIONS {
   /* Presentation_Target's file-select pass on the top screen: its viewport's first row and rows. */
   .patch.base_file_select_row 0x616400 : { KEEP(*(.patch.base_file_select_row)) }
   .patch.base_file_select_rows 0x616408 : { KEEP(*(.patch.base_file_select_rows)) }
+  .patch.base_fade_draw 0x616cc4 : { KEEP(*(.patch.base_fade_draw)) }
   . = PAYLOAD;
   .payload : { KEEP(*(.options)) *(.text*) *(.rodata*) *(.data*) }
   /* The item slots' block the app reads and writes (tools/z3dmods/slot_link.py). */

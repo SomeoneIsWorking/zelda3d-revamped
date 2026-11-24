@@ -29,6 +29,7 @@ kTouchScreen2DLayer1 = "TouchScreen2D_BeginLayer1"
 kTouchScreen2DLayer2 = "TouchScreen2D_BeginLayer2"
 kTouchScreen2DLayer3 = "TouchScreen2D_BeginLayer3"
 kCamera2DSetMatrices = "Camera2D_SetMatrices"
+kGlViewport = "glViewport"
 
 [globals]
 kSaveContext = "gSaveContext"

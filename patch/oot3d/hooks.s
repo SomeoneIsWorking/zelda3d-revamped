@@ -88,6 +88,12 @@
     mov r3, #400
 .section .expect.base_file_select_rows, "", %progbits
     .word 0xE3A03D05 @ mov r3, #320
+@ The One Screen's Presentation_DrawQueued draws a file select fade, a quad over the touch
+@ screen, through a viewport of the top screen's rows 0 to 400 (file_select.cpp).
+.section .patch.base_fade_draw, "ax", %progbits
+    bl _ZN7z3dmods5oot3d22fileSelectFadeViewportEiiii
+.section .expect.base_fade_draw, "", %progbits
+    .word 0xE12FFF37 @ blx r7 (glViewport)
 @ The One Screen's Minimap_Project lifts the minimap clear of the game's B button while mounted;
 @ that button is off the top screen (base_b_ring), so the minimap stays where it is on foot.
 .section .patch.base_minimap, "ax", %progbits

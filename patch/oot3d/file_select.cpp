@@ -13,6 +13,7 @@ namespace z3dmods::oot3d {
 namespace {
 
 using SetMatricesFn = void (*)(void *camera, float *projection, const float *view);
+using ViewportFn = void (*)(int x, int y, int width, int height);
 
 // The touch screen's width and the top screen's, in pixels.
 inline constexpr float kTouchWidth = 320.0F;
@@ -39,6 +40,18 @@ void fileSelectProjection(void *camera, float *projection, const float *view) {
     projection[kClipYScale] *= squeeze;
   }
   guest::function<SetMatricesFn>(kCamera2DSetMatrices)(camera, projection, view);
+}
+
+// The viewport a file select fade is drawn through: The One Screen spreads the fade's touch-screen
+// quad over the top screen's rows with the game's projection, which fileSelectProjection squeezes
+// by 320 / 400, so the viewport grows by 400 / 320 about its middle.
+void fileSelectFadeViewport(int x, int y, int width, int height) {
+  if (fileSelectUp()) {
+    const int grown = static_cast<int>(static_cast<float>(height) * kTopWidth / kTouchWidth);
+    y -= (grown - height) / 2;
+    height = grown;
+  }
+  guest::function<ViewportFn>(kGlViewport)(x, y, width, height);
 }
 
 } // namespace z3dmods::oot3d
