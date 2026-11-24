@@ -43,20 +43,9 @@ DRIVER = """{
 """
 
 
-def _flags(cfg: Config) -> list[str]:
-    """Keeps this Mac's folders out of the package, as the Linux container build does: a source
-    file is named from its checkout, and the app has no run path of its own (the bundle adds
-    @executable_path/../lib)."""
-    home = Path.home()
-    named = {app.azahar_source(cfg): "azahar", cfg.repo: "z3d", cfg.dependencies / "azahar-core": "azahar-core",
-             **{home / checkout: name for name, checkout in sources.HOME_CHECKOUTS.items()}, home: "builder"}
-    maps = " ".join(f"-ffile-prefix-map={folder}={name}" for folder, name in named.items())
-    return [f"-DCMAKE_C_FLAGS={maps}", f"-DCMAKE_CXX_FLAGS={maps}", "-DCMAKE_SKIP_RPATH=ON"]
-
-
-# The package's own core and app, built with _flags apart from the development build (app.HOST).
+# The package's own core and app, built with sources.package_flags apart from the development build (app.HOST).
 BUILDER = app.Builder(f"{app.TOOLCHAIN}-package", lambda cfg: cfg.repo / "build" / "package-app",
-                      lambda _cfg, command: subprocess.run(command, check=True), _flags)
+                      lambda _cfg, command: subprocess.run(command, check=True), sources.package_flags)
 
 
 def _run(*command: str) -> str:

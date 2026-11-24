@@ -26,7 +26,7 @@ import os
 import re
 import shutil
 import subprocess
-import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from z3dmods import (
@@ -104,24 +104,43 @@ def _run(*command: str) -> str:
     return subprocess.run(command, check=True, capture_output=True, text=True).stdout
 
 
-def _python(out: Path) -> Path:
+@dataclass(frozen=True)
+class Python:
+    """The CPython a package carries: uv's relocatable build for the package's platform."""
+    # What `uv python install` is asked for.
+    request: str
+    # The interpreter and the site-packages folder, in its folder.
+    interpreter: str
+    site: str | None
+    # The platform uv picks wheels for when the interpreter cannot run here; None for this machine's.
+    wheels: str | None = None
+    # What runs the interpreter here.
+    runner: tuple[str, ...] = ()
+
+
+HOST_PYTHON = Python(PYTHON, "bin/python3", None)
+WINDOWS_PYTHON = Python(f"cpython-{PYTHON}-windows-x86_64-none", "python.exe", "Lib/site-packages",
+                        "x86_64-pc-windows-msvc", ("wine",))
+
+
+def _python(out: Path, python: Python) -> Path:
     """A relocatable CPython in `out`/python with the locked wheels; returns its interpreter."""
     staging = out / "python-install"
-    _run("uv", "python", "install", PYTHON, "--no-bin", "--install-dir", str(staging))
+    _run("uv", "python", "install", python.request, "--no-bin", "--install-dir", str(staging))
     (installed,) = (p for p in staging.glob("cpython-*") if not p.is_symlink())
     installed.rename(out / "python")
     shutil.rmtree(staging)
     for pattern in PYTHON_UNUSED:
         for path in (out / "python").glob(pattern):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
-    windows = sys.platform == "win32"
-    interpreter = out / "python" / ("python.exe" if windows else "bin/python3")
+    interpreter = out / "python" / python.interpreter
     requirements = out / "requirements.txt"
     _run("uv", "export", "--frozen", "--no-dev", "--no-emit-project", "--directory", str(config.REPO),
          "--format", "requirements-txt", "-o", str(requirements))
-    site = out / "python" / "Lib" / "site-packages" if windows else next((out / "python" / "lib").glob("python*/site-packages"))
-    _run("uv", "pip", "install", "--python", str(interpreter), "--target", str(site), "--require-hashes",
-         "-r", str(requirements))
+    site = out / "python" / python.site if python.site else next((out / "python" / "lib").glob("python*/site-packages"))
+    target = (["--python-platform", python.wheels, "--python-version", PYTHON] if python.wheels
+              else ["--python", str(interpreter)])
+    _run("uv", "pip", "install", *target, "--target", str(site), "--require-hashes", "-r", str(requirements))
     requirements.unlink()
     # uv runs the interpreter to ask what it is, which leaves bytecode naming this folder.
     for cache in list((out / "python").rglob("__pycache__")):
@@ -165,7 +184,7 @@ def _licenses(cfg: Config, out: Path, python: Path) -> None:
         folder = source.folder(cfg)
         if folder == cfg.port_assets:
             continue
-        (out / source.name).mkdir()
+        (out / source.name).mkdir(parents=True)
         for file in license_files(folder):
             shutil.copyfile(file, out / source.name / file.name)
     externals = app.azahar_source(cfg) / "externals"
@@ -247,7 +266,7 @@ def folder(cfg: Config) -> Path:
     return cfg.repo / "build" / "package" / "z3d"
 
 
-def contents(cfg: Config, out: Path) -> Path:
+def contents(cfg: Config, out: Path, python: Python = HOST_PYTHON) -> Path:
     """What a package holds on every platform, written into `out`: the tools and their Python,
     the sets, the prebuilt patches and glyphs, the fonts, the sources and our licences. Returns
     the interpreter."""
@@ -275,17 +294,17 @@ def contents(cfg: Config, out: Path) -> Path:
     shutil.copyfile(cfg.repo / "LICENSE", out / "LICENSE")
     built_from = "\n".join(f"  {source.url} at {sources.built_from(source.folder(cfg))}" for source in sources.SOURCES)
     (out / "SOURCE.txt").write_text(SOURCE.format(revision=sources.built_from(cfg.repo), sources=built_from))
-    interpreter = _python(out)
+    interpreter = _python(out, python)
     _licenses(cfg, out / "licenses", out / "python")
     return interpreter
 
 
-def finish(cfg: Config, out: Path, interpreter: Path) -> None:
+def finish(cfg: Config, out: Path, interpreter: Path, python: Python = HOST_PYTHON) -> None:
     """Marks `out` a whole package once its tools import, and refuses one naming this machine."""
     revision = _run("git", "-C", str(cfg.repo), "rev-parse", "HEAD").strip()
     # The mark comes last: a folder with it is a whole package.
     (out / config.PACKAGE_MARK).write_text(json.dumps({"revision": revision, "azahar": app.AZAHAR_REVISION}) + "\n")
-    _run(str(interpreter), "-I", "-B", "-c", "import z3dmods.packed")
+    _run(*python.runner, str(interpreter), "-I", "-B", "-c", "import z3dmods.packed")
     _check_private(cfg, out)
 
 

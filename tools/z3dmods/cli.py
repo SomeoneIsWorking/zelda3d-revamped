@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 from pathlib import Path
@@ -82,11 +83,11 @@ def input_check(args: argparse.Namespace) -> None:
 
 
 def build_package(args: argparse.Namespace) -> None:
-    cfg = config.load()
+    cfg = dataclasses.replace(config.load(), jobs=args.jobs)
     if sys.platform == "darwin":
         print(package_mac.build(cfg, args.out or package_mac.folder(cfg)))
         return
-    if sys.platform == "win32":
+    if args.windows:
         print(package_windows.build(cfg, args.out or package_windows.folder(cfg)))
         return
     built = package.build(cfg, args.out or package.folder(cfg))
@@ -140,8 +141,11 @@ def main() -> None:
     played = commands.add_parser("play", help="the z3d app's title picker, or one game directly, with the installed mods")
     played.add_argument("game", nargs="?", choices=["oot3d", "mm3d"])
     played.set_defaults(run=play_game)
-    packed = commands.add_parser("package", help="build the z3d package: on Linux its folder and the AppImage of it, on macOS z3d.app and its zip, on Windows (MSYS2 clang64) its folder and zip")
+    packed = commands.add_parser("package", help="build the z3d package: on Linux its folder and the AppImage of it, on macOS z3d.app and its zip; --windows cross-builds the Windows one")
     packed.add_argument("--out", type=Path, help="the folder to make; build/package/z3d without it")
+    packed.add_argument("--jobs", type=int, default=0, help="parallel build jobs, as many as heavy.py's --cores; ninja's own count without it")
+    packed.add_argument("--windows", action="store_true",
+                        help="the Windows package instead, cross-built here: build/package/windows/z3d and its zip")
     packed.set_defaults(run=build_package)
     fetched = commands.add_parser("sources", help="clone the checkouts a package is built from that this machine lacks, each at its pinned revision")
     fetched.set_defaults(run=fetch_sources)

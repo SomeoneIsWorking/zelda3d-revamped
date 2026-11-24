@@ -17,7 +17,8 @@ from z3dmods import app, config
 from z3dmods.config import Config
 
 # The shared checkouts app/CMakeLists.txt builds from, under the home folder.
-HOME_CHECKOUTS = {"lucent": "repo/lucent", "setup-ui": "repo/shared/setup-ui", "RmlUi": "repo/RmlUi"}
+HOME_CHECKOUTS = {"lucent": "repo/lucent", "setup-ui": "repo/shared/setup-ui", "RmlUi": "repo/RmlUi",
+                  "target-platform": "repo/shared/target-platform"}
 # The AppImage runtime (github.com/AppImage/type2-runtime, MIT): the program a squashfs image of
 # the package folder is appended to.
 RUNTIME_RELEASE = "20251108"
@@ -54,7 +55,25 @@ SOURCES = (
     Source("RmlUi", "https://github.com/mikke89/RmlUi", "ba95ffe8bfb6370efb2cdcca927eaad4710c5413", _home("RmlUi")),
     Source("port-assets", "https://github.com/SomeoneIsWorking/port-assets",
            "485524f30ffc7288c4bb716562f898bd07e524f6", lambda cfg: cfg.port_assets),
+    # The Windows toolchain and libraries (package_windows.py).
+    Source("target-platform", "https://github.com/SomeoneIsWorking/target-platform",
+           "f162f2b843eca2468c445849e48781c9a9712799", _home("target-platform")),
 )
+
+
+def package_flags(cfg: Config) -> list[str]:
+    """CMake flags that keep this machine's folders out of what a package holds: a source file is
+    named from its checkout, and the app has no run path (each package finds its libraries itself)."""
+    home = Path.home()
+    named = {app.azahar_source(cfg): "azahar", cfg.repo: "z3d", cfg.dependencies / "azahar-core": "azahar-core",
+             **{home / checkout: name for name, checkout in HOME_CHECKOUTS.items()}, home: "builder"}
+    maps = " ".join(f"-ffile-prefix-map={folder}={name}" for folder, name in named.items())
+    return [f"-DCMAKE_C_FLAGS={maps}", f"-DCMAKE_CXX_FLAGS={maps}", "-DCMAKE_SKIP_RPATH=ON"]
+
+
+def folder(cfg: Config, name: str) -> Path:
+    """Where the checkout `name` lives on this machine."""
+    return next(source for source in SOURCES if source.name == name).folder(cfg)
 
 
 def _git(folder: Path, *words: str) -> str:

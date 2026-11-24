@@ -53,14 +53,4 @@ def output(cfg: Config, command: list[str]) -> str:
     return subprocess.run(_command(cfg, command), check=True, capture_output=True, text=True).stdout
 
 
-def _flags(cfg: Config) -> list[str]:
-    """Keeps this machine's folders out of what a package holds: a source file is named from
-    its checkout, and the app has no run path (its launcher names the package's lib/)."""
-    home = Path.home()
-    named = {app.azahar_source(cfg): "azahar", cfg.repo: "z3d", cfg.dependencies / "azahar-core": "azahar-core",
-             **{home / checkout: name for name, checkout in sources.HOME_CHECKOUTS.items()}, home: "builder"}
-    maps = " ".join(f"-ffile-prefix-map={folder}={name}" for folder, name in named.items())
-    return [f"-DCMAKE_C_FLAGS={maps}", f"-DCMAKE_CXX_FLAGS={maps}", "-DCMAKE_SKIP_RPATH=ON"]
-
-
-BUILDER = app.Builder(TOOLCHAIN, lambda cfg: cfg.repo / "build" / "package-app", run, _flags)
+BUILDER = app.Builder(TOOLCHAIN, lambda cfg: cfg.repo / "build" / "package-app", run, sources.package_flags)

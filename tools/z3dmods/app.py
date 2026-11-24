@@ -9,6 +9,7 @@ textures, which the core only reads).
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from collections.abc import Callable
@@ -16,14 +17,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from z3dmods import options
+from z3dmods import config, options
 from z3dmods.config import Config
 
 if TYPE_CHECKING:
     from z3dmods.install import GameSet
 
 # The fork's z3d-harness branch the app is built against.
-AZAHAR_REVISION = "7e5d89013"
+AZAHAR_REVISION = "35c307378"
 TOOLCHAIN = "clang"
 COMPILERS = ["-DCMAKE_C_COMPILER=clang", "-DCMAKE_CXX_COMPILER=clang++"]
 AZAHAR_OPTIONS = {
@@ -84,13 +85,21 @@ class Builder:
     run: Callable[[Config, list[str]], None]
     # What it adds to the core's and the app's CMake configure.
     flags: Callable[[Config], list[str]] = lambda _cfg: []
+    # The compilers it names; a cross toolchain file names its own.
+    compilers: tuple[str, ...] = tuple(COMPILERS)
+    # The app's file in its tree.
+    binary: str = "z3d"
 
 
 def _run_here(_cfg: Config, command: list[str]) -> None:
     subprocess.run(command, check=True)
 
 
-HOST = Builder(TOOLCHAIN, lambda cfg: cfg.app_binary.parent, _run_here)
+HOST = Builder(TOOLCHAIN, lambda cfg: cfg.app_binary.parent, _run_here, binary=config.APP_FILE)
+
+
+def _jobs(cfg: Config) -> list[str]:
+    return ["-j", str(cfg.jobs)] if cfg.jobs else []
 
 
 def core_prefix(cfg: Config, builder: Builder = HOST) -> Path:
@@ -105,36 +114,31 @@ def core(cfg: Config, builder: Builder = HOST) -> Path:
         tree.mkdir(parents=True, exist_ok=True)
         flags = [f"-D{key}={value}" for key, value in AZAHAR_OPTIONS.items()]
         builder.run(cfg, ["cmake", "-S", str(azahar_source(cfg)), "-B", str(tree), "-G", "Ninja",
-                          "-DCMAKE_BUILD_TYPE=Release", *COMPILERS, f"-DCMAKE_INSTALL_PREFIX={prefix}", *flags,
+                          "-DCMAKE_BUILD_TYPE=Release", *builder.compilers, f"-DCMAKE_INSTALL_PREFIX={prefix}", *flags,
                           *builder.flags(cfg)])
         # -k 0: a failed build names every unit that fails, not only the first.
-        builder.run(cfg, ["ninja", "-k", "0", "-C", str(tree), "install"])
+        builder.run(cfg, ["ninja", "-k", "0", *_jobs(cfg), "-C", str(tree), "install"])
     return prefix
 
 
-def _configured_prefix(tree: Path) -> str | None:
-    """The core prefix the app tree was configured with, if it was."""
-    cache = tree / "CMakeCache.txt"
-    if not (tree / "build.ninja").exists() or not cache.exists():
-        return None
-    for line in cache.read_text().splitlines():
-        if line.startswith("CMAKE_PREFIX_PATH:"):
-            return line.split("=", 1)[1]
-    return None
+# What an app tree records of the configure that made it.
+CONFIGURED = "z3d-configure.json"
 
 
 def _build(cfg: Config, builder: Builder) -> Path:
     tree = builder.tree(cfg)
     prefix = core(cfg, builder)
-    # A tree made for another core revision is configured from scratch: its cache keeps the old
-    # core's package directory.
-    if _configured_prefix(tree) != str(prefix):
+    configure = ["cmake", "--fresh", "-S", str(cfg.repo / "app"), "-B", str(tree), "-G", "Ninja",
+                 "-DCMAKE_BUILD_TYPE=Release", *builder.compilers, f"-DCMAKE_PREFIX_PATH={prefix}", *builder.flags(cfg)]
+    stamp = tree / CONFIGURED
+    # A tree configured otherwise (another core revision, other flags) is configured from scratch:
+    # its cache keeps what the old configure found.
+    if not (tree / "build.ninja").exists() or not stamp.exists() or json.loads(stamp.read_text()) != configure:
         tree.mkdir(parents=True, exist_ok=True)
-        builder.run(cfg, ["cmake", "--fresh", "-S", str(cfg.repo / "app"), "-B", str(tree), "-G", "Ninja",
-                          "-DCMAKE_BUILD_TYPE=Release", *COMPILERS, f"-DCMAKE_PREFIX_PATH={prefix}",
-                          *builder.flags(cfg)])
-    builder.run(cfg, ["ninja", "-C", str(tree)])
-    return tree / cfg.app_binary.name
+        builder.run(cfg, configure)
+        stamp.write_text(json.dumps(configure) + "\n")
+    builder.run(cfg, ["ninja", *_jobs(cfg), "-C", str(tree)])
+    return tree / builder.binary
 
 
 def binary(cfg: Config) -> Path:

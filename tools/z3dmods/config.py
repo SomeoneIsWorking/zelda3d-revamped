@@ -43,6 +43,8 @@ class Config:
     # A package (package.py), whose sets its picker keeps up with it; a checkout's are the
     # maintainer's to install.
     packaged: bool = False
+    # Builds' parallel jobs, to match a heavy.py reservation; 0 leaves it to ninja.
+    jobs: int = 0
 
     def rom(self, title_id: str) -> Path:
         if title_id not in self.roms:
@@ -142,7 +144,8 @@ def _packaged(data_home: Path) -> Config:
         app_data=app_data,
         session_env=_session_env(),
         port_assets=REPO / "assets",
-        tool_command=(sys.executable, "-I", "-m", "z3dmods.packed"),
+        # UTF-8 mode: the sets are UTF-8 and Windows reads text in its ANSI code page otherwise.
+        tool_command=(sys.executable, "-I", "-X", "utf8", "-m", "z3dmods.packed"),
         bundled_font=next((REPO / "fonts").glob("*.ttf")),
         libraries=REPO / "lib",
         packaged=True,
@@ -153,6 +156,9 @@ def load() -> Config:
     home = Path.home()
     data_home = Path(os.environ.get("XDG_DATA_HOME") or home / ".local/share")
     if (REPO / PACKAGE_MARK).exists():
+        if sys.platform == "win32":
+            # A Windows player's data is in their roaming app data.
+            return _packaged(Path(os.environ["APPDATA"]))
         return _packaged(data_home)
     config_home = Path(os.environ.get("XDG_CONFIG_HOME") or home / ".config")
     uv = shutil.which("uv")

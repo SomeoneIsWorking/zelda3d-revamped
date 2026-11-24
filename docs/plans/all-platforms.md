@@ -21,12 +21,15 @@ controller (hotswap)". The rules are the `release` and `android` skills.
    Shown on the Mac with no Homebrew on PATH: no Homebrew mapping in the running app, OoT3D's set
    made from the dump, OoT3D at 59.8 presents and 29.9 ticks a second. The heavy queue's Mac
    worker takes only `repo/psx` jobs, so the Mac session builds it.
-2. Windows `.exe`: written, building on the hand-started `windows` workflow (MSYS2 clang64):
-   `tools/z3dmods/package_windows.py` makes `z3d/` with the launcher `z3d.exe`
-   (`app/launcher/windows_launcher.cpp`), `bin/z3d.exe` with clang64's DLLs, the bundled Python,
-   `z3d-windows-x86_64.zip`. The app ends on the console's events (`term_signal_windows.cpp`).
-   The core builds on MSYS2 once dynarmic includes what it uses: clang64's libc++ no longer
-   includes `<vector>` and kin for it (fork `SomeoneIsWorking/dynarmic`).
+2. Windows `.exe`: cross-built on Linux (`z3dmods package --windows`, `tools/z3dmods/package_windows.py`)
+   with llvm-mingw and the libraries from `shared/target-platform`; never on hosted CI (release
+   skill). `z3d/` holds the launcher `z3d.exe` (`app/launcher/windows_launcher.cpp`) and
+   `bin/z3d.exe`, which links the core, SDL3, SDL3_ttf, SDL3_image, FreeType and the C++ runtime
+   statically and imports only DLLs Windows ships (target-platform's `audit-windows`), beside uv's
+   Windows CPython with Windows wheels; zipped as `z3d-windows-x86_64.zip`. On Windows the core is
+   one static archive (`AZAHAR_CORE_STATIC`, the fork's `core_package_static.cmake`): a DLL holds
+   at most 65535 exports and the core has 92208. The app ends on the console's events
+   (`term_signal_windows.cpp`) and hands paths to SDL and the core as UTF-8 (`lucent::text::utf8`).
 3. Android `.apk`: an SDL3 Android activity around the same app, the core's Android build, Vulkan;
    the setup run natively (the install's rules in C++ only where Python cannot go, one owner each),
    and the touch layer: the 3DS buttons and sticks drawn over the game, multi-touch, hidden while a

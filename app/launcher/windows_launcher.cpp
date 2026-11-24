@@ -1,4 +1,4 @@
-// The Windows package's z3d.exe: starts python\pythonw.exe -I -m z3dmods.packed play from the
+// The Windows package's z3d.exe: starts python\pythonw.exe -I -X utf8 -m z3dmods.packed play from the
 // folder it sits in, which opens the title picker, and returns its exit status.
 #include <string>
 
@@ -24,7 +24,7 @@ std::wstring ownFolder() {
 
 int WINAPI wWinMain(HINSTANCE /*instance*/, HINSTANCE /*previous*/, PWSTR /*arguments*/, int /*show*/) {
   const std::wstring folder = ownFolder();
-  std::wstring command = L"\"" + folder + L"python\\pythonw.exe\" -I -m z3dmods.packed play";
+  std::wstring command = L"\"" + folder + L"python\\pythonw.exe\" -I -X utf8 -m z3dmods.packed play";
   STARTUPINFOW startup{};
   startup.cb = sizeof(startup);
   PROCESS_INFORMATION process{};
