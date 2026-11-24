@@ -175,11 +175,17 @@ class Session:
 
     def press(self, keysyms: list[str], seconds: float = 0.15) -> None:
         """X keys held together for `seconds`, pressed in order."""
-        for keysym in keysyms:
-            subprocess.run(["xdotool", "keydown", keysym], env=self._env, check=True)
+        self._keys_down(keysyms, True)
         time.sleep(seconds)
-        for keysym in reversed(keysyms):
-            subprocess.run(["xdotool", "keyup", keysym], env=self._env, check=True)
+        self._keys_down(list(reversed(keysyms)), False)
+
+    def _keys_down(self, keysyms: list[str], down: bool) -> None:
+        for keysym in keysyms:
+            subprocess.run(["xdotool", "keydown" if down else "keyup", keysym], env=self._env, check=True)
+
+    def key_held(self, table: str, name: str, down: bool) -> None:
+        """The key the app binds to `name` of `table` put down or let go, for a hold that spans steps."""
+        self._keys_down(self._keys.keysyms(table, name), down)
 
     def key(self, table: str, name: str, seconds: float = 0.15) -> None:
         """The key the app binds to `name` of `table` (app_keys.py): menu, name, play, slot, stick
@@ -860,6 +866,27 @@ def _aim(session: Session, pad: Gamepad) -> None:
     _aim_released(session)
 
 
+def _view_hold(session: Session, pad: Gamepad) -> None:
+    """OoT3D: the first-person key held in the Deku Tree keeps the view for as long as it is held,
+    and stays the first-person key: Link does not crouch behind his shield (the game's R)."""
+    session.wait(20)
+    session.key("name", "start")
+    session.wait(3)
+    session.key("name", "a")
+    session.wait(2)
+    session.key("name", "a")
+    session.wait(10)
+    session.shot("deku-tree")
+    session.key_held("play", "first_person", True)
+    session.wait(0.5)
+    session.shot("held")
+    session.wait(1.5)
+    session.shot("held-long")
+    session.key_held("play", "first_person", False)
+    session.wait(1)
+    session.shot("released")
+
+
 def _aim_mm3d(session: Session, pad: Gamepad) -> None:
     """MM3D: the file at South Clock Town's owl statue, the first-person key, the mouse turns
     the view, and the key again gives the mouse back."""
@@ -1472,7 +1499,7 @@ def _interp_scenes(session: Session, pad: Gamepad, file_1: Callable[[Session], N
 
 
 DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _gaps, "notebook-mm3d": _notebook_mm3d, "map-zoom-mm3d": _map_zoom_mm3d, "masks-mm3d": _masks_mm3d, "autosave-mm3d": _mm3d_reload, "camera": _camera, "camera-mm3d": _camera_mm3d, "hotswap": _hotswap, "slots": _slots, "slots-small": _slots,
-          "slots-mm3d": _slots_mm3d, "slots-mm3d-small": _slots_mm3d, "aim": _aim, "aim-mm3d": _aim_mm3d,
+          "slots-mm3d": _slots_mm3d, "slots-mm3d-small": _slots_mm3d, "aim": _aim, "view-hold": _view_hold, "aim-mm3d": _aim_mm3d,
           "aim-fast": _aim_fast, "camera-fast": _camera_fast, "camera-mq": _camera, "fire": _fire,
           "fire-mm3d": _fire_mm3d, "interp": lambda session, pad: _interp(session, "on", _oot3d_file_1),
           "interp-off": lambda session, pad: _interp(session, "off", _oot3d_file_1),
@@ -1486,7 +1513,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
                                                                     "mm3d-clock-town.json")}
 # The game a direct scenario launches, when it is not the scenario's name.
 DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slots-mm3d": "mm3d", "slots-mm3d-small": "mm3d",
-               "aim": "oot3d", "aim-mm3d": "mm3d", "verbs-mm3d": "mm3d", "gaps": "oot3d", "notebook-mm3d": "mm3d", "map-zoom-mm3d": "mm3d", "masks-mm3d": "mm3d",
+               "aim": "oot3d", "view-hold": "oot3d", "aim-mm3d": "mm3d", "verbs-mm3d": "mm3d", "gaps": "oot3d", "notebook-mm3d": "mm3d", "map-zoom-mm3d": "mm3d", "masks-mm3d": "mm3d",
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
@@ -1499,7 +1526,7 @@ RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-tu
 SIZES = {"slots-small": SMALL, "slots-mm3d-small": SMALL}
 # What a scenario puts in its user folder before the app starts.
 PREPARE = {"slots": _oot3d_slots_file, "slots-small": _oot3d_slots_file, "slots-mm3d": _mm3d_slots_file,
-           "slots-mm3d-small": _mm3d_slots_file, "aim": _oot3d_slots_file, "aim-mm3d": _mm3d_slots_file, "verbs-mm3d": _mm3d_slots_file, "masks-mm3d": _mm3d_slots_file, "gaps": _oot3d_slots_file,
+           "slots-mm3d-small": _mm3d_slots_file, "aim": _oot3d_slots_file, "view-hold": _oot3d_slots_file, "aim-mm3d": _mm3d_slots_file, "verbs-mm3d": _mm3d_slots_file, "masks-mm3d": _mm3d_slots_file, "gaps": _oot3d_slots_file,
            "notebook-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, notebook=True),
            "map-zoom-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, maps=True),
            "autosave-mm3d": _mm3d_autosave_file, "camera": _oot3d_slots_file, "camera-mm3d": _mm3d_slots_file,

@@ -85,13 +85,18 @@ public:
     } else if (guest::read<int32_t>(kOcarinaScreenState) == kOcarinaScreenSongList) {
       mode = PadMode::Assign;
       table.assign(first, kSlotCount, pressed, songOnShow());
-    } else if (guest::read<uint32_t>(kHud + kHudState) == kHudStateGameplay) {
+    } else if (const uint32_t hud = guest::read<uint32_t>(kHud + kHudState);
+               hud == kHudStateGameplay || hud == kHudStateView) {
+      // Looking through View is still play: the held key that opened it keeps its meaning. Link
+      // takes out no item while he looks.
       mode = PadMode::Play;
-      if (guest::read<uint8_t>(play, kPlayCutscene + kCsState) != 0) {
-        // A cutscene can change Link's age.
-        restore(kSaveEquips, child);
-      } else if (guest::read<int8_t>(play, kPlayTransitionTrigger) == 0) {
-        use(play, table, first, held, pressed, child);
+      if (hud == kHudStateGameplay) {
+        if (guest::read<uint8_t>(play, kPlayCutscene + kCsState) != 0) {
+          // A cutscene can change Link's age.
+          restore(kSaveEquips, child);
+        } else if (guest::read<int8_t>(play, kPlayTransitionTrigger) == 0) {
+          use(play, table, first, held, pressed, child);
+        }
       }
     }
     publish(table, first);

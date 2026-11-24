@@ -170,6 +170,7 @@ kQuestSongMinuet = "QUEST_SONG_MINUET"
 kMenuScreenClosed = "MENU_SCREEN_CLOSED"
 kSlotOcarina = "SLOT_OCARINA"
 kHudStateGameplay = "HUD_STATE_GAMEPLAY"
+kHudStateView = "HUD_STATE_VIEW"
 kLinkAgeChild = "LINK_AGE_CHILD"
 kSaveUnusedSize = "SAVE_UNUSED_6C_SIZE"
 
