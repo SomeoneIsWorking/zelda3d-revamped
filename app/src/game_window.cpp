@@ -128,11 +128,15 @@ void GameWindow::placeOverlay(const OverlayLayout &layout) {
 }
 
 void GameWindow::boot(const std::string &title) {
-  overlay_ = splitLayout();
   SDL_SetWindowTitle(window_, title.c_str());
   if (!hidden_) {
     fitToDisplay();
   }
+  relayout();
+}
+
+void GameWindow::relayout() {
+  overlay_ = splitLayout();
   updateLayout();
 }
 
@@ -147,6 +151,7 @@ void GameWindow::listKeys(std::ostream &out) {
   out << "window\tmenu\t" << SDL_GetScancodeName(kMenuKey) << '\n';
   out << "window\tfullscreen\t" << SDL_GetScancodeName(kFullscreenKey) << '\n';
   out << "window\treport\t" << SDL_GetScancodeName(kReportKey) << '\n';
+  out << "window\tsettings\t" << SDL_GetScancodeName(kSettingsKey) << '\n';
   for (const ModKeyBinding &binding : kModKeys) {
     out << "window\t" << binding.name << '\t' << SDL_GetScancodeName(binding.key) << '\n';
   }
@@ -177,6 +182,8 @@ void GameWindow::pump(bool inGame, const std::function<void(const SDL_Event &)> 
         menuRequested_ = true;
       } else if (event.key.scancode == kReportKey && inGame) {
         reportRequested_ = true;
+      } else if (event.key.scancode == kSettingsKey) {
+        settingsRequested_ = true;
       } else if (const auto *mod =
                      std::ranges::find(kModKeys, event.key.scancode, &ModKeyBinding::key);
                  mod != kModKeys.end()) {
@@ -186,6 +193,10 @@ void GameWindow::pump(bool inGame, const std::function<void(const SDL_Event &)> 
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
       if (event.gbutton.button == kMenuButton) {
         menuRequested_ = true;
+      } else if (event.gbutton.button == kSettingsButton &&
+                 !SDL_GetGamepadButton(SDL_GetGamepadFromID(event.gbutton.which),
+                                       PadInput::kChord)) {
+        settingsRequested_ = true;
       }
       break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:

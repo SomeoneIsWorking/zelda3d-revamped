@@ -693,10 +693,10 @@ def _masks_mm3d(session: Session, pad: Gamepad) -> None:
 
 
 def _verbs_mm3d(session: Session, pad: Gamepad) -> None:
-    """MM3D's screens from play: M and the pad's View open the map, R brings the ocarina out,
+    """MM3D's screens from play: M and the pad's LB with View open the map, R brings the ocarina out,
     LB with Menu opens Gear; the sword's button leaves each."""
     _mm3d_file_1(session)
-    for name, press in (("key-map", lambda: session.key("play", "map")), ("pad-view", lambda: pad.button("select")),
+    for name, press in (("key-map", lambda: session.key("play", "map")), ("pad-view", lambda: _chorded(pad, "select")),
                         ("key-ocarina", lambda: session.key("play", "ocarina")),
                         ("pad-pause", lambda: _chorded(pad, "start")), ("key-pause", lambda: session.key("play", "pause"))):
         press()
@@ -708,12 +708,12 @@ def _verbs_mm3d(session: Session, pad: Gamepad) -> None:
 
 
 def _gaps(session: Session, pad: Gamepad) -> None:
-    """OoT3D's inputs its text names: inside the Deku Tree the pad's View opens the map and closes
+    """OoT3D's inputs its text names: inside the Deku Tree the pad's LB with View opens the map and closes
     it, as M does; in the item screen the right mouse button turns to Gear and the middle one
     back; R brings the ocarina out and R again its song list."""
     _oot3d_file_1(session)
     session.shot("play")
-    for name, press in (("pad-view", lambda: pad.button("select")), ("key-map", lambda: session.key("play", "map"))):
+    for name, press in (("pad-view", lambda: _chorded(pad, "select")), ("key-map", lambda: session.key("play", "map"))):
         press()
         session.wait(2)
         session.shot(name)
@@ -741,10 +741,10 @@ def _gaps(session: Session, pad: Gamepad) -> None:
 
 
 def _notebook_mm3d(session: Session, pad: Gamepad) -> None:
-    """MM3D with the Bombers' Notebook: the pad's View opens the map and View again the notebook,
+    """MM3D with the Bombers' Notebook: the pad's LB with View opens the map and again the notebook,
     B goes back to play; the same with M."""
     _mm3d_file_1(session)
-    for name, press in (("pad-view", lambda: pad.button("select")), ("key-map", lambda: session.key("play", "map"))):
+    for name, press in (("pad-view", lambda: _chorded(pad, "select")), ("key-map", lambda: session.key("play", "map"))):
         press()
         session.wait(3)
         session.shot(f"{name}-map")
@@ -763,7 +763,7 @@ def _map_zoom_mm3d(session: Session, pad: Gamepad) -> None:
     keys, the prompts shown as caps."""
     _mm3d_file_1(session)
     session.shot("play-minimap")
-    pad.button("select")
+    _chorded(pad, "select")
     session.wait(3)
     session.shot("pad-map")
     pad.stick(0, -20000, 0.4)
@@ -1503,6 +1503,57 @@ def _interp_turn(session: Session, file_1: Callable[[Session], None]) -> None:
         session.wait(FAST_TURN_EVERY)
 
 
+def _option_row(session: Session, row: str, key: str) -> None:
+    """Steps the open options with `key` (Up or Down) until `row` is selected."""
+    for _ in range(32):
+        session.press([key])
+        session.wait(0.2)
+        if session.expect("options: row ", 5).endswith(f"options: row {row}"):
+            return
+    raise RuntimeError(f"the options have no row {row}")
+
+
+def _settings(session: Session, pad: Gamepad) -> None:
+    """OoT3D in play: Esc holds the game for its options; a bigger HUD and another layout take
+    effect when Esc closes them, on the same game; the pad's View opens them and B closes them;
+    Enter is the game's Start (its save prompt) and Tab its item screen, as before."""
+    _oot3d_file_1(session)
+    session.shot("play")
+    session.key("window", "settings")
+    session.expect("options: open for", 10)
+    session.expect("options: row ", 5)
+    session.wait(0.5)
+    session.shot("options")
+    _option_row(session, "hud_size", "Down")
+    session.press(["Right"])
+    session.expect("options: hud_size = ", 5)
+    _option_row(session, "layout", "Up")
+    session.press(["Right"])
+    session.expect("options: layout = ", 5)
+    session.wait(0.5)
+    session.shot("options-changed")
+    session.key("window", "settings")
+    session.expect("options: closed", 5)
+    session.wait(2)
+    session.shot("play-changed")
+    pad.button("select")
+    session.expect("options: open for", 10)
+    session.wait(0.5)
+    session.shot("pad-options")
+    pad.button("b")
+    session.expect("options: closed", 5)
+    session.wait(2)
+    session.shot("pad-play")
+    session.key("play", "pause")
+    session.wait(2)
+    session.shot("save-prompt")
+    session.key("name", "b")
+    session.wait(2)
+    session.key("play", "item_screen")
+    session.wait(2)
+    session.shot("item-screen")
+
+
 def _report(session: Session, pad: Gamepad) -> None:
     """OoT3D in play: the report key holds the game for the bug report form; Escape cancels and
     leaves nothing; a second report typed and saved with Ctrl+Enter is a folder with the report,
@@ -1604,6 +1655,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
           "interp-turn": lambda session, pad: _interp_turn(session, _oot3d_file_1),
           "aim-smooth": lambda session, pad: _aim_smooth(session, _oot3d_file_1),
           "report": _report,
+          "settings": _settings,
           "interp-turn-mm3d": lambda session, pad: _interp_turn(session, _mm3d_file_1),
           "interp-scenes": lambda session, pad: _interp_scenes(session, pad, _oot3d_file_1, "oot3d-kokiri.json"),
           "interp-scenes-mm3d": lambda session, pad: _interp_scenes(session, pad, _mm3d_file_1,
@@ -1614,7 +1666,7 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
-               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d",
+               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d", "settings": "oot3d",
                "interp-scenes": "oot3d", "interp-scenes-mm3d": "mm3d"}
 # The direct scenarios that record every present into presents/ (app --record).
 RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",

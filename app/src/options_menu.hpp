@@ -1,7 +1,7 @@
 // The options screen of one game, drawn on the title picker's canvas: up and down pick an
-// option, left, right or A change it, B, X, F10 or Guide go back. Changes are saved as they are
-// made. After the game's options, a Fullscreen row (game_window.hpp). With `folders`, a last row
-// leaves to change the games and mods folders (folder_setup.hpp).
+// option, left, right or A change it, B, X, Esc, View, F10 or Guide go back. Changes are saved as
+// they are made. After the game's options, a Fullscreen row (game_window.hpp). With `folders`, a
+// last row leaves to change the games and mods folders (folder_setup.hpp).
 #pragma once
 
 #include "menu_canvas.hpp"

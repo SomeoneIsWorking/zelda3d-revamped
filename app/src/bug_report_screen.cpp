@@ -216,12 +216,6 @@ std::optional<std::filesystem::path> BugReportScreen::run() {
     }
     draw();
   }
-  // The key that closed the form would otherwise press something in the game.
-  while (!window_.closeRequested() && pad_.gameInputHeld()) {
-    (void)window_.pollMenu([](const SDL_Event &) {
-    });
-    draw();
-  }
   if (!saved_) {
     lucent::info("report", "cancelled");
     if (draft_) {

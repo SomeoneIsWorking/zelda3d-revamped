@@ -97,6 +97,13 @@ every key and mouse binding, a `<table>\t<name>\t<key>` line each; the tools rea
 from it (`tools/z3dmods/app_keys.py`). In the window F10 or Guide returns to the picker, F5
 reads the patch again, F6 takes it out or puts it back, F7 switches the textures, F11 or
 Alt+Enter switches fullscreen.
+Esc or the pad's View (without LB) in a game holds it for its options (`OptionsMenu` on the menu
+canvas, the picker's X screen); Esc, View or B go back and the same game plays on. `main.cpp`'s
+`play` owns the game's screens, HUD and helpers around the running emulator and makes them again
+when an option changes the layout, resolution or textures. `Player::run` starts only once no key
+or button the game reads is still held from the screen before, so the key that closed a screen
+never reaches the game. Enter is the game's Start (Pause in play), LB with View its Select (the
+map in play); Alt with a key is the window's alone.
 F8 in a game holds it for a bug report (`BugReportScreen`): the menu canvas shows both screens
 as they were with a form for a one-line summary and what the player did; Ctrl+Enter or Start saves
 it, Escape or B drops it. The report is a `lucent::bug_report` folder under

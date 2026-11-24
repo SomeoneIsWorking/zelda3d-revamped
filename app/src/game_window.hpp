@@ -50,6 +50,10 @@ inline constexpr SDL_Scancode kMenuKey = SDL_SCANCODE_F10;
 inline constexpr SDL_GamepadButton kMenuButton = SDL_GAMEPAD_BUTTON_GUIDE;
 // Holds the game and opens a bug report on it (bug_report_screen.hpp).
 inline constexpr SDL_Scancode kReportKey = SDL_SCANCODE_F8;
+// Holds the game and opens its options over it (options_menu.hpp); the pad's View with the chord
+// held is the game's instead (pad_input.hpp).
+inline constexpr SDL_Scancode kSettingsKey = SDL_SCANCODE_ESCAPE;
+inline constexpr SDL_GamepadButton kSettingsButton = SDL_GAMEPAD_BUTTON_BACK;
 // Flips fullscreen, as Alt+Enter does.
 inline constexpr SDL_Scancode kFullscreenKey = SDL_SCANCODE_F11;
 
@@ -75,6 +79,9 @@ public:
   pollMenu(const std::function<void(const SDL_Event &)> &each = {});
   // A game's title on the window and the window in its layout's shape (core_settings.hpp).
   void boot(const std::string &title);
+  // The screens placed again for the core's layout setting, at the window's size, after it
+  // changed under a running game (core_settings.hpp).
+  void relayout();
 
   // The window's size in pixels.
   [[nodiscard]] std::pair<unsigned, unsigned> pixelSize() const;
@@ -116,6 +123,11 @@ public:
     return std::exchange(reportRequested_, false);
   }
 
+  // kSettingsKey or kSettingsButton since the last call: a game's options, or back out of them.
+  [[nodiscard]] bool takeSettingsRequest() {
+    return std::exchange(settingsRequested_, false);
+  }
+
   // The mod key pressed since the last call, if any.
   [[nodiscard]] std::optional<ModKey> takeModKey() {
     return std::exchange(modKey_, std::nullopt);
@@ -146,6 +158,7 @@ private:
   bool closeRequested_ = false;
   bool menuRequested_ = false;
   bool reportRequested_ = false;
+  bool settingsRequested_ = false;
   std::optional<ModKey> modKey_;
   bool touching_ = false;
   bool mouseCaptured_ = false;

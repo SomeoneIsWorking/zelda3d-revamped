@@ -26,7 +26,8 @@ prints the keyboard's and the mouse's.
 | LB held | Chord: A, B, X, Y are item slots 8 to 11; the HUD shows them while held |
 | Menu | Item screen; a slot's input there assigns the cursor's item to it, Menu again leaves |
 | LB and Menu | Pause (MM3D: the Gear screen, where its options are) |
-| View | Map; MM3D: View again on the Map Screen opens the Bombers' Notebook |
+| View | The app's options over the held game; B or View again goes back |
+| LB and View | Map (outside play Select); MM3D: again on the Map Screen opens the Bombers' Notebook |
 
 | Keyboard and mouse | Job |
 |---|---|
@@ -39,15 +40,17 @@ prints the keyboard's and the mouse's.
 | F | First person |
 | 1 to 8 | Item slots 1 to 8; 9 to 11, behind LB, are the pad's alone |
 | R | Ocarina |
-| Tab | Item screen; M map; Esc pause |
+| Tab | Item screen; M map; Enter pause (outside play Enter is Start) |
+| Esc | The app's options over the held game; Esc again goes back |
 
 User (2026-11-24): "I don't like that ESC opens save and tab opens inventory, in the game, these
 are the same thing, instead we can separate game's own inventory/save and custom port settings",
 and "I don't want these fake overlay things either, everything must be RE based". To build:
 
-- One key and one pad button for the game's own menu, which reaches both the items and the save
-  the way the game does; Esc and the pad's View open our own settings over the running game (the
-  options that today live only on the picker tile's X), not the game's save prompt.
+- Built: Esc and the pad's View hold the game and open its options (`OptionsMenu`, the picker
+  tile's X screen) over it; Esc, View or B go back and the same game plays on, a layout or
+  resolution change remaking its screens around it (`inputtest settings`). The game's own Start
+  moved to Enter (Pause in play, Start outside it); the pad's map and Select moved to LB with View.
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.
@@ -245,7 +248,7 @@ The path is texture replacement, in both games, with nothing drawn by the app:
     strips the D-pad in play). Saving is "hold LB and press Menu". The Know-It-All Brother's
     menu answers "Your item slots", "The Action Icon", "The top-right icon".
   - MM3D: the Map Screen is View (icon 9, drawn as View); Masks is Menu, then RT; Gear is LB
-    and Menu, Pause (icon 0x0E, Esc on the keyboard); the map zooms and pans by mouse, at the
+    and Menu, Pause (icon 0x0E, Enter on the keyboard); the map zooms and pans by mouse, at the
     right of the split layout; the ocarina and the Pictograph Box are used from a slot; the notebook's screens are "left" and "right".
 - Seen, every reworded message drawn through a sign or statue given its number (decomp
   `docs/message.md`): OoT3D `txt-oot-w1`, `txt-oot-w2`; MM3D `txt-mm-p7`, `txt-mm-w2`,
@@ -280,11 +283,11 @@ The path is texture replacement, in both games, with nothing drawn by the app:
   sheet keeps the pad's glyphs there. The Backspace cap is its keyboard legend, a tag; four
   one-letter keys are two rows. Seen at 1x and 4x (`gap-cap1`, `gap-cap1b`, `gap-cap4`): the
   tag reads at 1x, a cell of four keys reads at 4x only.
-- Saving names Pause in one cell, OoT3D's unused 0x0E: LB held over Menu on the pad, Esc on the
+- Saving names Pause in one cell, OoT3D's unused 0x0E: LB held over Menu on the pad, Enter on the
   keyboard (0x103B, 0x010F; `gap-pause4`), where "hold the chord and press Menu" read Shift
   and Tab on the keyboard, which do not pause. MM3D's Gear (0x0270) is Pause in the +Control
   Pad Left's cell, icon 0x0E, which no message in any language uses; seen with the pad and the
-  keyboard (`txt-mm-pause1`: LB over Menu, then Esc).
+  keyboard (`txt-mm-pause1`: LB over Menu, then Enter).
 - Prompts by device, seen with the same box swapped live by `device:` (`txt-oot-k3`: 0x00A4
   shows Menu, RT, A, then Tab, the right mouse button, E, then the pad's again; 0x1036 and
   0x0066 with caps; `txt-mm-k2`: 0x0078's Menu, LT, Y, B, RB, D-pad become Tab, Q, 1, 2, 3,

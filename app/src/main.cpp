@@ -15,6 +15,7 @@
 #include "menu_canvas.hpp"
 #include "mod_swap.hpp"
 #include "mouse_aim.hpp"
+#include "options_menu.hpp"
 #include "pad_input.hpp"
 #include "player.hpp"
 #include "repl.hpp"
@@ -60,20 +61,53 @@ std::vector<GameOptions> loadAll(const AppConfig &config, const GameLibrary &lib
   return options;
 }
 
-// Plays until the window closes or the menu is asked for. A bug report holds the game for its
-// form on the menu canvas, then the same game plays on.
-void play(const AppConfig &config, Player &player, GameWindow &window, PadInput &pad,
-          Emulator &emulator, const ModSwap &mods, const ReportedRun &run) {
-  while (player.run() == Player::Left::Report) {
-    if (config.font.empty()) {
-      lucent::warn("report", "no menu font (--font): no report");
-      continue;
-    }
-    const MenuCanvas canvas(window, config.font, config.assets);
-    const ReportedRun now{run.title, run.game, run.options, mods.patchOn(), mods.texturesOn()};
-    (void)BugReportScreen(canvas, window, pad, emulator, config.userDir, now).run();
-    if (window.closeRequested()) {
-      return;
+// Whether the screens around the game must be made again for `after`.
+bool screensChanged(const GameSetup &before, const GameSetup &after) {
+  return before.layout != after.layout || before.resolution != after.resolution ||
+         before.customTextures != after.customTextures;
+}
+
+// Plays a running game until the window closes or the menu is asked for. The game's options and
+// a bug report hold it for their screen on the menu canvas, then the same game plays on; options
+// that change its screens make them again around it.
+void play(const AppConfig &config, GameWindow &window, PadInput &pad, Emulator &emulator,
+          GameOptions &options, const std::string &title, const GameSetup &game) {
+  const std::filesystem::path manifest = config.userDir / game.options;
+  ModSwap mods(emulator, manifest.parent_path(), options.blockAddress());
+  while (!window.closeRequested()) {
+    const ScreenOverlay overlay(window, emulator, options.setup(), manifest);
+    SlotLink link(emulator, pad, manifest);
+    const Hud hud(window, emulator, pad, link, overlay, options, config.assets, manifest);
+    const MouseAim aim(window, emulator, pad, link, manifest);
+    FrameInterpolation interpolation(emulator, manifest);
+    Player player(emulator, window, mods, options, pad, interpolation, config.record);
+    bool remake = false;
+    while (!remake) {
+      const Player::Left left = player.run();
+      if (left != Player::Left::Report && left != Player::Left::Settings) {
+        return;
+      }
+      if (config.font.empty()) {
+        lucent::warn("z3d", "no menu font (--font): no screen over the game");
+        continue;
+      }
+      const MenuCanvas canvas(window, config.font, config.assets);
+      if (left == Player::Left::Report) {
+        const ReportedRun run{title, game, options, mods.patchOn(), mods.texturesOn()};
+        (void)BugReportScreen(canvas, window, pad, emulator, config.userDir, run).run();
+      } else {
+        const GameSetup before = options.setup();
+        (void)OptionsMenu(canvas, window, pad, options, title, false).run();
+        options.apply(emulator, pad);
+        remake = screensChanged(before, options.setup());
+        if (remake) {
+          applyGameSettings(options.setup());
+          window.relayout();
+        }
+      }
+      if (window.closeRequested()) {
+        return;
+      }
     }
   }
 }
@@ -95,6 +129,10 @@ int direct(const AppConfig &config, const GameSetup &game, PadInput &pad) {
   const std::unique_ptr<TestPad> test = testPad(config);
   Emulator emulator(game.rom, window);
   options.apply(emulator, pad);
+  if (!config.hidden) {
+    play(config, window, pad, emulator, options, config.title, game);
+    return 0;
+  }
   const ScreenOverlay overlay(window, emulator, options.setup(), config.userDir / game.options);
   SlotLink link(emulator, pad, config.userDir / game.options);
   const Hud hud(window, emulator, pad, link, overlay, options, config.assets,
@@ -102,14 +140,9 @@ int direct(const AppConfig &config, const GameSetup &game, PadInput &pad) {
   ModSwap mods(emulator, (config.userDir / game.options).parent_path(), options.blockAddress());
   MouseAim aim(window, emulator, pad, link, config.userDir / game.options);
   FrameInterpolation interpolation(emulator, config.userDir / game.options);
-  if (config.hidden) {
-    Repl repl(emulator, window, pad, options, mods, aim, interpolation);
-    std::cout << "ready\n" << std::flush;
-    repl.serve(std::cin, std::cout);
-    return 0;
-  }
-  Player player(emulator, window, mods, options, pad, interpolation, config.record);
-  play(config, player, window, pad, emulator, mods, {config.title, game, options});
+  Repl repl(emulator, window, pad, options, mods, aim, interpolation);
+  std::cout << "ready\n" << std::flush;
+  repl.serve(std::cin, std::cout);
   return 0;
 }
 
@@ -134,8 +167,7 @@ int picker(const AppConfig &config, PadInput &pad) {
     std::optional<TitlePicker::Picked> picked;
     {
       const MenuCanvas canvas(window, config.font, config.assets);
-      TitlePicker picker(canvas, window, pad, library, options, install,
-                         !config.tools.empty());
+      TitlePicker picker(canvas, window, pad, library, options, install, !config.tools.empty());
       picked = picker.run();
     }
     if (!picked) {
@@ -163,19 +195,8 @@ int picker(const AppConfig &config, PadInput &pad) {
       const std::unique_ptr<Emulator> running =
           picked->emulator ? std::move(picked->emulator)
                            : std::make_unique<Emulator>(game.setup.rom, window);
-      Emulator &emulator = *running;
-      options[*chosen].apply(emulator, pad);
-      const ScreenOverlay overlay(window, emulator, options[*chosen].setup(),
-                                  config.userDir / game.setup.options);
-      SlotLink link(emulator, pad, config.userDir / game.setup.options);
-      const Hud hud(window, emulator, pad, link, overlay, options[*chosen], config.assets,
-                    config.userDir / game.setup.options);
-      ModSwap mods(emulator, (config.userDir / game.setup.options).parent_path(),
-                   options[*chosen].blockAddress());
-      const MouseAim aim(window, emulator, pad, link, config.userDir / game.setup.options);
-      FrameInterpolation interpolation(emulator, config.userDir / game.setup.options);
-      Player player(emulator, window, mods, options[*chosen], pad, interpolation, config.record);
-      play(config, player, window, pad, emulator, mods, {game.title, game.setup, options[*chosen]});
+      options[*chosen].apply(*running, pad);
+      play(config, window, pad, *running, options[*chosen], game.title, game.setup);
     }
     if (window.closeRequested()) {
       return 0;

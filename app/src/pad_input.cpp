@@ -51,7 +51,8 @@ constexpr std::array kPlayButtons{
     PlayButton{SDL_GAMEPAD_BUTTON_RIGHT_STICK, Verb::FirstPerson},
     // The games keep their items off the pause screen, so Menu is the item screen.
     PlayButton{SDL_GAMEPAD_BUTTON_START, Verb::ItemScreen, kNoSlot, kNoSlot, Verb::Pause},
-    PlayButton{SDL_GAMEPAD_BUTTON_BACK, Verb::Map},
+    // View alone opens the app's settings (game_window.hpp).
+    PlayButton{SDL_GAMEPAD_BUTTON_BACK, std::nullopt, kNoSlot, kNoSlot, Verb::Map},
 };
 
 struct PlayKey {
@@ -61,10 +62,14 @@ struct PlayKey {
 
 // A verb's first key is the one its prompt shows.
 constexpr std::array kPlayKeys{
-    PlayKey{SDL_SCANCODE_E, Verb::Action},  PlayKey{SDL_SCANCODE_SPACE, Verb::Action},
-    PlayKey{SDL_SCANCODE_Q, Verb::Target},  PlayKey{SDL_SCANCODE_F, Verb::FirstPerson},
-    PlayKey{SDL_SCANCODE_R, Verb::Ocarina}, PlayKey{SDL_SCANCODE_TAB, Verb::ItemScreen},
-    PlayKey{SDL_SCANCODE_M, Verb::Map},     PlayKey{SDL_SCANCODE_ESCAPE, Verb::Pause},
+    PlayKey{SDL_SCANCODE_E, Verb::Action},
+    PlayKey{SDL_SCANCODE_SPACE, Verb::Action},
+    PlayKey{SDL_SCANCODE_Q, Verb::Target},
+    PlayKey{SDL_SCANCODE_F, Verb::FirstPerson},
+    PlayKey{SDL_SCANCODE_R, Verb::Ocarina},
+    PlayKey{SDL_SCANCODE_TAB, Verb::ItemScreen},
+    PlayKey{SDL_SCANCODE_M, Verb::Map},
+    PlayKey{SDL_SCANCODE_RETURN, Verb::Pause},
     // The shield (crouch) beside the right mouse button, which a touchpad makes awkward.
     PlayKey{SDL_SCANCODE_C, Verb::Shield},
 };
@@ -93,9 +98,8 @@ constexpr std::array kNameKeys{
     KeyBinding{SDL_SCANCODE_R, Settings::NativeButton::ZR},
     KeyBinding{SDL_SCANCODE_E, Settings::NativeButton::A},
     KeyBinding{SDL_SCANCODE_SPACE, Settings::NativeButton::A},
-    KeyBinding{SDL_SCANCODE_RETURN, Settings::NativeButton::A},
     KeyBinding{SDL_SCANCODE_BACKSPACE, Settings::NativeButton::B},
-    KeyBinding{SDL_SCANCODE_ESCAPE, Settings::NativeButton::Start},
+    KeyBinding{SDL_SCANCODE_RETURN, Settings::NativeButton::Start},
     KeyBinding{SDL_SCANCODE_M, Settings::NativeButton::Select},
     KeyBinding{SDL_SCANCODE_Q, Settings::NativeButton::L},
     KeyBinding{SDL_SCANCODE_F, Settings::NativeButton::R},
@@ -133,7 +137,6 @@ constexpr std::array kNameButtons{
     PadBinding{SDL_GAMEPAD_BUTTON_WEST, Settings::NativeButton::X},
     PadBinding{SDL_GAMEPAD_BUTTON_NORTH, Settings::NativeButton::Y},
     PadBinding{SDL_GAMEPAD_BUTTON_START, Settings::NativeButton::Start},
-    PadBinding{SDL_GAMEPAD_BUTTON_BACK, Settings::NativeButton::Select},
     PadBinding{SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, Settings::NativeButton::ZL},
     PadBinding{SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, Settings::NativeButton::ZR},
     PadBinding{SDL_GAMEPAD_BUTTON_DPAD_UP, Settings::NativeButton::Up},
@@ -366,10 +369,12 @@ void PadInput::readHost() {
     held |= leaves ? game_->leave : game_->buttons[static_cast<size_t>(verb)];
   };
   const bool *keys = SDL_GetKeyboardState(nullptr);
+  // Alt with a key is the window's (Alt+Enter), never the game's.
+  const bool windowChord = (SDL_GetModState() & SDL_KMOD_ALT) != 0;
   bool keyHeld = false;
   if (play) {
     for (const PlayKey &binding : kPlayKeys) {
-      if (keys[binding.key]) {
+      if (keys[binding.key] && !windowChord) {
         keyHeld = true;
         press(binding.verb);
       }
@@ -395,7 +400,7 @@ void PadInput::readHost() {
     }
   } else {
     for (const KeyBinding &binding : kNameKeys) {
-      if (keys[binding.key]) {
+      if (keys[binding.key] && !windowChord) {
         keyHeld = true;
         held |= bit(binding.button);
       }
@@ -443,8 +448,15 @@ void PadInput::readHost() {
         }
       }
     } else {
+      // View alone is the app's settings; with the chord it is Select, and the chord is not ZL.
+      const bool select = SDL_GetGamepadButton(pad, kChord) &&
+                          SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_BACK);
+      if (select) {
+        padHeld = true;
+        held |= bit(Settings::NativeButton::Select);
+      }
       for (const PadBinding &binding : kNameButtons) {
-        if (SDL_GetGamepadButton(pad, binding.pad)) {
+        if (SDL_GetGamepadButton(pad, binding.pad) && !(select && binding.pad == kChord)) {
           padHeld = true;
           held |= bit(binding.button);
         }
@@ -536,6 +548,11 @@ Prompt PadInput::verbPrompt(Verb verb) {
   if (const auto *pad = std::ranges::find(kPlayButtons, std::optional(verb), &PlayButton::verb);
       pad != kPlayButtons.end()) {
     prompt.pad = pad->pad;
+  } else if (const auto *chorded =
+                 std::ranges::find(kPlayButtons, std::optional(verb), &PlayButton::chordVerb);
+             chorded != kPlayButtons.end()) {
+    prompt.pad = chorded->pad;
+    prompt.chord = true;
   }
   if (const auto *key = std::ranges::find(kPlayKeys, verb, &PlayKey::verb);
       key != kPlayKeys.end()) {

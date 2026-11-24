@@ -4,6 +4,7 @@
 #include "game_options.hpp"
 #include "game_window.hpp"
 #include "mod_swap.hpp"
+#include "pad_input.hpp"
 #include "frame_interpolation.hpp"
 
 #include <lucent/log.h>
@@ -11,8 +12,14 @@
 namespace z3d::app {
 
 Player::Left Player::run() {
+  // The key that left the picker or a screen over the game would otherwise press something.
+  do {
+    (void)window_.pollMenu([](const SDL_Event &) {
+    });
+  } while (pad_.gameInputHeld() && !window_.closeRequested());
   (void)window_.takeMenuRequest();
   (void)window_.takeReportRequest();
+  (void)window_.takeSettingsRequest();
   const bool interpolate = options_.frameInterpolation();
   const bool interpolating = interpolation_.setMode(interpolate ? FrameInterpolation::Mode::On
                                                                 : FrameInterpolation::Mode::Off);
@@ -24,6 +31,10 @@ Player::Left Player::run() {
   while (!window_.closeRequested()) {
     if (window_.takeMenuRequest()) {
       left = Left::Menu;
+      break;
+    }
+    if (window_.takeSettingsRequest()) {
+      left = Left::Settings;
       break;
     }
     if (window_.takeReportRequest()) {

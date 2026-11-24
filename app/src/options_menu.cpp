@@ -82,6 +82,7 @@ void OptionsMenu::step(int direction) {
 
 OptionsMenu::Left OptionsMenu::run() {
   (void)window_.takeMenuRequest();
+  (void)window_.takeSettingsRequest();
   Held before = Held::from(pad_.menu());
   lucent::info("menu", "options: open for {}", title_);
   select(selected_);
@@ -105,7 +106,7 @@ OptionsMenu::Left OptionsMenu::run() {
     if ((now.right && !before.right) || (now.change && !before.change)) {
       step(1);
     }
-    if ((now.back && !before.back) || window_.takeMenuRequest()) {
+    if ((now.back && !before.back) || window_.takeMenuRequest() || window_.takeSettingsRequest()) {
       break;
     }
     before = now;
@@ -169,10 +170,12 @@ void OptionsMenu::draw() {
     }
     y += pitch;
   }
+  // Back is Esc on the keyboard, the key that opens the options over a game.
+  Prompt back = PadInput::menuPrompt(&MenuPad::b);
+  back.key = kSettingsKey;
   const std::array hints{
       Hint{{PadInput::menuPrompt(&MenuPad::up), PadInput::menuPrompt(&MenuPad::down)}, kSelect},
-      Hint{{PadInput::menuPrompt(&MenuPad::a)}, kChange},
-      Hint{{PadInput::menuPrompt(&MenuPad::b)}, kBack}};
+      Hint{{PadInput::menuPrompt(&MenuPad::a)}, kChange}, Hint{{back}, kBack}};
   canvas_.hints(hints, pad_.lastDevice(), {left, height * kHintsTop}, row, right - left, false);
   SDL_RenderPresent(renderer_);
 }
