@@ -55,11 +55,17 @@ Frontend::EmuWindow::WindowSystemInfo nativeSurface(SDL_Window *window, SDL_Meta
       throw sdlError("SDL_Metal_CreateView");
     }
     info.render_surface = SDL_Metal_GetLayer(metalView);
+  } else if (driver == "windows") {
+    // A Win32 surface takes the window's HWND alone.
+    info.type = Frontend::WindowSystemType::Windows;
+    info.render_surface =
+        SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
   } else {
     throw std::runtime_error("no Vulkan surface for SDL video driver " + std::string(driver));
   }
-  if ((info.type != Frontend::WindowSystemType::MacOS && info.display_connection == nullptr) ||
-      info.render_surface == nullptr) {
+  const bool needsDisplay = info.type == Frontend::WindowSystemType::Wayland ||
+                            info.type == Frontend::WindowSystemType::X11;
+  if ((needsDisplay && info.display_connection == nullptr) || info.render_surface == nullptr) {
     throw std::runtime_error("SDL window has no native surface");
   }
   info.render_surface_scale = SDL_GetWindowPixelDensity(window);
