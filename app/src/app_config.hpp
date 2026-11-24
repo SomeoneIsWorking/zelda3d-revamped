@@ -61,6 +61,8 @@ struct AppConfig {
   bool dumpTextures = false;
   // The window's play: each present's top screen as <record>/<index>.png, in-betweens included.
   std::filesystem::path record;
+  // --help: the usage to print before leaving.
+  std::string help;
   // --keys alone: print every key binding (PadInput::listKeys) and leave.
   bool listKeys = false;
   // Z3D_TEST_PAD=1, the input tests alone: the loopback channel that makes and drives their
@@ -68,7 +70,8 @@ struct AppConfig {
   bool testPad = false;
 
   // z3d --keys
-  // z3d --user <dir> (--rom <3ds> [--layout l] [--textures] [--options <json>] [--option <id>=<value>]... [--assets <dir>] | --library <json> --font <ttf> --assets <dir>)
+  // z3d --user <dir> (--rom <3ds> [--layout l] [--textures] [--options <json>] [--option
+  // <id>=<value>]... [--assets <dir>] | --library <json> --font <ttf> --assets <dir>)
   //     [--title t] [--app-id id] [--resolution n] [--hidden] [--dump-textures] [--record <dir>]
   //     [--tools <program> [<argument>]...]
   // Environment: Z3D_TEST_PAD.

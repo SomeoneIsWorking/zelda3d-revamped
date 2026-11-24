@@ -213,6 +213,10 @@ int picker(const AppConfig &config, PadInput &pad) {
 int main(int argc, char **argv) {
   try {
     const z3d::app::AppConfig config = z3d::app::AppConfig::parse(argc, argv);
+    if (!config.help.empty()) {
+      std::cout << config.help << '\n';
+      return 0;
+    }
     if (config.listKeys) {
       z3d::app::PadInput::listKeys(std::cout);
       z3d::app::GameWindow::listKeys(std::cout);
