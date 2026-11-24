@@ -3,6 +3,7 @@
 // renderer takes the window after it is gone.
 #pragma once
 
+#include "frame.hpp"
 #include "pad_input.hpp"
 
 #include <SDL3/SDL_rect.h>
@@ -66,6 +67,10 @@ public:
   [[nodiscard]] SDL_FPoint size() const;
   void clear() const;
   void fill(Rgb color, const SDL_FRect &rect) const;
+  // The frame into `texture`, made again when its size changed; `grey` shows it grey at
+  // kGreyLight, as a game that is held.
+  void upload(SDL_Texture *&texture, const Frame &frame, bool grey) const;
+  static constexpr float kGreyLight = 0.5F;
   // Text at the font's size now; the caller destroys it.
   [[nodiscard]] TTF_Text *text(const std::string &line, Rgb color) const;
 

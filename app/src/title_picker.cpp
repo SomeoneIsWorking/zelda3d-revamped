@@ -62,8 +62,6 @@ constexpr float kSlant = 0.3F;
 constexpr float kEdgeLine = 0.006F;
 // The edge eases with this time constant: it closes 63% of its way in that time.
 constexpr float kEaseSeconds = 0.12F;
-// A held game's frame: grey at this brightness.
-constexpr float kGreyLight = 0.5F;
 // The band behind the titles and hints: its top as a share of the window's height, its alpha.
 constexpr float kBandTop = 0.7F;
 constexpr uint8_t kBandAlpha = 170;
@@ -87,35 +85,6 @@ struct Held {
 SDL_FColor color(Rgb rgb, float alpha = 1.0F) {
   return {static_cast<float>(rgb.r) / 255.0F, static_cast<float>(rgb.g) / 255.0F,
           static_cast<float>(rgb.b) / 255.0F, alpha};
-}
-
-// The frame into `texture`, made again when its size changed; `grey` darkens it to grey.
-void upload(SDL_Renderer *renderer, SDL_Texture *&texture, const Frame &frame, bool grey) {
-  const auto width = static_cast<int>(frame.width());
-  const auto height = static_cast<int>(frame.height());
-  if (texture != nullptr && (texture->w != width || texture->h != height)) {
-    SDL_DestroyTexture(texture);
-    texture = nullptr;
-  }
-  if (texture == nullptr) {
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING,
-                                width, height);
-    if (texture == nullptr) {
-      throw sdlError("SDL_CreateTexture");
-    }
-  }
-  if (!grey) {
-    SDL_UpdateTexture(texture, nullptr, frame.pixels().data(), width * 4);
-    return;
-  }
-  std::vector<uint32_t> pixels(frame.pixels().size());
-  std::ranges::transform(frame.pixels(), pixels.begin(), [](uint32_t pixel) {
-    const uint32_t luma =
-        ((pixel >> 16 & 0xFFU) * 77 + (pixel >> 8 & 0xFFU) * 150 + (pixel & 0xFFU) * 29) >> 8;
-    const auto level = static_cast<uint32_t>(static_cast<float>(luma) * kGreyLight);
-    return level << 16 | level << 8 | level;
-  });
-  SDL_UpdateTexture(texture, nullptr, pixels.data(), width * 4);
 }
 
 // A four-cornered shape (top left, top right, bottom right, bottom left), with `texture` drawn
@@ -228,14 +197,14 @@ void TitlePicker::step() {
   }
   side.emulator->runFrames(1, Emulator::Capture::Top);
   if (!side.emulator->frame().pixels().empty()) {
-    upload(renderer_, side.frame, side.emulator->frame(), false);
+    canvas_.upload(side.frame, side.emulator->frame(), false);
   }
 }
 
 void TitlePicker::select(size_t index) {
   if (index != selected_ && sides_[selected_].emulator &&
       !sides_[selected_].emulator->frame().pixels().empty()) {
-    upload(renderer_, sides_[selected_].grey, sides_[selected_].emulator->frame(), true);
+    canvas_.upload(sides_[selected_].grey, sides_[selected_].emulator->frame(), true);
   }
   selected_ = index;
   lucent::info("menu", "picker: on {}", library_.games()[selected_].title);

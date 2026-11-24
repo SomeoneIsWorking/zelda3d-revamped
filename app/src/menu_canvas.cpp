@@ -150,6 +150,34 @@ MenuCanvas::~MenuCanvas() {
 #endif
 }
 
+void MenuCanvas::upload(SDL_Texture *&texture, const Frame &frame, bool grey) const {
+  const auto width = static_cast<int>(frame.width());
+  const auto height = static_cast<int>(frame.height());
+  if (texture != nullptr && (texture->w != width || texture->h != height)) {
+    SDL_DestroyTexture(texture);
+    texture = nullptr;
+  }
+  if (texture == nullptr) {
+    texture = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING,
+                                width, height);
+    if (texture == nullptr) {
+      throw sdlError("SDL_CreateTexture");
+    }
+  }
+  if (!grey) {
+    SDL_UpdateTexture(texture, nullptr, frame.pixels().data(), width * 4);
+    return;
+  }
+  std::vector<uint32_t> pixels(frame.pixels().size());
+  std::ranges::transform(frame.pixels(), pixels.begin(), [](uint32_t pixel) {
+    const uint32_t luma =
+        ((pixel >> 16 & 0xFFU) * 77 + (pixel >> 8 & 0xFFU) * 150 + (pixel & 0xFFU) * 29) >> 8;
+    const auto level = static_cast<uint32_t>(static_cast<float>(luma) * kGreyLight);
+    return level << 16 | level << 8 | level;
+  });
+  SDL_UpdateTexture(texture, nullptr, pixels.data(), width * 4);
+}
+
 SDL_FPoint MenuCanvas::size() const {
   int w = 0;
   int h = 0;
