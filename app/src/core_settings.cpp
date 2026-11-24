@@ -11,6 +11,7 @@
 
 #include <lucent/text.h>
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 
@@ -54,7 +55,6 @@ void applyCoreSettings(const AppConfig &config) {
   FileUtil::SetUserPath(userPath(config.userDir));
   auto &values = Settings::values;
   values.graphics_api = Settings::GraphicsAPI::Vulkan;
-  values.resolution_factor = config.resolution;
   values.dump_textures = config.dumpTextures;
   values.frame_limit = config.hidden ? 0.0 : kRealTime;
   values.use_vsync = !config.hidden;
@@ -71,9 +71,12 @@ void applyCoreSettings(const AppConfig &config) {
 
 void applyGameSettings(const GameSetup &game) {
   Settings::values.layout_option = layoutOption(game.layout);
+  // The rasterizer cache rebuilds its surfaces on the next frame when this changes.
+  Settings::values.resolution_factor = game.resolution;
   if (game.layout == ScreenLayout::Overlay) {
-    // The window takes its shape from this: the top screen's, at the render scale.
-    const uint32_t scale = Settings::values.resolution_factor.GetValue();
+    // A hidden window takes its shape from this: the top screen's, at the render scale. A shown
+    // one is placed again at its own size when it boots.
+    const uint32_t scale = std::max(game.resolution, 1U);
     placeOverlay(Core::kScreenTopWidth * scale, Core::kScreenTopHeight * scale, {});
   }
   Settings::values.custom_textures = game.customTextures;

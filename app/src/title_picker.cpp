@@ -146,10 +146,9 @@ void quad(SDL_Renderer *renderer, std::array<SDL_FPoint, 4> corners, SDL_Texture
 
 } // namespace
 
-TitlePicker::TitlePicker(const AppConfig &config, const MenuCanvas &canvas, GameWindow &window,
-                         PadInput &pad, const GameLibrary &library,
+TitlePicker::TitlePicker(const MenuCanvas &canvas, GameWindow &window, PadInput &pad, const GameLibrary &library,
                          std::vector<GameOptions> &options, SetInstall &install, bool folders)
-    : config_(config), canvas_(canvas), renderer_(canvas.renderer()), font_(canvas.font()),
+    : canvas_(canvas), renderer_(canvas.renderer()), font_(canvas.font()),
       window_(window), pad_(pad), library_(library), options_(options), install_(install),
       folders_(folders), sides_(library.games().size()) {
   if (sides_.empty() || sides_.size() > 2) {
@@ -218,7 +217,7 @@ void TitlePicker::load(size_t index) {
   }
   lucent::info("menu", "picker: loading {}", game.title);
   applyGameSettings(options_[index].setup());
-  sides_[index].emulator = std::make_unique<Emulator>(config_, game.setup.rom, window_);
+  sides_[index].emulator = std::make_unique<Emulator>(game.setup.rom, window_);
   options_[index].apply(*sides_[index].emulator, pad_);
 }
 

@@ -165,12 +165,14 @@ def seed_user(cfg: Config, user: Path, fresh: bool) -> None:
             (target / name).symlink_to(source, target_is_directory=True)
 
 
-def launch_args(cfg: Config, game: GameSet, user: Path, resolution: int,
+def launch_args(cfg: Config, game: GameSet, user: Path, resolution: int | None,
                 textures: bool | None = None) -> list[str]:
-    """`resolution` is the render scale (1 is the 3DS's own 400x240 top screen); `textures`
-    overrides the set's custom textures."""
+    """`resolution` is the render scale (1 is the 3DS's own 400x240 top screen), None for the
+    window's size and the player's choice; `textures` overrides the set's custom textures."""
     args = [str(binary(cfg)), "--rom", str(cfg.rom(game.title_id)), "--user", str(user),
-            "--layout", game.screen_layout, "--resolution", str(resolution), "--assets", str(cfg.port_assets)]
+            "--layout", game.screen_layout, "--assets", str(cfg.port_assets)]
+    if resolution is not None:
+        args += ["--resolution", str(resolution)]
     if uses_textures(game, textures):
         args.append("--textures")
     return args + ["--options", str(options_manifest(game))]

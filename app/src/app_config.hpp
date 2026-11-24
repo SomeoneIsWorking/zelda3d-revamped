@@ -28,6 +28,8 @@ struct GameSetup {
   std::string inputs;
   // Folders beside the game's mods romfs/ that are layered over it (the core's romfs_layers).
   std::vector<std::string> romfsLayers;
+  // Render scale of the 3DS's 400x240; 0 follows the window's size (the core's own choice).
+  uint32_t resolution = 0;
 };
 
 struct AppConfig {
@@ -52,8 +54,9 @@ struct AppConfig {
   std::string appId = "z3d";
   // The tools' mode: unmapped window, no sound, unpaced, driven by stdin lines.
   bool hidden = false;
-  // Internal render scale; 1 is the 3DS's own 400x240 top screen.
-  uint32_t resolution = 1;
+  // Render scale; 1 is the 3DS's own 400x240 top screen, 0 follows the window's size. A hidden
+  // window has no display to follow and takes 1.
+  uint32_t resolution = 0;
   // Every texture the game uploads, as PNG under <user>/Azahar/dump/textures/.
   bool dumpTextures = false;
   // The window's play: each present's top screen as <record>/<index>.png, in-betweens included.

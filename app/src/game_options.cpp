@@ -3,6 +3,8 @@
 #include "emulator.hpp"
 #include "pad_input.hpp"
 
+#include "core/3ds.h"
+
 #include <lucent/json.h>
 #include <lucent/log.h>
 
@@ -20,6 +22,9 @@ namespace {
 
 constexpr const char *kLayoutId = "layout";
 constexpr const char *kTexturesId = "textures";
+constexpr const char *kResolutionId = "resolution";
+// "Auto" (the launch's scale), then 1x to this.
+constexpr uint8_t kMaxResolution = 10;
 constexpr const char *kHudSizeId = "hud_size";
 constexpr const char *kHudOpacityId = "hud_opacity";
 // The HUD's sizes and opacities, the default of each its 1; past 1.5 the D-pad meets the keys.
@@ -138,6 +143,14 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
                     {},
                     {},
                     {}});
+  Option resolution;
+  resolution.id = kResolutionId;
+  resolution.label = "Resolution";
+  resolution.choices.emplace_back("Auto");
+  for (uint8_t scale = 1; scale <= kMaxResolution; ++scale) {
+    resolution.choices.push_back(std::format("{}x ({}p)", scale, scale * Core::kScreenTopHeight));
+  }
+  items_.push_back(std::move(resolution));
   if (hud) {
     Option size;
     size.id = kHudSizeId;
@@ -198,6 +211,8 @@ GameSetup GameOptions::setup() const {
   for (const Option &item : items_) {
     if (item.id == kLayoutId) {
       result.layout = static_cast<ScreenLayout>(item.value);
+    } else if (item.id == kResolutionId && item.value != 0) {
+      result.resolution = item.value;
     } else if (item.id == kTexturesId) {
       result.customTextures = item.value != 0;
     } else if (!item.layers.empty() && item.value != 0) {

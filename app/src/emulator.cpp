@@ -116,9 +116,8 @@ private:
   std::vector<WriteHit> hits_;
 };
 
-Emulator::Emulator(const AppConfig &config, const std::filesystem::path &rom, GameWindow &window)
-    : owned_(std::make_unique<Core::System>()), system_(*owned_), window_(window),
-      resolution_(config.resolution) {
+Emulator::Emulator(const std::filesystem::path &rom, GameWindow &window)
+    : owned_(std::make_unique<Core::System>()), system_(*owned_), window_(window) {
   makeCurrent();
   Frontend::RegisterDefaultApplets(system_);
   system_.RegisterImageInterface(std::make_shared<Frontend::ImageInterface>());
@@ -160,11 +159,12 @@ void Emulator::runFrames(uint64_t count, Capture capture) {
   const uint64_t target = window_.framesShown() + count;
   while (window_.framesShown() < target) {
     if (capture != Capture::None && window_.framesShown() + 1 == target) {
+      const uint32_t scale = system_.GPU().Renderer().GetResolutionScaleFactor();
       const Layout::FramebufferLayout layout =
           capture == Capture::Top
-              ? Layout::SingleFrameLayout(Core::kScreenTopWidth * resolution_,
-                                          Core::kScreenTopHeight * resolution_, false, false)
-              : Layout::FrameLayoutFromResolutionScale(resolution_);
+              ? Layout::SingleFrameLayout(Core::kScreenTopWidth * scale,
+                                          Core::kScreenTopHeight * scale, false, false)
+              : Layout::FrameLayoutFromResolutionScale(scale);
       captureRows_.assign(static_cast<size_t>(layout.width) * layout.height, 0);
       system_.GPU().Renderer().RequestScreenshot(
           captureRows_.data(),

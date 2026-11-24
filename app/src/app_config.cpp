@@ -123,6 +123,9 @@ AppConfig AppConfig::parse(int argc, char **argv) {
   if (config.userDir.empty() || config.game.has_value() == picker) {
     throw std::invalid_argument(std::string(kUsage));
   }
+  if (config.hidden && config.resolution == 0) {
+    config.resolution = 1;
+  }
   return config;
 }
 

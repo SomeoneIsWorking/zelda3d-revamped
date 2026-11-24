@@ -36,7 +36,7 @@ class SetInstall;
 class TitlePicker {
 public:
   // `options` holds one entry per game of the library, in its order; the library has one or two.
-  TitlePicker(const AppConfig &config, const MenuCanvas &canvas, GameWindow &window, PadInput &pad,
+  TitlePicker(const MenuCanvas &canvas, GameWindow &window, PadInput &pad,
               const GameLibrary &library, std::vector<GameOptions> &options, SetInstall &install,
               bool folders);
   ~TitlePicker();
@@ -95,7 +95,6 @@ private:
   [[nodiscard]] bool setUp(size_t index);
   void drawSetUp(const std::string &heading, const std::string &line, std::span<const Hint> below);
 
-  const AppConfig &config_;
   const MenuCanvas &canvas_;
   SDL_Renderer *renderer_;
   TTF_Font *font_;

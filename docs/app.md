@@ -201,7 +201,10 @@ is the row that asks for the folders again (Setup above). `GameOptions` owns the
   `Settings::values.romfs_layers` and the core stacks it over `romfs/` when the game loads (both
   games' `stair_steps`: stone or painted stepped stairs in three sizes). The manifest leaves the option out
   unless the install wrote all its folders. Standalone Azahar never loads a layer.
-- The app's own rows follow: the screen layout, the HUD's size and opacity when the set has a
+- The app's own rows follow: the screen layout, the resolution (`GameSetup::resolution`, the
+  core's `resolution_factor`: Auto is the launch's `--resolution`, which a shown window leaves out
+  so the core scales the top screen's drawn size over 400x240, rounded up; 1x to 10x are fixed;
+  the rasterizer cache rebuilds its surfaces on the next frame), the HUD's size and opacity when the set has a
   HUD (`GameOptions::hudLook`, read by `Hud` every frame: size grows each element about the top
   screen's corner nearest its middle, so each corner's group stays put; opacity multiplies every
   quad's), and the texture pack when the set has one.

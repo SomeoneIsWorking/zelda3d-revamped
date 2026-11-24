@@ -16,7 +16,6 @@ from z3dmods.app_keys import AppKeys
 from z3dmods.config import Config
 from z3dmods.install import GameSet
 
-RESOLUTION = 3
 TITLES = {"oot3d": "Ocarina of Time 3D", "mm3d": "Majora's Mask 3D"}
 # The desktop entry (shortcut.py) and window app id, so the window gets its icon.
 DESKTOP_ID = "z3d"
@@ -70,7 +69,7 @@ def picker_args(binary: Path, library: Path, font: Path, assets: Path, user: Pat
     the picker runs it, to set up a game whose set is missing from `user` (`setup`) and to take
     the player's folders (`folders`)."""
     args = [str(binary), "--library", str(library), "--font", str(font), "--assets", str(assets), "--user", str(user),
-            "--resolution", str(RESOLUTION), "--app-id", DESKTOP_ID]
+            "--app-id", DESKTOP_ID]
     return args + ["--tools", *tools] if tools else args
 
 
@@ -79,7 +78,7 @@ def launch_args(cfg: Config, name: str | None, user: Path) -> list[str]:
     if name is None:
         return picker_args(app.binary(cfg), write_library(cfg, user), cfg.ui_font(), cfg.port_assets, user,
                            cfg.tool_command)
-    return app.launch_args(cfg, GameSet.named(cfg.repo, name), user, RESOLUTION) + [
+    return app.launch_args(cfg, GameSet.named(cfg.repo, name), user, None) + [
         "--title", TITLES[name], "--app-id", DESKTOP_ID]
 
 

@@ -44,8 +44,10 @@ std::filesystem::path storedOptions(const AppConfig &config, const GameSetup &ga
 }
 
 GameOptions loadOptions(const AppConfig &config, const GameSetup &game) {
+  GameSetup launched = game;
+  launched.resolution = config.resolution;
   // The tools run every game on its defaults.
-  return {game, config.userDir / game.options,
+  return {launched, config.userDir / game.options,
           config.hidden ? std::filesystem::path() : storedOptions(config, game)};
 }
 
@@ -72,7 +74,7 @@ int direct(const AppConfig &config, const GameSetup &game, PadInput &pad) {
   applyGameSettings(options.setup());
   GameWindow window(config, pad);
   const std::unique_ptr<TestPad> test = testPad(config);
-  Emulator emulator(config, game.rom, window);
+  Emulator emulator(game.rom, window);
   options.apply(emulator, pad);
   const ScreenOverlay overlay(window, emulator, options.setup(), config.userDir / game.options);
   SlotLink link(emulator, pad, config.userDir / game.options);
@@ -112,7 +114,7 @@ int picker(const AppConfig &config, PadInput &pad) {
     std::optional<TitlePicker::Picked> picked;
     {
       const MenuCanvas canvas(window, config.font, config.assets);
-      TitlePicker picker(config, canvas, window, pad, library, options, install,
+      TitlePicker picker(canvas, window, pad, library, options, install,
                          !config.tools.empty());
       picked = picker.run();
     }
@@ -140,7 +142,7 @@ int picker(const AppConfig &config, PadInput &pad) {
       // The picker's game plays on; one set up just now starts here.
       const std::unique_ptr<Emulator> running =
           picked->emulator ? std::move(picked->emulator)
-                           : std::make_unique<Emulator>(config, game.setup.rom, window);
+                           : std::make_unique<Emulator>(game.setup.rom, window);
       Emulator &emulator = *running;
       options[*chosen].apply(emulator, pad);
       const ScreenOverlay overlay(window, emulator, options[*chosen].setup(),

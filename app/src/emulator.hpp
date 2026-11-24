@@ -56,7 +56,7 @@ struct Pacing {
 class Emulator {
 public:
   // The core's log (core_log.hpp) outlives every Emulator.
-  Emulator(const AppConfig &config, const std::filesystem::path &rom, GameWindow &window);
+  Emulator(const std::filesystem::path &rom, GameWindow &window);
   ~Emulator();
   Emulator(const Emulator &) = delete;
   Emulator &operator=(const Emulator &) = delete;
@@ -123,7 +123,6 @@ private:
   std::unique_ptr<Core::System> owned_;
   Core::System &system_;
   GameWindow &window_;
-  uint32_t resolution_;
   Frame frame_;
   std::vector<uint32_t> captureRows_;
   std::unique_ptr<WriteWatches> watches_;
