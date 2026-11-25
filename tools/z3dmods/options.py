@@ -113,6 +113,7 @@ def manifest(repo: Path, game: str, address: int, layers: set[str], link: int | 
         document["screens"] = {"active": layout.active_screen, "table": layout.screens,
                                "layouts": layout.screen_layouts,
                                "placements": layout.screen_placements, "outside": layout.screen_outside,
+                               "named": layout.screen_named,
                                "hud": layout.hud_visibility, "hud_hidden": layout.hud_hidden}
     if layout.hud is not None:
         document["hud"] = layout.hud
