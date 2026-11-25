@@ -36,6 +36,11 @@ title card draws the top screen alone (`hudVisibility` 2). The pad reaches the t
 through Project Restoration: ZL is View, ZR with X is item I and ZR with Y is item II (`mm-zl`,
 `mm-zr3`).
 
+Items and Masks (2026-11-26) are no longer the touch screen pasted large: the game draws them on
+the top screen (`patch/mm3d/item_screens.cpp`), the grid against the app's slots, the tabs down the
+left, Return in the corner and the item's description under the grid (`items21`, `inputtest
+masks-mm3d`, `slots-mm3d`). Gear, the map, the notebook and the ocarina are still to follow.
+
 The Bombers' Notebook (table entry 2) is side by side: its list is on the top screen and the entry
 with Return and Schedule on the touch screen (`mm-pad2`). The ocarina's screen is an inset for as
 long as it is up (`mm-oc3`): the game sets the HUD visibility that hides the main screen while

@@ -41,6 +41,16 @@ inline void place(uint8_t *widget, float x, float y, float scale) {
   place(widget, x, y, scale, scale);
 }
 
+// Hidden until the game shows it again; it stays hidden once its flags are written (decomp
+// docs/hud.md).
+inline void hide(uint8_t *widget) {
+  if (guest::read<uint32_t>(widget, kUiWidgetFlags) == kUiWidgetFlagsHidden) {
+    return;
+  }
+  guest::write<uint32_t>(widget, kUiWidgetFlags, kUiWidgetFlagsHidden);
+  guest::write<uint32_t>(widget, kUiWidgetActiveFlags, kUiWidgetActiveFlagsHidden);
+}
+
 inline uint8_t *root(void *layout) {
   return static_cast<uint8_t *>(layout) + kUiLayoutRoot;
 }

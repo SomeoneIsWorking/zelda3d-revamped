@@ -29,7 +29,7 @@ only. It links the core's shared library, so it is GPL-2.0-or-later as linked. T
 | `device <pad\|keyboard>` | which device the held input stands for; the HUD's prompts follow it |
 | `gyro <x> <y> <z>` | the 3DS turning from now on, degrees a second of the game's time on the core's axes (x left along the D-pad, y out of the touch screen, z up along the D-pad) |
 | `mouse <dx> <dy>` | the mouse moved by that many counts (x right, y down) for the aim or the camera, as a window's mouse motion does; an error while the mouse is the stylus |
-| `r <va> <size>` / `w <va> <hex>` | guest memory of the running process: code, `.data`, `.bss`, heap |
+| `r <va> <size>` / `w <va> <hex>` | guest memory of the running process: code, `.data`, `.bss`, heap; `w` drops translated code, so code writes take effect |
 | `savestate <file>` / `loadstate <file>` | the core's own states |
 | `shot <file>` | the last frame of the last `run` as PNG, in the set's layout at the render scale |
 | `watch <va> <size>` / `hits` / `unwatch` | guest CPU writes to a range, `address:size:value:pc:lr` |
@@ -287,13 +287,13 @@ of the game's touch screens (and one for while its HUD visibility hides that scr
 
 - `play` (the main touch screen): the top screen alone, under our own HUD (`hud = true`; "HUD"
   below). No part of the touch screen is drawn in play;
-- `menu` (Items, Masks, Gear): the whole touch screen, large, under the menu's title bar;
+- `menu` (Gear): the whole touch screen, large, under the menu's title bar;
 - `top_only` (the game blanks the touch screen, or its HUD visibility hides the main one: an
   area's title card, a cutscene): the top screen alone;
 - `ocarina`: the whole touch screen as a small inset, since the notes play on the top screen;
-- `touch_menus` (outside play: boot, the title, file select): the top screen alone, where the patch
-  has the game draw those touch menus across the top screen (`patch/mm3d/top_touch_screen.cpp`,
-  `file_start_page.cpp`). Its `touch` rectangle is the part of the top screen the touch screen's
+- `touch_menus` (outside play: boot, the title, file select; Items and Masks): the top screen
+  alone, where the patch has the game draw those touch menus across the top screen
+  (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, `item_screens.cpp`). Its `touch` rectangle is the part of the top screen the touch screen's
   320x240 spans, the whole of it: the game hit-tests touches where it draws them and the patch
   spreads the stylus's 320 columns back over the top screen's 400, so a click touches the pixel
   under it. The core keeps the touch screen drawn fully transparent (`custom_second_layer_opacity`
@@ -391,7 +391,7 @@ release and a 3-frame re-press (`txt-flip-oot2b`, `txt-flip-oot4b`, `txt-flip-mm
 `txt-flip-mm4b`: X with the sword and A with Check turn, empty Y and B stay). Each ring's prompt is what `PadInput::slotPrompt` or
 `verbPrompt` says presses it, drawn by `prompt_art`: the pad's glyph, or with the keyboard last
 used the key's cap (the mouse's button for the sword). While a screen assigns slots (`PadMode::
-Assign`) a panel beside it shows all eleven. The keyboard has no chord: it has a layout of its
+Assign`) all eleven stand down the right edge under the title bar, ringed as in play. The keyboard has no chord: it has a layout of its
 own (an element's `device`), its number keys 1 to 8 slots 1 to 8, and the four slots behind LB are
 the pad's alone. The game's own text prompts follow the same
 device: each frame `Hud` selects the texture pack's `keyboard` variant while the keyboard was

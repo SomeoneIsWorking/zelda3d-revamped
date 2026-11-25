@@ -652,10 +652,9 @@ def _slots_mm3d(session: Session, pad: Gamepad) -> None:
         session.shot(f"song-{shot}")
 
 
-# The Items screen's Masks tab on the touch screen, and where the overlay layout draws that
-# screen on the top one (patch/mm3d/overlay.toml, layouts.menu).
-MM3D_MASKS_TAB = (115, 222)
-MM3D_MENU_PIECE = (59.2, 28.8, 281.6, 211.2)
+# The Items screen's Masks tab on the top screen, first of the tabs down its left
+# (patch/mm3d/item_screens.cpp).
+MM3D_MASKS_TAB = (52, 59)
 
 
 def _masks_mm3d(session: Session, pad: Gamepad) -> None:
@@ -665,9 +664,7 @@ def _masks_mm3d(session: Session, pad: Gamepad) -> None:
     _mm3d_file_1(session)
     pad.button("start")
     session.wait(2)
-    piece = MM3D_MENU_PIECE
-    session.click_top(piece[0] + MM3D_MASKS_TAB[0] * piece[2] / TOUCH_SCREEN[0],
-                      piece[1] + MM3D_MASKS_TAB[1] * piece[3] / TOUCH_SCREEN[1])
+    session.click_top(*MM3D_MASKS_TAB)
     session.wait(2)
     session.shot("masks-screen")
     for x, y in ((32767, 0), (32767, 0), (0, 32767)):

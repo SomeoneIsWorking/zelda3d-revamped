@@ -168,7 +168,12 @@ std::string Repl::execute(const std::string &line) {
     if (!(args >> std::hex >> address >> hex) || !fromHex(hex, bytes)) {
       return "err w <hex va> <hex bytes>";
     }
-    return emulator_.write(address, bytes) ? "ok" : "err unmapped";
+    if (!emulator_.write(address, bytes)) {
+      return "err unmapped";
+    }
+    // The write may land on code the CPU has already translated.
+    emulator_.codeChanged();
+    return "ok";
   }
   if (command == "savestate") {
     std::string path;

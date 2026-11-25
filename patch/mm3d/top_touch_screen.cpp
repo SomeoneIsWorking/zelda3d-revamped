@@ -117,12 +117,14 @@ void drawFileDialogs(void *manager, void *layout, int32_t /*queue*/, int32_t ord
   queueLayout(manager, layout, kDrawQueueTop3, order);
 }
 
-// Input_ReadTouch's read of the stylus: across the top screen while the title or file select is up,
-// as the app maps the pointer over it (overlay.toml touch_menus).
+// Input_ReadTouch's read of the stylus: across the top screen while the title, file select or the
+// Items or Masks screen (item_screens.cpp) is up, as the app maps the pointer over it (overlay.toml
+// touch_menus).
 bool readTouch(void *reader, void *status) {
   const bool read = guest::function<ReadTouchFn>(kTouchPanelReadLatest)(reader, status);
   const auto active = guest::read<uintptr_t>(kUiScreenContext + kUiActiveScreen);
-  if (active == kTitleUiScreen || active == kFileSelectUiScreen) {
+  if (active == kTitleUiScreen || active == kFileSelectUiScreen || active == kItemsUiScreen ||
+      active == kMasksUiScreen) {
     const auto x = guest::read<uint16_t>(status, kTouchStatusX);
     guest::write(status, kTouchStatusX,
                  static_cast<uint16_t>(static_cast<float>(x) * kTopWidth / kTouchWidth + 0.5F));

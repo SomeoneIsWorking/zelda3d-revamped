@@ -117,6 +117,34 @@ actor_update:
     bl _ZN7z3dmods4mm3d13drawTopQueue1EPviS1_
 .section .expect.top_queue_1, "", %progbits
     .word 0xEB0056C6 @ bl 0x126810
+@ MessageMgr_DrawWindow's queueing of play's message box, which the item screens place
+@ (item_screens.cpp).
+.section .patch.message_window, "ax", %progbits
+    bl _ZN7z3dmods4mm3d17drawMessageWindowEPvS1_ii
+.section .expect.message_window, "", %progbits
+    .word 0xEB000006 @ bl 0x17EC58
+@ The Items and Masks screens' queueing of their touch layouts: each screen's page and cells, and
+@ ItemScreen_DrawCursor's cursors (item_screens.cpp).
+.section .patch.items_page, "ax", %progbits
+    bl _ZN7z3dmods4mm3d13drawItemsPageEPvS1_ii
+.section .expect.items_page, "", %progbits
+    .word 0xEBEF8213 @ bl 0x17EC58
+.section .patch.items_cell, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawItemCellEPvS1_ii
+.section .expect.items_cell, "", %progbits
+    .word 0xEBEF81E5 @ bl 0x17EC58
+.section .patch.masks_page, "ax", %progbits
+    bl _ZN7z3dmods4mm3d13drawMasksPageEPvS1_ii
+.section .expect.masks_page, "", %progbits
+    .word 0xEBEF7D95 @ bl 0x17EC58
+.section .patch.masks_cell, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawItemCellEPvS1_ii
+.section .expect.masks_cell, "", %progbits
+    .word 0xEBEF7D65 @ bl 0x17EC58
+.section .patch.item_cursor, "ax", %progbits
+    bl _ZN7z3dmods4mm3d14drawItemCursorEPvS1_ii
+.section .expect.item_cursor, "", %progbits
+    .word 0xEBEF748C @ bl 0x17EC58
 @ TitleScreen_Draw's tail call queueing PRESS START.
 .section .patch.title_press_start, "ax", %progbits
     b _ZN7z3dmods4mm3d19drawTitlePressStartEPvS1_ii
@@ -155,6 +183,24 @@ actor_update:
     .word _ZN7z3dmods4mm3d14initFileSelectEPvS1_
 .section .expect.file_select_init, "", %progbits
     .word 0x005BA3BC @ FileSelectScreen_Init
+@ ItemScreen_DrawBase's queueing of unk_68, unk_70, the column's icons and the held ones
+@ (item_screens.cpp).
+.section .patch.item_base_68, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawItemBaseEPvS1_ii
+.section .expect.item_base_68, "", %progbits
+    .word 0xEBEEF2AB @ bl 0x17EC58
+.section .patch.item_base_70, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawItemBaseEPvS1_ii
+.section .expect.item_base_70, "", %progbits
+    .word 0xEBEEF2A3 @ bl 0x17EC58
+.section .patch.item_base_icon, "ax", %progbits
+    bl _ZN7z3dmods4mm3d18skipItemButtonIconEPvS1_ii
+.section .expect.item_base_icon, "", %progbits
+    .word 0xEBEEF275 @ bl 0x17EC58
+.section .patch.item_base_held, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawItemBaseEPvS1_ii
+.section .expect.item_base_held, "", %progbits
+    .word 0xEBEEF266 @ bl 0x17EC58
 @ OptionsScreen's vtable entry for its update, which hands over to the app's options
 @ (options_handoff.cpp).
 .section .patch.options_update, "a", %progbits

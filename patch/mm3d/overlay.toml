@@ -13,17 +13,18 @@ UI_SCREEN_BLACK = "top_only"
 UI_SCREEN_MAIN = { layout = "play", hidden = "top_only" }
 UI_SCREEN_OCARINA = "ocarina"
 UI_SCREEN_GEAR = "menu"
-UI_SCREEN_ITEMS = "menu"
-UI_SCREEN_MASKS = "menu"
+UI_SCREEN_ITEMS = "touch_menus"
+UI_SCREEN_MASKS = "touch_menus"
 UI_SCREEN_MAP = "split"
 UI_SCREEN_SCHEDULE = "split"
 
 [layouts.top_only]
 pieces = []
 
-# The game draws the title's and file select's touch menus across the top screen and hit-tests
-# touches where it draws them: the pointer over the top screen is the stylus over the touch screen,
-# whose 320 columns the game spreads back over the 400 (top_touch_screen.cpp readTouch).
+# The game draws the title's, file select's and the Items and Masks screens' touch menus across the
+# top screen (item_screens.cpp) and hit-tests touches where it draws them: the pointer over the top
+# screen is the stylus over the touch screen, whose 320 columns the game spreads back over the 400
+# (top_touch_screen.cpp readTouch).
 [layouts.touch_menus]
 pieces = []
 touch = [0, 0, 400, 240]

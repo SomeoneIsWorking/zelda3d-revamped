@@ -1,7 +1,8 @@
 // The game's own A button on the top screen is hidden: the app's HUD draws the A button and its
-// word (hud.toml). The widget stays hidden once its flags are written (decomp docs/hud.md).
+// word (hud.toml).
 #include "../common/guest.hpp"
 #include "symbols.hpp"
+#include "ui_widget.hpp"
 
 #include <stdint.h>
 
@@ -14,11 +15,9 @@ void hideBaseHud() {
     return;
   }
   auto *button = guest::read<uint8_t *>(hud, kPlayHudAActionButton);
-  if (button == nullptr || guest::read<uint32_t>(button, kUiWidgetFlags) == kUiWidgetFlagsHidden) {
-    return;
+  if (button != nullptr) {
+    ui::hide(button);
   }
-  guest::write<uint32_t>(button, kUiWidgetFlags, kUiWidgetFlagsHidden);
-  guest::write<uint32_t>(button, kUiWidgetActiveFlags, kUiWidgetActiveFlagsHidden);
 }
 
 } // namespace z3dmods::mm3d
