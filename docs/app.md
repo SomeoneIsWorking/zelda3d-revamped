@@ -104,7 +104,7 @@ when an option changes the layout, resolution or textures. `Player::run` starts 
 or button the game reads is still held from the screen before, so the key that closed a screen
 never reaches the game. Enter is the game's Start (Pause in play), LB with View its Select (the
 map in play); Alt with a key is the window's alone.
-F8 in a game holds it for a bug report (`BugReportScreen`): the menu canvas shows both screens
+B on the keyboard in a game holds it for a bug report (`BugReportScreen`): the menu canvas shows both screens
 as they were with a form for a one-line summary and what the player did; Ctrl+Enter or Start saves
 it, Escape or B drops it. The report is a `lucent::bug_report` folder under
 `<user>/bug-reports/<stamp>-<summary>/`: `report.json` and `README.md` (the words, the run's facts:

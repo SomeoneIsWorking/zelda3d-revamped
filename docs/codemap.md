@@ -77,7 +77,7 @@
   - `prompt_art`: the port-assets set and file of each pad glyph, key cap and mouse button a prompt draws, and their loader.
   - `tool_process`: one run of the tools as a child process: its printed lines and its refusal.
   - `set_install`: whether a game's set in the user folder is the one the tools make now (missing, or made from other inputs), and the tools' setup run on the player's dump when it is not.
-  - `bug_report_screen`: F8's bug report: holds the game, captures screens, state, log and facts into a `lucent::bug_report` draft, and the form for the player's words.
+  - `bug_report_screen`: B's bug report: holds the game, captures screens, state, log and facts into a `lucent::bug_report` draft, and the form for the player's words.
   - `menu_canvas`: the SDL renderer and outline font the picker and its screens draw with between games, and their hint lines (pad glyphs or key caps by the last device).
   - `folder_setup`: the first run's questions (dump folder, mods folder) on the shared setup screen (`shared/setup-ui`), answered in the folder browser and taken by the tools.
   - `folder_browser`: the in-window folder chooser, by pad, keys or mouse.

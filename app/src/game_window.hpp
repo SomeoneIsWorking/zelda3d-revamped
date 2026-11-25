@@ -49,7 +49,7 @@ inline constexpr std::array kModKeys{
 inline constexpr SDL_Scancode kMenuKey = SDL_SCANCODE_F10;
 inline constexpr SDL_GamepadButton kMenuButton = SDL_GAMEPAD_BUTTON_GUIDE;
 // Holds the game and opens a bug report on it (bug_report_screen.hpp).
-inline constexpr SDL_Scancode kReportKey = SDL_SCANCODE_F8;
+inline constexpr SDL_Scancode kReportKey = SDL_SCANCODE_B;
 // Holds the game and opens its options over it (options_menu.hpp); the pad's View with the chord
 // held is the game's instead (pad_input.hpp).
 inline constexpr SDL_Scancode kSettingsKey = SDL_SCANCODE_ESCAPE;

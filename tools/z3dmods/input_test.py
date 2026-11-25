@@ -1625,7 +1625,7 @@ def _report(session: Session, pad: Gamepad) -> None:
     session.expect("[report] open", 10)
     session.type("Link walks into the wall")
     session.press(["Tab"])
-    session.type("Pressed F8 to test")
+    session.type("Pressed B to test")
     session.wait(0.5)
     session.shot("typed")
     session.press(["Control_L", "Return"])
@@ -1636,7 +1636,7 @@ def _report(session: Session, pad: Gamepad) -> None:
     if names != ["README.md", "report.json", "screens.png", "state.state", "z3d_core.log"]:
         raise RuntimeError(f"the report holds {names}")
     report = json.loads((folder / "report.json").read_text())
-    if report["summary"] != "Link walks into the wall" or report["description"] != "Pressed F8 to test":
+    if report["summary"] != "Link walks into the wall" or report["description"] != "Pressed B to test":
         raise RuntimeError(f"the report says {report['summary']!r} / {report['description']!r}")
     if any(p.name.endswith(".draft") for p in folder.parent.iterdir()):
         raise RuntimeError("a draft was left behind")
