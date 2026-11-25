@@ -1537,7 +1537,8 @@ def _pause_wide(session: Session, pad: Gamepad) -> None:
 def _files_mm3d(session: Session, pad: Gamepad) -> None:
     """MM3D's title and file select on the single screen, the game's touch menus drawn on the top
     screen: PRESS START under the logo, the list in the middle; a click on File 1 opens its Start
-    page and a click on Return goes back to the list."""
+    page, a click on Options past the touch screen's 320 columns opens the options, B goes back,
+    and a click on Return in the corner goes back to the list."""
     session.wait(30)
     session.key("name", "a")
     session.wait(6)
@@ -1548,7 +1549,12 @@ def _files_mm3d(session: Session, pad: Gamepad) -> None:
     session.click_top(200, 66)
     session.wait(2)
     session.shot("file-1")
-    session.click_top(57, 222)
+    session.click_top(355, 221)
+    session.wait(2)
+    session.shot("options")
+    session.key("name", "b")
+    session.wait(2)
+    session.click_top(29, 221)
     session.wait(2)
     session.shot("returned")
 

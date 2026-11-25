@@ -21,11 +21,12 @@ UI_SCREEN_SCHEDULE = "split"
 [layouts.top_only]
 pieces = []
 
-# The game draws the title's and file select's touch menus on the top screen and hit-tests
-# touches where it draws them (top_touch_screen.cpp): its pixels there are the touch screen's.
+# The game draws the title's and file select's touch menus across the top screen and hit-tests
+# touches where it draws them: the pointer over the top screen is the stylus over the touch screen,
+# whose 320 columns the game spreads back over the 400 (top_touch_screen.cpp readTouch).
 [layouts.touch_menus]
 pieces = []
-touch = [0, 0, 320, 240]
+touch = [0, 0, 400, 240]
 
 # The game's menus keep a title bar along the top of the top screen.
 [layouts.menu]

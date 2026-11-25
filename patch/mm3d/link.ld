@@ -5,6 +5,7 @@ INCLUDE symbols.ld
 SECTIONS {
   /* Fixed sites in address order. */
   .patch.top_queue_1 kGraphDrawTopScreen + kGraphDrawTopQueue1Call : { KEEP(*(.patch.top_queue_1)) }
+  .patch.read_touch kInputReadTouch + kInputReadTouchCall : { KEEP(*(.patch.read_touch)) }
   .patch.play_entry kPlayUpdate : { KEEP(*(.patch.play_entry)) }
   .patch.interpreter_start kCutsceneBeginScript + 0x1D8 : { KEEP(*(.patch.interpreter_start)) }
   .patch.actor_update kActorUpdateAll + 0x48 : { KEEP(*(.patch.actor_update)) }
@@ -22,6 +23,8 @@ SECTIONS {
   .patch.file_title_bar kFileSelectScreenDraw + kFileSelectTitleBarCall : { KEEP(*(.patch.file_title_bar)) }
   .patch.file_list kFileSelectScreenDraw + kFileSelectFilesCall : { KEEP(*(.patch.file_list)) }
   .patch.file_dialogs kFileSelectScreenDraw + kFileSelectDialogsCall : { KEEP(*(.patch.file_dialogs)) }
+  .patch.file_start_update kFileSelectScreenUpdate + kFileSelectUpdateStartCall : { KEEP(*(.patch.file_start_update)) }
+  .patch.file_select_init kFileSelectScreenVtable + kFileSelectScreenInitSlot * 4 : { KEEP(*(.patch.file_select_init)) }
   . = PAYLOAD;
   .payload : { KEEP(*(.options)) *(.text*) *(.rodata*) *(.data*) }
   /* The item slots' block the app reads and writes (tools/z3dmods/slot_link.py). */

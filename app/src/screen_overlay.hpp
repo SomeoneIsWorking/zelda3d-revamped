@@ -50,7 +50,7 @@ struct OverlayPiece {
 struct OverlayLayout {
   OverlayRect top{0.0F, 0.0F, kOverlayWidth, kOverlayHeight};
   std::vector<OverlayPiece> pieces;
-  // Where the top screen's pixels are the touch screen's own, for a game that draws its touch
+  // The part of the top screen the touch screen's 320x240 spans, for a game that draws its touch
   // screen's menus on the top screen and hit-tests touches there; the touch screen is not shown.
   std::optional<OverlayRect> touch{};
   // Play's view: our HUD (hud.hpp) is drawn over it.

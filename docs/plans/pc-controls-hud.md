@@ -59,10 +59,15 @@ and "I don't want these fake overlay things either, everything must be RE based"
   (`patch/oot3d/top_touch_screen.cpp`, the decomp's `docs/pause.md`, `inputtest pause-wide`).
 - MM3D's title and file select are the game's touch menus drawn on the top screen, as OoT3D's
   file select: PRESS START under the logo, file select's list at full size in the middle over the
-  top screen's background (its title bar and the file's plate not drawn), clipped to its 320
-  pixels as the touch screen clipped it, its prompts centred over a dim across the screen. The
-  game hit-tests touches where it draws, so a click on the top screen is a touch at that pixel
-  (`patch/mm3d/top_touch_screen.cpp`, the decomp's `docs/ui.md`, `inputtest files-mm3d`).
+  top screen's background (its title bar not drawn), clipped at the touch screen's right edge,
+  Return in the screen's bottom left corner, its prompts centred over a dim across the screen.
+  The Start page is a screen of its own: the file's details plate (songs, masks, hearts, day and
+  time, place) over most of it and Return, Start, Copy, Erase and Options in a row along the
+  bottom, laid out once after the game builds file select and slid in as the files slide off the
+  screen's left edge. The game hit-tests touches where it draws and the patch spreads the stylus
+  over the top screen's 400 columns, so a click anywhere is a touch at that pixel
+  (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, the decomp's `docs/ui.md`,
+  `inputtest files-mm3d`). The Options screen's own list is still on the touch screen, not shown.
 
 Menu is the item screen and not Pause as first decided: the game's Start in play is only OoT3D's
 "Save your progress?" and does nothing visible in MM3D (`ctl-pad1`), while the item screen is

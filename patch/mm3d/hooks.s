@@ -122,10 +122,10 @@ actor_update:
     b _ZN7z3dmods4mm3d19drawTitlePressStartEPvS1_ii
 .section .expect.title_press_start, "", %progbits
     .word 0xEAEF5A8D @ b 0x17EC58
-@ FileSelectScreen_Draw's queueing of the file's details and title bar, which the list replaces, of
-@ the list, and of its prompts (a tail call).
+@ FileSelectScreen_Draw's queueing of the file's details (the Start page's plate), of its title bar,
+@ which the list replaces, of the list, and of its prompts (a tail call).
 .section .patch.file_details, "ax", %progbits
-    nop
+    bl _ZN7z3dmods4mm3d15drawFileDetailsEPvS1_ii
 .section .expect.file_details, "", %progbits
     .word 0xEBEF12C9 @ bl 0x17EC58
 .section .patch.file_title_bar, "ax", %progbits
@@ -140,3 +140,18 @@ actor_update:
     b _ZN7z3dmods4mm3d15drawFileDialogsEPvS1_ii
 .section .expect.file_dialogs, "", %progbits
     .word 0xEAEF1296 @ b 0x17EC58
+@ Input_ReadTouch's read of the stylus (top_touch_screen.cpp).
+.section .patch.read_touch, "ax", %progbits
+    bl _ZN7z3dmods4mm3d9readTouchEPvS1_
+.section .expect.read_touch, "", %progbits
+    .word 0xEB00312A @ bl 0x122678
+@ FileSelectScreen_Update's call of FileSelectScreen_UpdateStart, and FileSelectScreen's vtable
+@ entry for its build (file_start_page.cpp).
+.section .patch.file_start_update, "ax", %progbits
+    bl _ZN7z3dmods4mm3d15updateFileStartEPvS1_
+.section .expect.file_start_update, "", %progbits
+    .word 0xEBFFF213 @ bl 0x5B821C
+.section .patch.file_select_init, "a", %progbits
+    .word _ZN7z3dmods4mm3d14initFileSelectEPvS1_
+.section .expect.file_select_init, "", %progbits
+    .word 0x005BA3BC @ FileSelectScreen_Init

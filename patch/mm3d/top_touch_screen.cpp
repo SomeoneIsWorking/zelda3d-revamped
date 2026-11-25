@@ -1,11 +1,17 @@
 // The title's and file select's touch screens on the top screen, as OoT3D's file select shows its
 // touch screen there: their draws queue the game's own layouts on the top screen at full size, in
-// its middle. File select's list takes the place of the top screen's title bar and file details
-// (hooks.s file_details, file_title_bar) over its background, clipped to its 320 pixels of width as
-// the touch screen's edges clipped it, so what the game parks or slides past them stays hidden. The
-// game hit-tests touches where it draws (decomp docs/ui.md "Title and file select").
+// its middle. File select's list takes the place of the top screen's title bar (hooks.s
+// file_title_bar) over its background, clipped to the touch screen's right edge as that edge
+// clipped it, so what the game parks past it stays hidden; Return in the corner and the Start page
+// (file_start_page.cpp) take the whole width. The game hit-tests touches where it draws, so the
+// stylus's 320 columns span the top screen's 400 while these screens are up (decomp docs/ui.md
+// "Title and file select").
+#include "top_touch_screen.hpp"
+
 #include "../common/guest.hpp"
+#include "file_start_page.hpp"
 #include "symbols.hpp"
+#include "ui_widget.hpp"
 
 #include <stdint.h>
 
@@ -14,10 +20,8 @@ namespace {
 
 using LayoutDrawFn = void (*)(void *manager, void *layout, int32_t queue, int32_t order);
 using DrawQueueFn = void (*)(void *manager, int32_t queue, void *context);
+using ReadTouchFn = bool (*)(void *reader, void *status);
 
-// The touch screen's size and the top screen's, in pixels.
-inline constexpr float kTouchWidth = 320.0F;
-inline constexpr float kTopWidth = 400.0F;
 // PRESS START, under the title's logo.
 inline constexpr float kPressStartDrop = 44.0F;
 
@@ -28,38 +32,20 @@ struct Placement {
 };
 
 // The touch screen's frame in the middle of the top screen.
-inline constexpr Placement kCentred{(kTopWidth - kTouchWidth) / 2.0F, 0.0F, 1.0F};
+inline constexpr Placement kCentred{kTouchLeft, 0.0F, 1.0F};
 inline constexpr Placement kPressStart{kCentred.x, kPressStartDrop, 1.0F};
 
-// A root widget's field set as the game's setters do: the field's flag in flags, and in
-// activeFlags whether it holds its default.
-void set(uint8_t *widget, uint32_t offset, float value, uint32_t flag, float fallback) {
-  if (guest::read<float>(widget, offset) == value) {
-    return;
-  }
-  guest::write(widget, offset, value);
-  guest::write(widget, kUiWidgetFlags, guest::read<uint32_t>(widget, kUiWidgetFlags) | flag);
-  const auto active = guest::read<uint32_t>(widget, kUiWidgetActiveFlags) & ~flag;
-  guest::write(widget, kUiWidgetActiveFlags, value == fallback ? active | flag : active);
-}
-
-void place(uint8_t *widget, float x, float y, float scaleX, float scaleY) {
-  set(widget, kUiWidgetTranslate, x, kUiWidgetTranslateX, 0.0F);
-  set(widget, kUiWidgetTranslate + sizeof(float), y, kUiWidgetTranslateY, 0.0F);
-  set(widget, kUiWidgetScale, scaleX, kUiWidgetScaleX, 1.0F);
-  set(widget, kUiWidgetScale + sizeof(float), scaleY, kUiWidgetScaleY, 1.0F);
-}
-
 void place(void *layout, const Placement &at) {
-  place(static_cast<uint8_t *>(layout) + kUiLayoutRoot, at.x, at.y, at.scale, at.scale);
+  ui::place(ui::root(layout), at.x, at.y, at.scale);
 }
 
 void queueLayout(void *manager, void *layout, int32_t queue, int32_t order) {
   guest::function<LayoutDrawFn>(kLayoutDrawManagerDraw)(manager, layout, queue, order);
 }
 
-// The list's width as a PICA scissor in the top screen's target, whose x runs up the screen and y
-// leftwards across it; the pass's own scissor, the whole target, is put back after.
+// The list clipped at the touch screen's right edge as a PICA scissor in the top screen's target,
+// whose x runs up the screen and y leftwards across it; the pass's own scissor, the whole target,
+// is put back after.
 class FilesClip {
 public:
   void arm() {
@@ -71,8 +57,7 @@ public:
     armed_ = false;
     if (clipped) {
       const auto fromY = static_cast<uint32_t>(kTopWidth - kCentred.x - kTouchWidth);
-      const auto toY = static_cast<uint32_t>(kTopWidth - kCentred.x);
-      scissor(fromY << 16U, (kTopTargetWidth - 1) | toY << 16U);
+      scissor(fromY << 16U, (kTopTargetWidth - 1) | (kTopTargetHeight - 1) << 16U);
     }
     guest::function<DrawQueueFn>(kLayoutDrawManagerDrawQueue)(manager, queue, context);
     if (clipped) {
@@ -112,20 +97,37 @@ void drawTitlePressStart(void *manager, void *layout, int32_t /*queue*/, int32_t
   queueLayout(manager, layout, kDrawQueueTop3, order);
 }
 
-// FileSelectScreen_Draw's queueing of the list, in a top queue of its own so it can be clipped.
+// FileSelectScreen_Draw's queueing of the list, in a top queue of its own so it can be clipped
+// while the Start page is not up.
 void drawFileList(void *manager, void *layout, int32_t /*queue*/, int32_t order) {
   place(layout, kCentred);
   queueLayout(manager, layout, kDrawQueueTop1, order);
-  filesClip.arm();
+  if (!fileStartPageShown(reinterpret_cast<void *>(kFileSelectUiScreen))) {
+    filesClip.arm();
+  }
 }
 
 // FileSelectScreen_Draw's tail call queueing its prompts, over everything; the black that dims
 // the touch screen behind them spans the top screen.
 void drawFileDialogs(void *manager, void *layout, int32_t /*queue*/, int32_t order) {
   place(layout, kCentred);
-  place(guest::read<uint8_t *>(layout, kUiDialogBlackScreen), -kCentred.x, 0.0F,
-        kTopWidth / kTouchWidth, 1.0F);
+  auto *black = guest::read<uint8_t *>(layout, kUiDialogBlackScreen);
+  ui::place(black, -kCentred.x, 0.0F, 1.0F);
+  ui::set(black, kUiWidgetScale, kTopWidth / kTouchWidth, kUiWidgetScaleX, 1.0F);
   queueLayout(manager, layout, kDrawQueueTop3, order);
+}
+
+// Input_ReadTouch's read of the stylus: across the top screen while the title or file select is up,
+// as the app maps the pointer over it (overlay.toml touch_menus).
+bool readTouch(void *reader, void *status) {
+  const bool read = guest::function<ReadTouchFn>(kTouchPanelReadLatest)(reader, status);
+  const auto active = guest::read<uintptr_t>(kUiScreenContext + kUiActiveScreen);
+  if (active == kTitleUiScreen || active == kFileSelectUiScreen) {
+    const auto x = guest::read<uint16_t>(status, kTouchStatusX);
+    guest::write(status, kTouchStatusX,
+                 static_cast<uint16_t>(static_cast<float>(x) * kTopWidth / kTouchWidth + 0.5F));
+  }
+  return read;
 }
 
 // Graph_DrawTopScreen's draw of queue 1.

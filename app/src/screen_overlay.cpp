@@ -175,7 +175,9 @@ std::optional<TouchPoint> overlayTouch(unsigned width, unsigned height, const Ov
     if (ux < to.x || uy < to.y || ux >= to.x + to.w || uy >= to.y + to.h) {
       return std::nullopt;
     }
-    return TouchPoint{static_cast<uint16_t>(ux - to.x), static_cast<uint16_t>(uy - to.y)};
+    return TouchPoint{
+        static_cast<uint16_t>((ux - to.x) * static_cast<float>(Core::kScreenBottomWidth) / to.w),
+        static_cast<uint16_t>((uy - to.y) * static_cast<float>(Core::kScreenBottomHeight) / to.h)};
   }
   for (auto piece = layout.pieces.rbegin(); piece != layout.pieces.rend(); ++piece) {
     const OverlayRect &to = piece->to;
