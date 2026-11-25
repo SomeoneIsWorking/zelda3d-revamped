@@ -97,8 +97,6 @@ private:
     std::vector<OverlayLayout> layouts;
     std::vector<ScreenPlacement> placements;
     size_t outside = 0;
-    // Screens outside the table (the title, file select): a screen's address and its layout.
-    std::vector<std::pair<uint32_t, size_t>> named;
     // The game's 16-bit HUD visibility and its values that blank or dim a screen.
     uint32_t hud = 0;
     std::vector<uint16_t> hudHidden;

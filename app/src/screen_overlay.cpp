@@ -209,14 +209,11 @@ ScreenOverlay::ScreenOverlay(GameWindow &window, Emulator &emulator, const GameS
   const lucent::json::Value *placements = screens->find("placements");
   const lucent::json::Value *hidden = screens->find("hud_hidden");
   const lucent::json::Value *outside = screens->find("outside");
-  const lucent::json::Value *named = screens->find("named");
   if (layouts == nullptr || layouts->object() == nullptr || placements == nullptr ||
       placements->array() == nullptr || hidden == nullptr || hidden->array() == nullptr ||
-      outside == nullptr || outside->string() == nullptr || named == nullptr ||
-      named->array() == nullptr) {
-    throw std::runtime_error(
-        manifest.string() +
-        ": \"screens\" wants layouts, placements, hud_hidden, outside and named");
+      outside == nullptr || outside->string() == nullptr) {
+    throw std::runtime_error(manifest.string() +
+                             ": \"screens\" wants layouts, placements, hud_hidden and outside");
   }
   std::vector<std::string> names{"split"};
   found.layouts.push_back(splitLayout());
@@ -224,7 +221,7 @@ ScreenOverlay::ScreenOverlay(GameWindow &window, Emulator &emulator, const GameS
     names.push_back(name);
     found.layouts.push_back(parseLayout(layout, name));
   }
-  const auto layoutOf = [&](const lucent::json::Value *name) {
+  const auto named = [&](const lucent::json::Value *name) {
     const auto at = name != nullptr && name->string() != nullptr
                         ? std::ranges::find(names, *name->string())
                         : names.end();
@@ -240,21 +237,13 @@ ScreenOverlay::ScreenOverlay(GameWindow &window, Emulator &emulator, const GameS
     found.hudHidden.push_back(static_cast<uint16_t>(*entry.integer()));
   }
   for (const lucent::json::Value &entry : *placements->array()) {
-    ScreenPlacement placement{layoutOf(entry.find("layout")), std::nullopt};
+    ScreenPlacement placement{named(entry.find("layout")), std::nullopt};
     if (const lucent::json::Value *whenHidden = entry.find("hidden")) {
-      placement.hidden = layoutOf(whenHidden);
+      placement.hidden = named(whenHidden);
     }
     found.placements.push_back(placement);
   }
-  found.outside = layoutOf(outside);
-  for (const lucent::json::Value &entry : *named->array()) {
-    const lucent::json::Value *address = entry.find("address");
-    if (address == nullptr || !address->integer()) {
-      throw std::runtime_error(manifest.string() + ": a named screen wants an address");
-    }
-    found.named.emplace_back(static_cast<uint32_t>(*address->integer()),
-                             layoutOf(entry.find("layout")));
-  }
+  found.outside = named(outside);
   screens_ = std::move(found);
   update();
   emulator_.onFrame([this] {
@@ -266,11 +255,6 @@ size_t ScreenOverlay::layout() const {
   const std::optional<uint32_t> active = readPointer(emulator_, screens_->active);
   if (!active || *active == 0) {
     return screens_->outside;
-  }
-  for (const auto &[address, layout] : screens_->named) {
-    if (*active == address) {
-      return layout;
-    }
   }
   for (size_t i = 0; i < screens_->placements.size(); ++i) {
     if (readPointer(emulator_, screens_->table + static_cast<uint32_t>(i * sizeof(uint32_t))) ==

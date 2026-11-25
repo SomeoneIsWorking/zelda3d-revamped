@@ -45,8 +45,6 @@ class Layout:
     screen_layouts: dict[str, dict] | None = None
     screen_placements: tuple[dict[str, str], ...] | None = None
     screen_outside: str | None = None
-    # overlay.toml's [named]: screens outside the table, each a guest address and its layout.
-    screen_named: tuple[dict[str, object], ...] | None = None
     # hud.toml as the app reads it (app/src/hud.hpp): elements with their guest addresses.
     hud: dict[str, object] | None = None
     # aim.toml as the app reads it (app/src/mouse_aim.hpp): guest addresses and offsets.
@@ -99,14 +97,10 @@ def _overlay(repo: Path, game: str, d: symbols.Decomp) -> dict[str, object]:
     placements = [{"layout": table["outside"]} for _ in range(d.define("UI_SCREEN_COUNT"))]
     for name, entry in table["screens"].items():
         placements[d.define(name)] = {"layout": entry} if isinstance(entry, str) else entry
-    named = tuple({"address": symbols.global_(d, name), "layout": layout}
-                  for name, layout in table.get("named", {}).items())
-    for used in ([table["outside"]] + [name for entry in placements for name in entry.values()]
-                 + [entry["layout"] for entry in named]):
+    for used in [table["outside"]] + [name for entry in placements for name in entry.values()]:
         if used not in layouts and used != "split":
             raise SystemExit(f"patch/{game}/overlay.toml names a layout that is not there: {used}")
-    return {"screen_layouts": layouts, "screen_placements": tuple(placements), "screen_outside": table["outside"],
-            "screen_named": named}
+    return {"screen_layouts": layouts, "screen_placements": tuple(placements), "screen_outside": table["outside"]}
 
 
 def _guest_address(d: symbols.Decomp, terms: list[str | int]) -> int:

@@ -284,14 +284,11 @@ of the game's touch screens (and one for while its HUD visibility hides that scr
   area's title card, a cutscene): the top screen alone;
 - `ocarina`: the whole touch screen as a small inset, since the notes play on the top screen;
 - `split`, the app's own (`splitLayout`): the two screens side by side, for the map, the
-  notebook and anything outside play (boot, the title).
-
-Screens outside play's table are named in `[named]` by the decomp's global for each: MM3D's file
-select (`gFileSelectUiScreen`) takes `menu`, its list under the top screen's "Select File" bar.
+  notebook and anything outside play (boot, title, file select).
 
 The install writes the table into `z3d-options.json` as `"screens"`, with the address of the
-game's pointer to the touch screen that is up, the table of play's screens, the named screens'
-addresses and the HUD visibility word (from the decomp, `tools/z3dmods/games.py`). `ScreenOverlay` reads the game after every frame
+game's pointer to the touch screen that is up, the table of play's screens and the HUD visibility
+word (from the decomp, `tools/z3dmods/games.py`). `ScreenOverlay` reads the game after every frame
 and hands the layout to `GameWindow`, which writes the core's custom layout and
 `custom_bottom_pieces` (`placeOverlay`). The mouse goes back through the same pieces
 (`overlayTouch`): a click on a piece touches the touch-screen pixel drawn there, and a click

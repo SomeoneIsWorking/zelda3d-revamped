@@ -16,11 +16,6 @@ UI_SCREEN_GEAR = "menu"
 UI_SCREEN_ITEMS = "menu"
 UI_SCREEN_MASKS = "menu"
 
-# Screens outside play's table, by the decomp's name of each: file select's list goes under its
-# "Select File" bar as a menu does.
-[named]
-gFileSelectUiScreen = "menu"
-
 [layouts.top_only]
 pieces = []
 
