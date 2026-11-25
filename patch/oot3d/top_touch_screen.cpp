@@ -1,8 +1,8 @@
-// File select on the top screen: The One Screen draws the touch screen's file select there through
-// a viewport of the top screen's middle 320 pixels, so nothing can reach its corners. While file
-// select is up its viewport takes the whole top screen (hooks.s base_file_select_*) and the touch
-// screen's projection spans x -40 to 360 to match: everything stays where it was, and what is
-// moved past the touch screen's edges (BACK, hooks.s back_*) shows (decomp docs/file_select.md).
+// The touch screen's menus on the top screen: The One Screen draws them there through a viewport of
+// the top screen's middle 320 pixels, so nothing can reach its corners. While a widened menu is up
+// its viewport takes the whole top screen (hooks.s base_file_select_*) and the touch screen's
+// projection spans x -40 to 360 to match: everything stays where it was, and what is moved past
+// the touch screen's edges (BACK, hooks.s back_*) shows (decomp docs/file_select.md).
 #include "../common/guest.hpp"
 #include "game.hpp"
 #include "symbols.hpp"
@@ -27,11 +27,15 @@ bool fileSelectUp() {
          guest::read<uint32_t>(kFileChoose + kFileChooseActive) != 0;
 }
 
+bool widened() {
+  return fileSelectUp();
+}
+
 } // namespace
 
 // The touch screen layers' calls of Camera2D_SetMatrices (TouchScreen2D_BeginLayer0 to 3).
-void fileSelectProjection(void *camera, float *projection, const float *view) {
-  if (fileSelectUp()) {
+void touchProjection(void *camera, float *projection, const float *view) {
+  if (widened()) {
     // Clip y of x is the game's of x' = (x + margin) * 320 / 400, so x -40 to 360 spans what
     // 0 to 320 did.
     constexpr float squeeze = kTouchWidth / kTopWidth;
@@ -43,10 +47,10 @@ void fileSelectProjection(void *camera, float *projection, const float *view) {
 }
 
 // The viewport a file select fade is drawn through: The One Screen spreads the fade's touch-screen
-// quad over the top screen's rows with the game's projection, which fileSelectProjection squeezes
-// by 320 / 400, so the viewport grows by 400 / 320 about its middle.
-void fileSelectFadeViewport(int x, int y, int width, int height) {
-  if (fileSelectUp()) {
+// quad over the top screen's rows with the game's projection, which touchProjection squeezes by
+// 320 / 400, so the viewport grows by 400 / 320 about its middle.
+void touchFadeViewport(int x, int y, int width, int height) {
+  if (widened()) {
     const int grown = static_cast<int>(static_cast<float>(height) * kTopWidth / kTouchWidth);
     y -= (grown - height) / 2;
     height = grown;
