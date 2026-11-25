@@ -67,7 +67,9 @@ and "I don't want these fake overlay things either, everything must be RE based"
   screen's left edge. The game hit-tests touches where it draws and the patch spreads the stylus
   over the top screen's 400 columns, so a click anywhere is a touch at that pixel
   (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, the decomp's `docs/ui.md`,
-  `inputtest files-mm3d`). The Options screen's own list is still on the touch screen, not shown.
+  `inputtest files-mm3d`). The Options screen's list is scaled over the message box that shows the
+  chosen option's hint, its two pages' slide stretched off the screen's edges and Return in the
+  bottom left corner beside the box (`patch/mm3d/options_screen.cpp`).
 
 Menu is the item screen and not Pause as first decided: the game's Start in play is only OoT3D's
 "Save your progress?" and does nothing visible in MM3D (`ctl-pad1`), while the item screen is

@@ -26,11 +26,19 @@ inline void moveX(uint8_t *widget, float x) {
   set(widget, kUiWidgetTranslate, x, kUiWidgetTranslateX, 0.0F);
 }
 
-inline void place(uint8_t *widget, float x, float y, float scale) {
+inline void scale(uint8_t *widget, float x, float y) {
+  set(widget, kUiWidgetScale, x, kUiWidgetScaleX, 1.0F);
+  set(widget, kUiWidgetScale + sizeof(float), y, kUiWidgetScaleY, 1.0F);
+}
+
+inline void place(uint8_t *widget, float x, float y, float scaleX, float scaleY) {
   moveX(widget, x);
   set(widget, kUiWidgetTranslate + sizeof(float), y, kUiWidgetTranslateY, 0.0F);
-  set(widget, kUiWidgetScale, scale, kUiWidgetScaleX, 1.0F);
-  set(widget, kUiWidgetScale + sizeof(float), scale, kUiWidgetScaleY, 1.0F);
+  scale(widget, scaleX, scaleY);
+}
+
+inline void place(uint8_t *widget, float x, float y, float scale) {
+  place(widget, x, y, scale, scale);
 }
 
 inline uint8_t *root(void *layout) {
