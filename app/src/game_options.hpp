@@ -20,10 +20,12 @@ class PadInput;
 struct Option {
   std::string id;
   std::string label;
+  // The options menu's group it is listed in.
+  std::string category;
   // What the value picks from; a switch has "Off" and "On".
   std::vector<std::string> choices;
   uint8_t value = 0;
-  // An app option on the pad (cstick_invert_x, cstick_invert_y, mouse_scale); empty for the others.
+  // An app option on the pad (mouse_scale); empty for the others.
   std::string pad;
   // What each choice is, for an option that picks a scale (mouse_scale); empty for a switch.
   std::vector<double> scales;

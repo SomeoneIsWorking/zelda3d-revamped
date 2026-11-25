@@ -240,10 +240,7 @@ public:
   }
   [[nodiscard]] std::tuple<float, float> GetStatus() const override {
     const auto &[x, y] = state_->sticks[index_];
-    if (index_ != Settings::NativeAnalog::CStick) {
-      return {x, y};
-    }
-    return {state_->cStickInverted[0] ? -x : x, state_->cStickInverted[1] ? -y : y};
+    return {x, y};
   }
 
 private:
@@ -355,7 +352,6 @@ void PadInput::handle(const SDL_Event &event) {
 
 void PadInput::readHost() {
   PadState state;
-  state.cStickInverted = state_->cStickInverted;
   state.gyro = state_->gyro;
   state.gyroSource = state_->gyroSource;
   const bool play = game_ != nullptr && mode_ != PadMode::ByName;

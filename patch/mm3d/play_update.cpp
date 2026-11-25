@@ -21,6 +21,7 @@ bool inPlainPlay(void *play) {
 
 // Called at the start of Play_Update (hooks.s).
 void updatePlay(void *play) {
+  holdCommonOptions();
   updateSlotItems(play);
   updateAutosave(play);
   updateNotebook(play);

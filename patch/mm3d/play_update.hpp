@@ -9,6 +9,8 @@ bool inPlainPlay(void *play);
 void updateSlotItems(void *play);
 void updateAutosave(void *play);
 void updateNotebook(void *play);
+// The game's options held at the player's (common_options.cpp).
+void holdCommonOptions();
 // The mouse's turn the camera did not take is dropped (mouse_camera.cpp).
 void dropUntakenLook();
 

@@ -1,41 +1,74 @@
-# The game's switches (tools/z3dmods/options.py). The app's options menu lists them by label. One
-# with a field is a byte of the patch's block, in this order, read through options() from the
-# generated options.hpp; one with a pad is the app's.
+# The game's switches (tools/z3dmods/options.py). The app's options menu lists them by label under
+# their category. One with a field is a byte of the patch's block, in this order, read through
+# options() from the generated options.hpp; one with choices picks one of them by its index, the
+# game's own value for the game's options (game_options.cpp). One with a pad is the app's.
 
 [[option]]
 id = "cutscene_skip"
+category = "Gameplay"
 field = "cutsceneSkip"
 label = "Cutscene skip (Start)"
 default = true
 
 [[option]]
 id = "quick_text"
+category = "Gameplay"
 field = "quickText"
 label = "Quick Text"
 default = true
 
 [[option]]
 id = "autosave"
+category = "Gameplay"
 field = "autosave"
 label = "Autosave after each scene change"
 default = false
 
-# The game turns its camera with the C-stick itself; the app turns the stick around.
+# The game's own options (decomp docs/ui.md "Options"), held in the loaded file at these choices.
 [[option]]
-id = "camera_invert_x"
-pad = "cstick_invert_x"
-label = "Camera stick: invert X"
-default = false
+id = "target_hold"
+category = "Controls"
+field = "targetHold"
+label = "L-Targeting"
+choices = ["Switch", "Hold"]
+default = "Switch"
 
 [[option]]
-id = "camera_invert_y"
-pad = "cstick_invert_y"
-label = "Camera stick: invert Y"
-default = false
+id = "free_camera_invert"
+category = "Controls"
+field = "freeCameraInvert"
+label = "Free camera"
+choices = ["Normal", "Invert Y", "Invert X", "Invert both"]
+default = "Normal"
+
+[[option]]
+id = "first_person_invert"
+category = "Controls"
+field = "firstPersonInvert"
+label = "First-person camera"
+choices = ["Normal", "Invert Y", "Invert X", "Invert both"]
+default = "Normal"
+
+[[option]]
+id = "swim_invert"
+category = "Controls"
+field = "swimInvert"
+label = "Swimming"
+choices = ["Normal", "Invert Y"]
+default = "Normal"
+
+[[option]]
+id = "volume"
+category = "Sound"
+field = "volume"
+label = "Volume"
+choices = ["Lower", "Normal", "Higher"]
+default = "Normal"
 
 # A 60 Hz in-between of each two 30 Hz ticks, the game's draw run again (docs/plans/replay-interpolation.md).
 [[option]]
 id = "frame_interpolation"
+category = "Display"
 app = "frame_interpolation"
 label = "Frame interpolation"
 default = true
@@ -43,6 +76,7 @@ default = true
 # Times the mouse's 0.05 degrees a count, for the camera and the aim.
 [[option]]
 id = "mouse_sensitivity"
+category = "Controls"
 pad = "mouse_scale"
 label = "Mouse sensitivity"
 scales = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0]
@@ -52,6 +86,7 @@ default = 1.0
 # own square steps in our stone texture; the others fold the game's painted steps.
 [[option]]
 id = "stair_steps"
+category = "Gameplay"
 label = "Stepped stairs"
 default = "Stone medium"
 layers = [

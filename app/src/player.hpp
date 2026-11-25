@@ -22,22 +22,25 @@ class GameOptions;
 class GameWindow;
 class ModSwap;
 class PadInput;
+class SlotLink;
 
 inline constexpr std::chrono::seconds kPacingReport{10};
 
 class Player {
 public:
   Player(Emulator &emulator, GameWindow &window, ModSwap &mods, const GameOptions &options,
-         PadInput &pad, FrameInterpolation &interpolation, std::filesystem::path record)
+         PadInput &pad, SlotLink &link, FrameInterpolation &interpolation,
+         std::filesystem::path record)
       : emulator_(emulator), window_(window), mods_(mods), options_(options), pad_(pad),
-        interpolation_(interpolation) {
+        link_(link), interpolation_(interpolation) {
     if (!record.empty()) {
       recorder_.emplace(std::move(record));
     }
   }
 
   enum class Left : uint8_t { Closed, Menu, Settings, Report };
-  // Until the window closes, the menu or the options are asked for, or a bug report (whose
+  // Until the window closes, the menu or the options are asked for (by the player or the game,
+  // slot_link.hpp), or a bug report (whose
   // frame, both screens, is then the emulator's frame()).
   [[nodiscard]] Left run();
 
@@ -49,6 +52,7 @@ private:
   ModSwap &mods_;
   const GameOptions &options_;
   PadInput &pad_;
+  SlotLink &link_;
   FrameInterpolation &interpolation_;
   std::optional<FrameRecorder> recorder_;
 };

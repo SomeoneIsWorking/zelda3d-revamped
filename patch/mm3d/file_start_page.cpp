@@ -122,16 +122,25 @@ public:
   }
 
   // The details plate while the Start page is up or sliding in or out: it comes in from the
-  // screen's right edge as the rows leave by its left. The layout draws with the transform it had
-  // before this call, so it is kept off the screen while hidden.
+  // screen's right edge as the rows leave by its left. The rows are not drawn while the page is
+  // up, so their matrix is stale then (file select comes back onto the page from Options). The
+  // layout draws with the transform it had before this call, so it is kept off the screen while
+  // hidden.
   void drawDetails(const void *screen, void *manager, void *layout, int32_t order) const {
     const float left = (kTouchLeft + kRowsRest - ui::drawnX(firstRow_)) / kRowsTravel;
-    const float x = (1.0F - (left < 0.0F ? 0.0F : left > 1.0F ? 1.0F : left)) * kTopWidth;
+    const float x = sliding(screen)
+                        ? (1.0F - (left < 0.0F ? 0.0F : left > 1.0F ? 1.0F : left)) * kTopWidth
+                        : 0.0F;
     ui::place(ui::root(layout), shown(screen) ? x : kTopWidth, kPlateMargin - kPlateTop, 1.0F);
     if (!shown(screen)) {
       return;
     }
     guest::function<LayoutDrawFn>(kLayoutDrawManagerDraw)(manager, layout, kDrawQueueTop2, order);
+  }
+
+  static bool sliding(const void *screen) {
+    return guest::read<uint8_t>(screen, kFileSelectPage) !=
+           guest::read<uint8_t>(screen, kFileSelectNextPage);
   }
 
   static bool shown(const void *screen) {

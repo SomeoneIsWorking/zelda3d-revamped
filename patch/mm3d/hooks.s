@@ -155,21 +155,9 @@ actor_update:
     .word _ZN7z3dmods4mm3d14initFileSelectEPvS1_
 .section .expect.file_select_init, "", %progbits
     .word 0x005BA3BC @ FileSelectScreen_Init
-@ OptionsScreen_Draw's queueing of its list, of the frame on the plate chosen and of its title bar,
-@ which the list replaces, and OptionsScreen's vtable entry for its build (options_screen.cpp).
-.section .patch.options_list, "ax", %progbits
-    bl _ZN7z3dmods4mm3d15drawOptionsListEPvS1_ii
-.section .expect.options_list, "", %progbits
-    .word 0xEBEF6E7B @ bl 0x17EC58
-.section .patch.options_cursor, "ax", %progbits
-    bl _ZN7z3dmods4mm3d17drawOptionsCursorEPvS1_ii
-.section .expect.options_cursor, "", %progbits
-    .word 0xEBEF6E65 @ bl 0x17EC58
-.section .patch.options_title_bar, "ax", %progbits
-    nop
-.section .expect.options_title_bar, "", %progbits
-    .word 0xEBEF6E55 @ bl 0x17EC58
-.section .patch.options_init, "a", %progbits
-    .word _ZN7z3dmods4mm3d11initOptionsEPvS1_
-.section .expect.options_init, "", %progbits
-    .word 0x005A3614 @ OptionsScreen_Init
+@ OptionsScreen's vtable entry for its update, which hands over to the app's options
+@ (options_handoff.cpp).
+.section .patch.options_update, "a", %progbits
+    .word _ZN7z3dmods4mm3d13updateOptionsEPvS1_
+.section .expect.options_update, "", %progbits
+    .word 0x005A3D60 @ OptionsScreen_Update

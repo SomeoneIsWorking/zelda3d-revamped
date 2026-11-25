@@ -41,8 +41,6 @@ struct PadState {
   std::array<bool, Settings::NativeButton::NumButtons> buttons{};
   // Indexed by Settings::NativeAnalog: x right, y up, each -1..1.
   std::array<std::array<float, 2>, Settings::NativeAnalog::NumAnalogs> sticks{};
-  // The C-stick as the game gets it: each axis turned around or not.
-  std::array<bool, 2> cStickInverted{};
   // The 3DS turning, in degrees a second of the game's time, on the core's axes: x points left
   // along the D-pad, y out of the touch screen, z up along the D-pad; right-handed.
   std::array<float, 3> gyro{};
@@ -174,9 +172,6 @@ public:
   // (a verb's mouse button, or a 3DS button's outside play), slot, stick and chord.
   static void listKeys(std::ostream &out);
   // Game options (game_options.hpp).
-  void invertCStick(bool x, bool y) {
-    state_->cStickInverted = {x, y};
-  }
   void scaleMouse(double scale) {
     mouseScale_ = scale;
   }

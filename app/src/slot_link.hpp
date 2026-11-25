@@ -1,6 +1,6 @@
-// The item slots' block the running game's patch keeps (tools/z3dmods/slot_link.py, "link" in
+// The block the running game's patch keeps (tools/z3dmods/slot_link.py, "link" in
 // z3d-options.json): after every frame the pad's held slots go in, and the pad table the game
-// wants and what each slot holds come out. A block whose patch is out or not running (a title
+// wants, what each slot holds and whether the game asked for the app's options come out. A block whose patch is out or not running (a title
 // screen) has no slots and the pad by name.
 #pragma once
 
@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <optional>
+#include <utility>
 
 namespace z3d::app {
 
@@ -46,6 +47,10 @@ public:
   [[nodiscard]] bool looks() const {
     return layout_.has_value() && mode_ != PadMode::ByName;
   }
+  // Whether the game asked for the app's options since the last call (file select's Options).
+  [[nodiscard]] bool takeOptionsRequest() {
+    return std::exchange(optionsAsked_, false);
+  }
   // Turns the free camera by this many binary angles, right and down; it goes in after the next
   // frame, added to what the patch has not taken yet.
   void look(int32_t right, int32_t down);
@@ -61,6 +66,7 @@ private:
     uint32_t beat = 0;
     uint32_t charge = 0;
     uint32_t look = 0;
+    uint32_t options = 0;
   };
 
   void update();
@@ -73,6 +79,9 @@ private:
   // The block's beat as last read, and the frame it last moved in; none before it ever has.
   uint8_t beat_ = 0;
   std::optional<uint64_t> alive_;
+  // The block's options count as last read, none before it has been; and whether it moved since.
+  std::optional<uint8_t> optionsCount_;
+  bool optionsAsked_ = false;
   // The turn look() was given since the last frame.
   std::array<int32_t, 2> look_{};
 };

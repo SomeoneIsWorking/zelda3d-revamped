@@ -31,10 +31,10 @@ constexpr const char *kHudOpacityId = "hud_opacity";
 constexpr std::array kHudSizes{0.5, 0.75, 1.0, 1.25, 1.5};
 constexpr std::array kHudOpacities{0.25, 0.5, 0.75, 1.0};
 constexpr double kPercent = 100.0;
-constexpr std::string_view kCStickInvertX = "cstick_invert_x";
-constexpr std::string_view kCStickInvertY = "cstick_invert_y";
 constexpr std::string_view kMouseScale = "mouse_scale";
 constexpr std::string_view kFrameInterpolation = "frame_interpolation";
+// The group of the app's own options.
+constexpr const char *kDisplay = "Display";
 // In ScreenLayout's order.
 constexpr std::array<const char *, 5> kLayoutNames{
     "Both screens", "Top screen only", "Large top screen", "Side by side", "Single screen"};
@@ -75,10 +75,13 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
     for (const lucent::json::Value &entry : *options->array()) {
       const lucent::json::Value *id = entry.find("id");
       const lucent::json::Value *label = entry.find("label");
+      const lucent::json::Value *category = entry.find("category");
       const lucent::json::Value *fallback = entry.find("default");
       if (id == nullptr || id->string() == nullptr || label == nullptr ||
-          label->string() == nullptr || fallback == nullptr) {
-        throw std::runtime_error(manifest.string() + ": an option wants id, label and default");
+          label->string() == nullptr || category == nullptr || category->string() == nullptr ||
+          fallback == nullptr) {
+        throw std::runtime_error(manifest.string() +
+                                 ": an option wants id, label, category and default");
       }
       // A switch is on or off by default; a choice of scales starts on one of them.
       std::vector<std::string> choices = switchChoices();
@@ -95,6 +98,17 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
           }
           scales.push_back(*scale.real());
           choices.push_back(std::format("{}x", scales.back()));
+        }
+        value = fallback->integer();
+      } else if (const lucent::json::Value *list = entry.find("choices");
+                 list != nullptr && list->array() != nullptr) {
+        choices.clear();
+        for (const lucent::json::Value &choice : *list->array()) {
+          if (choice.string() == nullptr) {
+            throw std::runtime_error(manifest.string() + ": " + *id->string() +
+                                     "'s choices are labels");
+          }
+          choices.push_back(*choice.string());
         }
         value = fallback->integer();
       } else if (const lucent::json::Value *list = entry.find("layers");
@@ -128,7 +142,7 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
       if (inBlock && blockCount_ != items_.size()) {
         throw std::runtime_error(manifest.string() + ": the patch's options come before the app's");
       }
-      items_.push_back({*id->string(), *label->string(), std::move(choices),
+      items_.push_back({*id->string(), *label->string(), *category->string(), std::move(choices),
                         static_cast<uint8_t>(*value), onPad ? *pad->string() : std::string(),
                         std::move(scales), std::move(layers),
                         onApp ? *app->string() : std::string()});
@@ -137,6 +151,7 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
   }
   items_.push_back({kLayoutId,
                     "Screen layout",
+                    kDisplay,
                     std::vector<std::string>(kLayoutNames.begin(), kLayoutNames.end()),
                     static_cast<uint8_t>(setup_.layout),
                     {},
@@ -146,6 +161,7 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
   Option resolution;
   resolution.id = kResolutionId;
   resolution.label = "Resolution";
+  resolution.category = kDisplay;
   resolution.choices.emplace_back("Auto");
   for (uint8_t scale = 1; scale <= kMaxResolution; ++scale) {
     resolution.choices.push_back(std::format("{}x ({}p)", scale, scale * Core::kScreenTopHeight));
@@ -155,6 +171,7 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
     Option size;
     size.id = kHudSizeId;
     size.label = "HUD size";
+    size.category = kDisplay;
     for (const double scale : kHudSizes) {
       size.scales.push_back(scale);
       size.choices.push_back(std::format("{}x", scale));
@@ -164,6 +181,7 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
     Option opacity;
     opacity.id = kHudOpacityId;
     opacity.label = "HUD opacity";
+    opacity.category = kDisplay;
     for (const double share : kHudOpacities) {
       opacity.scales.push_back(share);
       opacity.choices.push_back(std::format("{}%", share * kPercent));
@@ -172,7 +190,7 @@ GameOptions::GameOptions(const GameSetup &setup, const std::filesystem::path &ma
     items_.push_back(std::move(opacity));
   }
   if (setup_.customTextures) {
-    items_.push_back({kTexturesId, "Texture pack", switchChoices(), 1, {}, {}, {}, {}});
+    items_.push_back({kTexturesId, "Texture pack", kDisplay, switchChoices(), 1, {}, {}, {}, {}});
   }
   if (stored_.empty()) {
     return;
@@ -241,17 +259,12 @@ bool GameOptions::frameInterpolation() const {
 }
 
 void GameOptions::apply(Emulator &emulator, PadInput &pad) const {
-  bool invertX = false;
-  bool invertY = false;
   double mouseScale = 1.0;
   for (const Option &item : items_) {
-    invertX = invertX || (item.pad == kCStickInvertX && item.value != 0);
-    invertY = invertY || (item.pad == kCStickInvertY && item.value != 0);
     if (item.pad == kMouseScale) {
       mouseScale = item.scales.at(item.value);
     }
   }
-  pad.invertCStick(invertX, invertY);
   pad.scaleMouse(mouseScale);
   // The manifest sits in the mod folder named by the title ID.
   pad.bindGame(setup_.options.parent_path().filename().string());

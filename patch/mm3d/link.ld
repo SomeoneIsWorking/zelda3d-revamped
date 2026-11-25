@@ -18,16 +18,13 @@ SECTIONS {
   .patch.camera_follow kCameraFollow : { KEEP(*(.patch.camera_follow)) }
   .patch.interpreter_state1 kCutsceneStartScript + 0x2C : { KEEP(*(.patch.interpreter_state1)) }
   .patch.minimap kMainScreenDraw + 0xCC : { KEEP(*(.patch.minimap)) }
-  .patch.options_list kOptionsScreenDraw + kOptionsListCall : { KEEP(*(.patch.options_list)) }
-  .patch.options_cursor kOptionsScreenDraw + kOptionsCursorCall : { KEEP(*(.patch.options_cursor)) }
-  .patch.options_title_bar kOptionsScreenDraw + kOptionsTitleBarCall : { KEEP(*(.patch.options_title_bar)) }
   .patch.title_press_start kTitleScreenDraw + kTitlePressStartCall : { KEEP(*(.patch.title_press_start)) }
   .patch.file_details kFileSelectScreenDraw + kFileSelectDetailsCall : { KEEP(*(.patch.file_details)) }
   .patch.file_title_bar kFileSelectScreenDraw + kFileSelectTitleBarCall : { KEEP(*(.patch.file_title_bar)) }
   .patch.file_list kFileSelectScreenDraw + kFileSelectFilesCall : { KEEP(*(.patch.file_list)) }
   .patch.file_dialogs kFileSelectScreenDraw + kFileSelectDialogsCall : { KEEP(*(.patch.file_dialogs)) }
   .patch.file_start_update kFileSelectScreenUpdate + kFileSelectUpdateStartCall : { KEEP(*(.patch.file_start_update)) }
-  .patch.options_init kOptionsScreenVtable + kOptionsScreenInitSlot * 4 : { KEEP(*(.patch.options_init)) }
+  .patch.options_update kOptionsScreenVtable + kOptionsScreenUpdateSlot * 4 : { KEEP(*(.patch.options_update)) }
   .patch.file_select_init kFileSelectScreenVtable + kFileSelectScreenInitSlot * 4 : { KEEP(*(.patch.file_select_init)) }
   . = PAYLOAD;
   .payload : { KEEP(*(.options)) *(.text*) *(.rodata*) *(.data*) }

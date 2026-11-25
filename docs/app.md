@@ -70,10 +70,10 @@ printed lines it reads (`src/tool_process`); a tool's refusal is its lines that 
   and Down pick a row, A opens it, B goes to the parent, X or Start takes the folder shown, a
   click opens a row, F10 or Guide gives up. A name too long for its line loses its middle. A folder
   the tools refuse (no dump of either game in it) stays on the screen with the reason.
-- The options list scrolls to keep the selected row above the hints. After the game's own options
-  comes "Fullscreen" (`WindowMode`, `<user>/window.json`, on unless the player turned it off), the
+- The options' rows scroll to keep the selected one above the hints. Display ends with
+  "Fullscreen" (`WindowMode`, `<user>/window.json`, on unless the player turned it off), the
   same switch F11 and Alt+Enter flip anywhere in the window.
-- The options' last row, "Games and mods folders", runs `FolderSetup` again: B or Escape on a
+- The options' System category, "Games and mods folders", runs `FolderSetup` again: B or Escape on a
   question keeps that folder, and the picker reopens on the library the tools wrote. Each
   question shows the folder set now ("Now: ..."), which `<tools> folders --user <user> --kept
   roms|mods` prints.
@@ -98,7 +98,8 @@ from it (`tools/z3dmods/app_keys.py`). In the window F10 or Guide returns to the
 reads the patch again, F6 takes it out or puts it back, F7 switches the textures, F11 or
 Alt+Enter switches fullscreen.
 Esc or the pad's View (without LB) in a game holds it for its options (`OptionsMenu` on the menu
-canvas, the picker's X screen); Esc, View or B go back and the same game plays on. `main.cpp`'s
+canvas, the picker's X screen); Esc or View go back, as B or X does from its categories, and the
+same game plays on. `main.cpp`'s
 `play` owns the game's screens, HUD and helpers around the running emulator and makes them again
 when an option changes the layout, resolution or textures. `Player::run` starts only once no key
 or button the game reads is still held from the screen before, so the key that closed a screen
@@ -193,19 +194,25 @@ button is the same whichever game was played last. Their hint lines are drawn by
 `prompt_art`'s glyphs and caps, the set of the last device; the picker needs `--assets` for them.
 
 ## Options
-Each game has its own options, opened with X on its picker tile (`options_menu`): Up and Down pick
-a row, A, Left or Right change it, B or X goes back. Under them, when the picker has the tools,
-is the row that asks for the folders again (Setup above). `GameOptions` owns the options:
+Each game has its own options, opened with X on its picker tile or Esc in play (`options_menu`):
+their categories down the left (Gameplay, Controls, Display, Sound, and System when the picker has
+the tools, which holds the row that asks for the folders again, Setup above) and the chosen one's
+rows on the right. Up and Down pick a category and A or Right opens it; there Up and Down pick a
+row, A, Left or Right change it and B or X goes back to the categories, where B or X leaves.
+`GameOptions` owns the options; each has the category it is listed under:
 
 - The patch's switches come from the manifest the install writes beside the set,
   `load/mods/<title id>/z3d-options.json` (`tools/z3dmods/options.py`, from
   `patch/<game>/options.toml`): the guest address of the patch's options block and each switch's
-  id, label and default, one byte each in order. `--options` and the library's `"options"` name it
-  relative to the user folder.
-- An `[[option]]` with `pad` instead of `field` is the app's: `cstick_invert_x` and
-  `cstick_invert_y` turn the C-stick around on its way to the game (MM3D's camera stick, which the
-  game reads itself); `mouse_scale`, with `scales` (its choices, "0.25x" to "4x"), multiplies
-  the mouse's degrees a count for the aim and the camera.
+  id, label, category and default, one byte each in order; one with `choices` holds the index of
+  one of its labels. `--options` and the library's `"options"` name it relative to the user folder.
+- MM3D's own options are such switches: L-Targeting, Free camera, First-person camera, Swimming and
+  Volume, each byte the game's own value. The game keeps them in the loaded file (decomp
+  docs/ui.md "Options"); the patch holds the file's at the player's choices every play frame and
+  applies the volume as the game's Options screen does, and holds the Circle Pad Pro in use and
+  motion on, which the port needs and the menu leaves out (`patch/mm3d/common_options.cpp`).
+- An `[[option]]` with `pad` instead of `field` is the app's: `mouse_scale`, with `scales` (its
+  choices, "0.25x" to "4x"), multiplies the mouse's degrees a count for the aim and the camera.
 - An `[[option]]` with `app` is an app switch read by the owner it names:
   `frame_interpolation` ("Frame interpolation", OoT3D, on by default) has `Player` turn the
   game's in-betweens on (`FrameInterpolation::Mode::On`, docs/plans/replay-interpolation.md) for
@@ -217,7 +224,7 @@ is the row that asks for the folders again (Setup above). `GameOptions` owns the
   `Settings::values.romfs_layers` and the core stacks it over `romfs/` when the game loads (both
   games' `stair_steps`: stone or painted stepped stairs in three sizes). The manifest leaves the option out
   unless the install wrote all its folders. Standalone Azahar never loads a layer.
-- The app's own rows follow: the screen layout, the resolution (`GameSetup::resolution`, the
+- The app's own rows follow, under Display: the screen layout, the resolution (`GameSetup::resolution`, the
   core's `resolution_factor`: Auto is the launch's `--resolution`, which a shown window leaves out
   so the core scales the top screen's drawn size over 400x240, rounded up; 1x to 10x are fixed;
   the rasterizer cache rebuilds its surfaces on the next frame), the HUD's size and opacity when the set has a
@@ -234,10 +241,11 @@ is the row that asks for the folders again (Setup above). `GameOptions` owns the
   made it. A state also carries the game files that run had open: a layer stays as it was when
   the state was made, and a state from before an install that changed those files stops the game
   on its next scene load.
-- The menu lives on the picker because the core's renderer owns the window while a game runs: a
-  change takes effect the next time the game boots.
+- Over a running game (Esc) the patch's switches are written into its block when the menu
+  closes and take effect on the next frame; the layout, resolution and textures make the game's
+  screens again; a layer takes effect the next time the game boots.
 
-Adding a switch: an `[[option]]` in `patch/<game>/options.toml`, then read `options().<field>` from
+Adding a switch: an `[[option]]` with its category in `patch/<game>/options.toml`, then read `options().<field>` from
 the generated `options.hpp` in the feature; the menu, the manifest and the stored file follow.
 
 ## Hotswap

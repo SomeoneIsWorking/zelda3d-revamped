@@ -5,6 +5,7 @@
 #include "game_window.hpp"
 #include "mod_swap.hpp"
 #include "pad_input.hpp"
+#include "slot_link.hpp"
 #include "frame_interpolation.hpp"
 
 #include <lucent/log.h>
@@ -20,6 +21,7 @@ Player::Left Player::run() {
   (void)window_.takeMenuRequest();
   (void)window_.takeReportRequest();
   (void)window_.takeSettingsRequest();
+  (void)link_.takeOptionsRequest();
   const bool interpolate = options_.frameInterpolation();
   const bool interpolating = interpolation_.setMode(interpolate ? FrameInterpolation::Mode::On
                                                                 : FrameInterpolation::Mode::Off);
@@ -33,7 +35,7 @@ Player::Left Player::run() {
       left = Left::Menu;
       break;
     }
-    if (window_.takeSettingsRequest()) {
+    if (window_.takeSettingsRequest() || link_.takeOptionsRequest()) {
       left = Left::Settings;
       break;
     }

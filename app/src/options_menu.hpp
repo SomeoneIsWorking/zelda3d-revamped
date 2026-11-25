@@ -1,14 +1,19 @@
-// The options screen of one game, drawn on the title picker's canvas: up and down pick an
-// option, left, right or A change it, B, X, Esc, View, F10 or Guide go back. Changes are saved as
-// they are made. After the game's options, a Fullscreen row (game_window.hpp). With `folders`, a
-// last row leaves to change the games and mods folders (folder_setup.hpp).
+// The options screen of one game, drawn on the title picker's canvas: the options' categories down
+// the left, the chosen one's rows on the right. Up and down pick a category, A or right opens it;
+// in a category up and down pick an option, left, right or A change it and B goes back to the
+// categories. B on the categories, Esc, View, F10 or Guide go back. Changes are saved as they are
+// made. Display also holds a Fullscreen row (game_window.hpp); with `folders`, System holds a row
+// that leaves to change the games and mods folders (folder_setup.hpp).
 #pragma once
 
 #include "menu_canvas.hpp"
 
+#include <SDL3/SDL_pixels.h>
+
 #include <cstddef>
+#include <cstdint>
 #include <string>
-#include <utility>
+#include <vector>
 
 namespace z3d::app {
 
@@ -18,25 +23,34 @@ class GameWindow;
 class OptionsMenu {
 public:
   OptionsMenu(const MenuCanvas &canvas, GameWindow &window, const PadInput &pad,
-              GameOptions &options, std::string title, bool folders)
-      : canvas_(canvas), renderer_(canvas.renderer()), engine_(canvas.engine()),
-        font_(canvas.font()), window_(window), pad_(pad), options_(options),
-        title_(std::move(title)), folders_(folders) {
-  }
+              GameOptions &options, std::string title, bool folders);
 
   enum class Left { Back, ForFolders };
   // Until the player goes back, asks for the folders, or the window closes.
   [[nodiscard]] Left run();
 
 private:
+  struct Row {
+    enum class Kind : uint8_t { Option, Fullscreen, Folders };
+    Kind kind = Kind::Option;
+    // The option's index in GameOptions::items().
+    size_t option = 0;
+  };
+  struct Category {
+    std::string name;
+    std::vector<Row> rows;
+  };
+
   // Each logs the menu's new state, which the input tests wait on.
+  void pickCategory(size_t index);
   void select(size_t index);
-  [[nodiscard]] size_t rows() const;
-  [[nodiscard]] bool onFullscreen() const;
-  [[nodiscard]] bool onFolders() const;
   void step(int direction);
+  [[nodiscard]] const Row &row() const {
+    return categories_[category_].rows[selected_];
+  }
+  [[nodiscard]] std::string rowId(const Row &row) const;
   void draw();
-  void text(const std::string &line, float x, float y, bool selected, bool rightAligned);
+  void text(const std::string &line, float x, float y, SDL_Color color, bool rightAligned);
 
   const MenuCanvas &canvas_;
   SDL_Renderer *renderer_;
@@ -46,7 +60,10 @@ private:
   const PadInput &pad_;
   GameOptions &options_;
   std::string title_;
-  bool folders_;
+  std::vector<Category> categories_;
+  size_t category_ = 0;
+  // In the rows of the category, or on the categories.
+  bool inRows_ = false;
   size_t selected_ = 0;
   // The first row drawn.
   size_t first_ = 0;

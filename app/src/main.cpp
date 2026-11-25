@@ -80,7 +80,7 @@ void play(const AppConfig &config, GameWindow &window, PadInput &pad, Emulator &
     const Hud hud(window, emulator, pad, link, overlay, options, config.assets, manifest);
     const MouseAim aim(window, emulator, pad, link, manifest);
     FrameInterpolation interpolation(emulator, manifest);
-    Player player(emulator, window, mods, options, pad, interpolation, config.record);
+    Player player(emulator, window, mods, options, pad, link, interpolation, config.record);
     bool remake = false;
     while (!remake) {
       const Player::Left left = player.run();

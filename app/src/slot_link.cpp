@@ -61,7 +61,8 @@ SlotLink::SlotLink(Emulator &emulator, PadInput &pad, const std::filesystem::pat
   layout_ = Layout{address(*link, "held", manifest),  address(*link, "mode", manifest),
                    address(*link, "items", manifest), address(*link, "songs", manifest),
                    address(*link, "lanes", manifest), address(*link, "beat", manifest),
-                   address(*link, "charge", manifest), address(*link, "look", manifest)};
+                   address(*link, "charge", manifest), address(*link, "look", manifest),
+                   address(*link, "options", manifest)};
   emulator_.onFrame([this] {
     update();
   });
@@ -77,6 +78,11 @@ void SlotLink::look(int32_t right, int32_t down) {
 }
 
 void SlotLink::update() {
+  // The request comes outside play too, where nothing beats.
+  if (std::array<uint8_t, 1> options{}; emulator_.read(layout_->options, options)) {
+    optionsAsked_ = optionsAsked_ || (optionsCount_ && *optionsCount_ != options[0]);
+    optionsCount_ = options[0];
+  }
   const uint16_t held = pad_.slotsHeld();
   const std::array<uint8_t, 2> heldBytes{static_cast<uint8_t>(held),
                                          static_cast<uint8_t>(held >> 8)};

@@ -1,6 +1,6 @@
-"""The block a patch and the app share for the item slots (docs/plans/pc-controls-hud.md): the app's
-pad owner writes the slots held this frame, the patch writes which pad table the game wants and
-what each slot holds. One layout, here: the patch gets a generated `slot_link.hpp`, and the app
+"""The block a patch and the app share every frame (docs/plans/pc-controls-hud.md): the app's pad
+owner writes the slots held this frame, the patch writes which pad table the game wants, what each
+slot holds and when the game asks for the app's options. One layout, here: the patch gets a generated `slot_link.hpp`, and the app
 the address of each field in the install's manifest (`"link"` in z3d-options.json)."""
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ FIELDS = (
     Field("charge", "uint8_t", 1, SLOTS, "patch: how far a slot that must be held has been held, kSlotCharged when it plays"),
     Field("look", "int16_t", 2, 2, "app: the mouse's turn of the free camera not yet taken, right then down, in binary angles; the patch takes it and writes 0"),
     Field("draw_fraction", "float", 4, 1, "app: in an in-between's draw, how far it is from the newer tick's in ticks (t - 1); 0 in every real draw"),
+    Field("options", "uint8_t", 1, 1, "patch: one more each time the game asks for the app's options in place of its own Options screen"),
 )
 
 # PadMode, in the app's order (app/src/pad_input.hpp).

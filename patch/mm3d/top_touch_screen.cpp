@@ -122,7 +122,7 @@ void drawFileDialogs(void *manager, void *layout, int32_t /*queue*/, int32_t ord
 bool readTouch(void *reader, void *status) {
   const bool read = guest::function<ReadTouchFn>(kTouchPanelReadLatest)(reader, status);
   const auto active = guest::read<uintptr_t>(kUiScreenContext + kUiActiveScreen);
-  if (active == kTitleUiScreen || active == kFileSelectUiScreen || active == kOptionsUiScreen) {
+  if (active == kTitleUiScreen || active == kFileSelectUiScreen) {
     const auto x = guest::read<uint16_t>(status, kTouchStatusX);
     guest::write(status, kTouchStatusX,
                  static_cast<uint16_t>(static_cast<float>(x) * kTopWidth / kTouchWidth + 0.5F));

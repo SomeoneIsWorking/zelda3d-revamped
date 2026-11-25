@@ -3,36 +3,42 @@
 
 [[option]]
 id = "cutscene_skip"
+category = "Gameplay"
 field = "cutsceneSkip"
 label = "Cutscene skip (Start)"
 default = true
 
 [[option]]
 id = "quick_text"
+category = "Gameplay"
 field = "quickText"
 label = "Quick Text"
 default = true
 
 [[option]]
 id = "free_camera"
+category = "Controls"
 field = "freeCamera"
 label = "Free camera (right stick)"
 default = true
 
 [[option]]
 id = "free_camera_invert_x"
+category = "Controls"
 field = "freeCameraInvertX"
 label = "Free camera: invert X"
 default = false
 
 [[option]]
 id = "free_camera_invert_y"
+category = "Controls"
 field = "freeCameraInvertY"
 label = "Free camera: invert Y"
 default = false
 
 [[option]]
 id = "autosave"
+category = "Gameplay"
 field = "autosave"
 label = "Autosave after each scene change"
 default = false
@@ -40,6 +46,7 @@ default = false
 # A 60 Hz in-between of each two 30 Hz ticks, the game's draw run again (docs/plans/replay-interpolation.md).
 [[option]]
 id = "frame_interpolation"
+category = "Display"
 app = "frame_interpolation"
 label = "Frame interpolation"
 default = true
@@ -47,6 +54,7 @@ default = true
 # Times the mouse's 0.05 degrees a count, for the camera and the aim.
 [[option]]
 id = "mouse_sensitivity"
+category = "Controls"
 pad = "mouse_scale"
 label = "Mouse sensitivity"
 scales = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0]
@@ -56,6 +64,7 @@ default = 1.0
 # own square steps in our stone texture; the others fold the game's painted steps.
 [[option]]
 id = "stair_steps"
+category = "Gameplay"
 label = "Stepped stairs"
 default = "Stone medium"
 layers = [

@@ -8,6 +8,7 @@ gamepad is an SDL virtual pad inside the app alone, made and driven over its loo
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import json
 import os
 import shlex
@@ -1223,13 +1224,13 @@ def _first_run(session: Session, pad: Gamepad) -> None:
     session.expect("picker: on Majora")
     session.wait(1)
     session.shot("picker-second")
-    # The options' last row asks again: the dump folder is kept, the mods folder changed.
+    # The options' System row asks again: the dump folder is kept, the mods folder changed.
     pad.button("x")
-    row = session.expect("options: row ")
-    while not row.endswith("options: row folders"):
-        pad.stick(0, 32767, 0.12)
+    def stick(way: str) -> None:
+        pad.stick(*_STICK_WAYS[way], 0.12)
         session.wait(0.1)
-        row = session.expect("options: row ")
+
+    _option_category(session, "folders", stick)
     session.wait(1)
     session.shot("options-folders")
     pad.button("a")
@@ -1369,24 +1370,25 @@ def _options(session: Session, pad: Gamepad) -> None:
         session.key("menu", "right")
         game = session.expect("picker: on ")
     session.key("menu", "x")
-    row = session.expect("options: row ")
-    session.shot("options")
-    while not row.endswith("options: row cutscene_skip"):
-        session.key("menu", "down")
-        row = session.expect("options: row ")
+    def menu(way: str) -> None:
+        session.wait(0.2)
+        session.key("menu", way)
+
+    _option_category(session, "cutscene_skip", menu, "options")
     session.key("menu", "a")
     session.expect("options: cutscene_skip = Off")
     session.shot("skip-off")
-    while not row.endswith("options: row fullscreen"):
-        session.key("menu", "up")
-        row = session.expect("options: row ")
+    menu("b")
+    _option_category(session, "fullscreen", menu)
     session.shot("fullscreen-row")
     session.key("menu", "a")
     session.expect("fullscreen off")
     session.shot("fullscreen-off")
     session.key("window", "fullscreen")
     session.expect("fullscreen on")
-    session.key("menu", "b")
+    menu("b")
+    session.expect("options: category ")
+    menu("b")
     session.expect("picker: on ")
     session.shot("picker")
     session.key("menu", "a")
@@ -1415,21 +1417,20 @@ def _options_oot3d(session: Session, pad: Gamepad) -> None:
         session.key("menu", "right")
         game = session.expect("picker: on ")
     session.key("menu", "x")
-    row = session.expect("options: row ")
-    session.shot("options")
-    while not row.endswith("options: row quick_text"):
-        session.key("menu", "down")
-        row = session.expect("options: row ")
+    def menu(way: str) -> None:
+        session.wait(0.2)
+        session.key("menu", way)
+
+    _option_category(session, "quick_text", menu, "options")
     session.key("menu", "a")
     session.expect("options: quick_text = Off")
     session.shot("quick-text-off")
-    while not row.endswith("options: row frame_interpolation"):
-        # A press right after a release would read as held.
-        session.wait(0.2)
-        session.key("menu", "down")
-        row = session.expect("options: row ")
+    menu("b")
+    _option_category(session, "frame_interpolation", menu)
     session.shot("frame-interpolation-row")
-    session.key("menu", "b")
+    menu("b")
+    session.expect("options: category ")
+    menu("b")
     session.expect("picker: on ")
     session.key("menu", "a")
     session.wait(20)
@@ -1537,8 +1538,9 @@ def _pause_wide(session: Session, pad: Gamepad) -> None:
 def _files_mm3d(session: Session, pad: Gamepad) -> None:
     """MM3D's title and file select on the single screen, the game's touch menus drawn on the top
     screen: PRESS START under the logo, the list in the middle; a click on File 1 opens its Start
-    page, a click on Options past the touch screen's 320 columns opens the options, B goes back,
-    and a click on Return in the corner goes back to the list."""
+    page, a click on Options past the touch screen's 320 columns opens the app's options over the
+    game, the game's own L-Targeting among their Controls, B twice goes back to the Start page, and
+    a click on Return in the corner goes back to the list."""
     session.wait(30)
     session.key("name", "a")
     session.wait(6)
@@ -1550,13 +1552,52 @@ def _files_mm3d(session: Session, pad: Gamepad) -> None:
     session.wait(2)
     session.shot("file-1")
     session.click_top(355, 221)
+    session.expect("options: open for", 10)
+
+    def menu(way: str) -> None:
+        session.wait(0.2)
+        session.key("menu", way)
+
+    _option_category(session, "target_hold", menu, "options")
+    session.wait(0.5)
+    session.shot("options-controls")
+    menu("b")
+    session.expect("options: category ", 5)
+    menu("b")
+    session.expect("options: closed", 5)
     session.wait(2)
-    session.shot("options")
-    session.key("name", "b")
-    session.wait(2)
+    session.shot("start-page")
     session.click_top(29, 221)
     session.wait(2)
     session.shot("returned")
+
+
+_STICK_WAYS = {"up": (0, -32767), "down": (0, 32767), "right": (32767, 0)}
+
+
+def _option_category(session: Session, row: str, press: Callable[[str], object],
+                     shot: str | None = None) -> None:
+    """From the open options' categories, presses "down" (with `press`) to the category that lists
+    `row`, "right" into it and "down" to the row, each step waiting on the menu's log line."""
+    def step(way: str) -> None:
+        # A press right after a release would read as held.
+        session.wait(0.2)
+        press(way)
+
+    line = session.expect("options: category ", 5)
+    if shot is not None:
+        session.wait(0.5)
+        session.shot(shot)
+    for _ in range(8):
+        if row in line.split("options: category ", 1)[1].split(":", 1)[1].split():
+            break
+        step("down")
+        line = session.expect("options: category ", 5)
+    else:
+        raise RuntimeError(f"the options have no category with {row}")
+    step("right")
+    while not session.expect("options: row ", 5).endswith(f"options: row {row}"):
+        step("down")
 
 
 def _option_row(session: Session, row: str, key: str) -> None:
@@ -1577,10 +1618,11 @@ def _settings(session: Session, pad: Gamepad) -> None:
     session.shot("play")
     session.key("window", "settings")
     session.expect("options: open for", 10)
-    session.expect("options: row ", 5)
-    session.wait(0.5)
-    session.shot("options")
-    _option_row(session, "hud_size", "Down")
+    def arrow(way: str) -> None:
+        session.press([way.capitalize()])
+        session.wait(0.2)
+
+    _option_category(session, "hud_size", arrow, "options")
     session.press(["Right"])
     session.expect("options: hud_size = ", 5)
     _option_row(session, "layout", "Up")
