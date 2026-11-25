@@ -52,5 +52,13 @@ Built (`patch/oot3d/free_camera.cpp`). Seen on the harness, File 1 as a child:
 Replaced by our own item slots, where LB with A, B, X and Y are slots 8 to 11
 ([pc-controls-hud.md](pc-controls-hud.md)); `chord_items.cpp` is gone from both patches.
 
+## Gyro aim, mouse and controller apart
+User (2026-11-25): "I'll need gyro aim option togglable independent for mouse and controller".
+Two options, both on by default: the mouse turning the game's gyroscope look (`MouseAim`, today
+always on) and a controller's own gyroscope doing the same. The pad's gyroscope is not read yet:
+it needs SDL's gamepad sensor (`SDL_SetGamepadSensorEnabled`, `SDL_SENSOR_GYRO`) turned into
+`PadState::gyro` on the core's axes (docs/app.md, the `gyro` command). The game's own Motion
+Controls stays held on (`patch/mm3d/common_options.cpp`); these two pick what feeds it. Not started.
+
 ## When
 After the title picker; free camera first (OoT3D), then the chord buttons, then the glyphs.
