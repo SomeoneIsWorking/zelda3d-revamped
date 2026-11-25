@@ -57,8 +57,12 @@ and "I don't want these fake overlay things either, everything must be RE based"
 - OoT3D's pause screens (items, gear, map, the save prompt) span the top screen: the book behind
   them across its width, BACK in its corner, their panels in the middle
   (`patch/oot3d/top_touch_screen.cpp`, the decomp's `docs/pause.md`, `inputtest pause-wide`).
-- MM3D's title and file select still show the touch screen as an inset beside the top screen:
-  the same work, the game's own menu laid out across the wide screen, found through its decomp.
+- MM3D's title and file select are the game's touch menus drawn on the top screen, as OoT3D's
+  file select: PRESS START under the logo, file select's list at full size in the middle over the
+  top screen's background (its title bar and the file's plate not drawn), clipped to its 320
+  pixels as the touch screen clipped it, its prompts centred over a dim across the screen. The
+  game hit-tests touches where it draws, so a click on the top screen is a touch at that pixel
+  (`patch/mm3d/top_touch_screen.cpp`, the decomp's `docs/ui.md`, `inputtest files-mm3d`).
 
 Menu is the item screen and not Pause as first decided: the game's Start in play is only OoT3D's
 "Save your progress?" and does nothing visible in MM3D (`ctl-pad1`), while the item screen is

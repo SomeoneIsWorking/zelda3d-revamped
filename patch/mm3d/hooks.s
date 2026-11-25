@@ -112,3 +112,31 @@ actor_update:
     bl _ZN7z3dmods4mm3d11hideBaseHudEv
     pop {r3, lr}
     b kActorUpdateFirstCall
+@ Graph_DrawTopScreen's draw of queue 1 (top_touch_screen.cpp).
+.section .patch.top_queue_1, "ax", %progbits
+    bl _ZN7z3dmods4mm3d13drawTopQueue1EPviS1_
+.section .expect.top_queue_1, "", %progbits
+    .word 0xEB0056C6 @ bl 0x126810
+@ TitleScreen_Draw's tail call queueing PRESS START.
+.section .patch.title_press_start, "ax", %progbits
+    b _ZN7z3dmods4mm3d19drawTitlePressStartEPvS1_ii
+.section .expect.title_press_start, "", %progbits
+    .word 0xEAEF5A8D @ b 0x17EC58
+@ FileSelectScreen_Draw's queueing of the file's details and title bar, which the list replaces, of
+@ the list, and of its prompts (a tail call).
+.section .patch.file_details, "ax", %progbits
+    nop
+.section .expect.file_details, "", %progbits
+    .word 0xEBEF12C9 @ bl 0x17EC58
+.section .patch.file_title_bar, "ax", %progbits
+    nop
+.section .expect.file_title_bar, "", %progbits
+    .word 0xEBEF12C1 @ bl 0x17EC58
+.section .patch.file_list, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawFileListEPvS1_ii
+.section .expect.file_list, "", %progbits
+    .word 0xEBEF129F @ bl 0x17EC58
+.section .patch.file_dialogs, "ax", %progbits
+    b _ZN7z3dmods4mm3d15drawFileDialogsEPvS1_ii
+.section .expect.file_dialogs, "", %progbits
+    .word 0xEAEF1296 @ b 0x17EC58

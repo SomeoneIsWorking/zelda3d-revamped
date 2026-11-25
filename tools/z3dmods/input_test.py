@@ -1534,6 +1534,25 @@ def _pause_wide(session: Session, pad: Gamepad) -> None:
     session.shot("items")
 
 
+def _files_mm3d(session: Session, pad: Gamepad) -> None:
+    """MM3D's title and file select on the single screen, the game's touch menus drawn on the top
+    screen: PRESS START under the logo, the list in the middle; a click on File 1 opens its Start
+    page and a click on Return goes back to the list."""
+    session.wait(30)
+    session.key("name", "a")
+    session.wait(6)
+    session.shot("title")
+    session.key("name", "start")
+    session.wait(8)
+    session.shot("files")
+    session.click_top(200, 66)
+    session.wait(2)
+    session.shot("file-1")
+    session.click_top(57, 222)
+    session.wait(2)
+    session.shot("returned")
+
+
 def _option_row(session: Session, row: str, key: str) -> None:
     """Steps the open options with `key` (Up or Down) until `row` is selected."""
     for _ in range(32):
@@ -1689,6 +1708,7 @@ DIRECT = {"oot3d": _oot3d, "mm3d": _mm3d, "verbs-mm3d": _verbs_mm3d, "gaps": _ga
           "settings": _settings,
           "file-fade": _file_fade,
           "pause-wide": _pause_wide,
+          "files-mm3d": _files_mm3d,
           "interp-turn-mm3d": lambda session, pad: _interp_turn(session, _mm3d_file_1),
           "interp-scenes": lambda session, pad: _interp_scenes(session, pad, _oot3d_file_1, "oot3d-kokiri.json"),
           "interp-scenes-mm3d": lambda session, pad: _interp_scenes(session, pad, _mm3d_file_1,
@@ -1699,7 +1719,7 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
                "autosave-mm3d": "mm3d", "camera": "oot3d", "camera-mm3d": "mm3d", "aim-fast": "oot3d",
                "camera-fast": "oot3d", "camera-mq": "oot3d", "fire": "oot3d", "fire-mm3d": "mm3d",
                "interp": "oot3d", "interp-off": "oot3d", "interp-mm3d": "mm3d", "interp-textures": "oot3d",
-               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d", "settings": "oot3d", "file-fade": "oot3d", "pause-wide": "oot3d",
+               "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d", "settings": "oot3d", "file-fade": "oot3d", "pause-wide": "oot3d", "files-mm3d": "mm3d",
                "interp-scenes": "oot3d", "interp-scenes-mm3d": "mm3d"}
 # The direct scenarios that record every present into presents/ (app --record).
 RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",
@@ -1711,7 +1731,7 @@ PREPARE = {"slots": _oot3d_slots_file, "slots-small": _oot3d_slots_file, "slots-
            "slots-mm3d-small": _mm3d_slots_file, "aim": _oot3d_slots_file, "view-hold": _oot3d_slots_file, "shield-key": lambda cfg, user, out: _oot3d_slots_file(cfg, user, out, aimed_on_y=True), "aim-mm3d": _mm3d_slots_file, "verbs-mm3d": _mm3d_slots_file, "masks-mm3d": _mm3d_slots_file, "gaps": _oot3d_slots_file,
            "notebook-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, notebook=True),
            "map-zoom-mm3d": lambda cfg, user, out: _mm3d_slots_file(cfg, user, out, maps=True),
-           "autosave-mm3d": _mm3d_autosave_file, "camera": _oot3d_slots_file, "camera-mm3d": _mm3d_slots_file,
+           "autosave-mm3d": _mm3d_autosave_file, "files-mm3d": _mm3d_autosave_file, "camera": _oot3d_slots_file, "camera-mm3d": _mm3d_slots_file,
            "aim-fast": lambda cfg, user, out: (_oot3d_slots_file(cfg, user, out), _fast_option(cfg, user, "oot3d")),
            "camera-fast": lambda cfg, user, out: (_oot3d_slots_file(cfg, user, out), _fast_option(cfg, user, "oot3d")),
            "camera-mq": lambda cfg, user, out: _oot3d_slots_file(cfg, user, out, master_quest=True),

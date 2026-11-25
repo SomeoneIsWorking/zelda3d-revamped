@@ -283,16 +283,21 @@ of the game's touch screens (and one for while its HUD visibility hides that scr
 - `top_only` (the game blanks the touch screen, or its HUD visibility hides the main one: an
   area's title card, a cutscene): the top screen alone;
 - `ocarina`: the whole touch screen as a small inset, since the notes play on the top screen;
-- `split`, the app's own (`splitLayout`): the two screens side by side, for the map, the
-  notebook and anything outside play (boot, title, file select).
+- `touch_menus` (outside play: boot, the title, file select): the top screen alone, where the patch
+  has the game draw those touch menus (`patch/mm3d/top_touch_screen.cpp`). Its `touch` rectangle
+  is where the top screen's pixels are the touch screen's own, since the game hit-tests touches
+  where it draws them: a click there touches the same pixel, and the core keeps the touch screen
+  there drawn fully transparent (`custom_second_layer_opacity` 0);
+- `split`, the app's own (`splitLayout`): the two screens side by side, for the map and the
+  notebook.
 
 The install writes the table into `z3d-options.json` as `"screens"`, with the address of the
 game's pointer to the touch screen that is up, the table of play's screens and the HUD visibility
 word (from the decomp, `tools/z3dmods/games.py`). `ScreenOverlay` reads the game after every frame
 and hands the layout to `GameWindow`, which writes the core's custom layout and
 `custom_bottom_pieces` (`placeOverlay`). The mouse goes back through the same pieces
-(`overlayTouch`): a click on a piece touches the touch-screen pixel drawn there, and a click
-between pieces touches nothing. A tool screenshot of the side-by-side layout is cut to the
+(`overlayTouch`): a click on a piece touches the touch-screen pixel drawn there, a click in a
+`touch` rectangle the pixel under it, and a click elsewhere touches nothing. A tool screenshot of the side-by-side layout is cut to the
 screens' extent (800x384 at scale 2).
 
 Seen (`mm-ov3`, scale 3): the Items and Masks menus, and Woodfall Temple's title card with the

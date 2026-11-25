@@ -80,11 +80,20 @@ OverlayLayout parseLayout(const lucent::json::Value &value, const std::string &n
   if (const lucent::json::Value *hud = value.find("hud")) {
     layout.hud = hud->boolean() != nullptr && *hud->boolean();
   }
+  if (const lucent::json::Value *touch = value.find("touch")) {
+    if (!layout.pieces.empty()) {
+      throw std::runtime_error("layout " + name + " has both \"touch\" and pieces");
+    }
+    layout.touch = parseOverlayRect(touch, "layout " + name + ": \"touch\"");
+  }
   return layout;
 }
 
-// The rectangle touches are mapped through: all the pieces' extent.
+// The rectangle touches are mapped through: the touch rectangle, or all the pieces' extent.
 OverlayRect extent(const OverlayLayout &layout) {
+  if (layout.touch) {
+    return *layout.touch;
+  }
   if (layout.pieces.empty()) {
     return {};
   }
@@ -145,21 +154,29 @@ void placeOverlay(unsigned width, unsigned height, const OverlayLayout &layout) 
   values.custom_bottom_y = static_cast<uint16_t>(touch.y);
   values.custom_bottom_width = static_cast<uint16_t>(touch.w);
   values.custom_bottom_height = static_cast<uint16_t>(touch.h);
-  values.custom_second_layer_opacity = 100;
+  // A touch rectangle keeps the touch screen where touches land, drawn fully transparent.
+  values.custom_second_layer_opacity = layout.touch ? 0 : 100;
   values.custom_bottom_pieces.clear();
   for (const OverlayPiece &piece : layout.pieces) {
     const OverlayRect to = place(piece.to);
-    values.custom_bottom_pieces.push_back(
-        {piece.from.x, piece.from.y, piece.from.w, piece.from.h, to.x, to.y, to.w, to.h,
-         piece.radius * to.w / piece.from.w, piece.opacity});
+    values.custom_bottom_pieces.push_back({piece.from.x, piece.from.y, piece.from.w, piece.from.h,
+                                           to.x, to.y, to.w, to.h,
+                                           piece.radius * to.w / piece.from.w, piece.opacity});
   }
 }
 
-std::optional<TouchPoint> overlayTouch(unsigned width, unsigned height,
-                                       const OverlayLayout &layout, float x, float y) {
+std::optional<TouchPoint> overlayTouch(unsigned width, unsigned height, const OverlayLayout &layout,
+                                       float x, float y) {
   const Fit at = fit(width, height);
   const float ux = (x - at.left) / at.unit;
   const float uy = (y - at.top) / at.unit;
+  if (layout.touch) {
+    const OverlayRect &to = *layout.touch;
+    if (ux < to.x || uy < to.y || ux >= to.x + to.w || uy >= to.y + to.h) {
+      return std::nullopt;
+    }
+    return TouchPoint{static_cast<uint16_t>(ux - to.x), static_cast<uint16_t>(uy - to.y)};
+  }
   for (auto piece = layout.pieces.rbegin(); piece != layout.pieces.rend(); ++piece) {
     const OverlayRect &to = piece->to;
     if (ux < to.x || uy < to.y || ux >= to.x + to.w || uy >= to.y + to.h) {
@@ -167,10 +184,10 @@ std::optional<TouchPoint> overlayTouch(unsigned width, unsigned height,
     }
     const float tx = piece->from.x + (ux - to.x) * piece->from.w / to.w;
     const float ty = piece->from.y + (uy - to.y) * piece->from.h / to.h;
-    return TouchPoint{
-        static_cast<uint16_t>(std::clamp(tx, 0.0F, static_cast<float>(Core::kScreenBottomWidth - 1))),
-        static_cast<uint16_t>(
-            std::clamp(ty, 0.0F, static_cast<float>(Core::kScreenBottomHeight - 1)))};
+    return TouchPoint{static_cast<uint16_t>(
+                          std::clamp(tx, 0.0F, static_cast<float>(Core::kScreenBottomWidth - 1))),
+                      static_cast<uint16_t>(
+                          std::clamp(ty, 0.0F, static_cast<float>(Core::kScreenBottomHeight - 1)))};
   }
   return std::nullopt;
 }

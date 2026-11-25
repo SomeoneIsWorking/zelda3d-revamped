@@ -50,18 +50,24 @@ struct OverlayPiece {
 struct OverlayLayout {
   OverlayRect top{0.0F, 0.0F, kOverlayWidth, kOverlayHeight};
   std::vector<OverlayPiece> pieces;
+  // Where the top screen's pixels are the touch screen's own, for a game that draws its touch
+  // screen's menus on the top screen and hit-tests touches there; the touch screen is not shown.
+  std::optional<OverlayRect> touch{};
   // Play's view: our HUD (hud.hpp) is drawn over it.
   bool hud = false;
 };
 
-// The two screens side by side: the layout named "split", and the one before a game's table is read.
+// The two screens side by side: the layout named "split", and the one before a game's table is
+// read.
 [[nodiscard]] OverlayLayout splitLayout();
 
 // [x, y, width, height] of a manifest; `where` names it in the refusal.
-[[nodiscard]] OverlayRect parseOverlayRect(const lucent::json::Value *value, const std::string &where);
+[[nodiscard]] OverlayRect parseOverlayRect(const lucent::json::Value *value,
+                                           const std::string &where);
 
 // A rectangle of the layout's 400x240 in the pixels of a `width` x `height` window.
-[[nodiscard]] OverlayRect overlayWindowRect(unsigned width, unsigned height, const OverlayRect &rect);
+[[nodiscard]] OverlayRect overlayWindowRect(unsigned width, unsigned height,
+                                            const OverlayRect &rect);
 
 // Writes the core's custom layout for a `width` x `height` window.
 void placeOverlay(unsigned width, unsigned height, const OverlayLayout &layout);
