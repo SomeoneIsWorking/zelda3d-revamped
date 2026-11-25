@@ -28,6 +28,17 @@ SECTIONS {
   /* File select's quad places (hooks.s back_lit, back_button), two floats a quad. */
   .patch.back_lit kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBackLit * 8 : { KEEP(*(.patch.back_lit)) }
   .patch.back_button kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBack * 8 : { KEEP(*(.patch.back_button)) }
+  /* The pause screens' (hooks.s <screen>_back_lit, <screen>_back). */
+  .patch.item_back_lit kItemMenuQuadPositions + kItemMenuQuadBackLit * 8 : { KEEP(*(.patch.item_back_lit)) }
+  .patch.item_back kItemMenuQuadPositions + kItemMenuQuadBack * 8 : { KEEP(*(.patch.item_back)) }
+  .patch.gear_back_lit kGearMenuQuadPositions + kGearMenuQuadBackLit * 8 : { KEEP(*(.patch.gear_back_lit)) }
+  .patch.gear_back kGearMenuQuadPositions + kGearMenuQuadBack * 8 : { KEEP(*(.patch.gear_back)) }
+  .patch.map_back_lit kMapMenuQuadPositions + kMapMenuQuadBackLit * 8 : { KEEP(*(.patch.map_back_lit)) }
+  .patch.map_back kMapMenuQuadPositions + kMapMenuQuadBack * 8 : { KEEP(*(.patch.map_back)) }
+  .patch.map_other_back_lit kMapMenuOtherQuadPositions + kMapMenuOtherQuadBackLit * 8 : { KEEP(*(.patch.map_other_back_lit)) }
+  .patch.map_other_back kMapMenuOtherQuadPositions + kMapMenuOtherQuadBack * 8 : { KEEP(*(.patch.map_other_back)) }
+  .patch.save_back_lit kSaveMenuQuadPositions + kSaveMenuQuadBackLit * 8 : { KEEP(*(.patch.save_back_lit)) }
+  .patch.save_back kSaveMenuQuadPositions + kSaveMenuQuadBack * 8 : { KEEP(*(.patch.save_back)) }
   /* The One Screen 891b60e's payload (decomp docs/hud.md): Hud_Submit's visible flag. */
   .patch.base_hud 0x612C84 : { KEEP(*(.patch.base_hud)) }
   /* Minimap_Project's mounted test. */
@@ -36,6 +47,10 @@ SECTIONS {
   .patch.base_file_select_row 0x616400 : { KEEP(*(.patch.base_file_select_row)) }
   .patch.base_file_select_rows 0x616408 : { KEEP(*(.patch.base_file_select_rows)) }
   .patch.base_fade_draw 0x616cc4 : { KEEP(*(.patch.base_fade_draw)) }
+  /* Presentation_Target's viewport for a touch screen it draws on the top screen. */
+  .patch.base_touch_viewport 0x6164cc : { KEEP(*(.patch.base_touch_viewport)) }
+  /* tos_common_backdrop's draw of the touch screen's backdrop. */
+  .patch.base_backdrop_draw 0x6156ec : { KEEP(*(.patch.base_backdrop_draw)) }
   . = PAYLOAD;
   .payload : { KEEP(*(.options)) *(.text*) *(.rodata*) *(.data*) }
   /* The item slots' block the app reads and writes (tools/z3dmods/slot_link.py). */

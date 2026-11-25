@@ -60,6 +60,47 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.back_button, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
+@ The pause screens' BACK and BACK lit (decomp docs/pause.md), the same way.
+.section .patch.item_back_lit, "a", %progbits
+    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
+.section .expect.item_back_lit, "", %progbits
+    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
+.section .patch.item_back, "a", %progbits
+    .float -40.0, 204.0, 0.0, 204.0
+.section .expect.item_back, "", %progbits
+    .float 0.0, 204.0, 40.0, 204.0
+.section .patch.gear_back_lit, "a", %progbits
+    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
+.section .expect.gear_back_lit, "", %progbits
+    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
+.section .patch.gear_back, "a", %progbits
+    .float -40.0, 204.0, 0.0, 204.0
+.section .expect.gear_back, "", %progbits
+    .float 0.0, 204.0, 40.0, 204.0
+.section .patch.map_back_lit, "a", %progbits
+    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0, -40.0, 208.0, -40.0, 224.0
+.section .expect.map_back_lit, "", %progbits
+    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0, 0.0, 208.0, 0.0, 224.0
+.section .patch.map_back, "a", %progbits
+    .float -40.0, 204.0, 0.0, 204.0
+.section .expect.map_back, "", %progbits
+    .float 0.0, 204.0, 40.0, 204.0
+.section .patch.map_other_back_lit, "a", %progbits
+    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
+.section .expect.map_other_back_lit, "", %progbits
+    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
+.section .patch.map_other_back, "a", %progbits
+    .float -40.0, 204.0, 0.0, 204.0
+.section .expect.map_other_back, "", %progbits
+    .float 0.0, 204.0, 40.0, 204.0
+.section .patch.save_back_lit, "a", %progbits
+    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
+.section .expect.save_back_lit, "", %progbits
+    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
+.section .patch.save_back, "a", %progbits
+    .float -40.0, 206.0, 0.0, 206.0
+.section .expect.save_back, "", %progbits
+    .float 0.0, 206.0, 40.0, 206.0
 @ The touch screen's 2D layers (TouchScreen2D_BeginLayer0 to 3): each one's projection, widened
 @ while file select is up.
 .section .patch.touch_projection0, "ax", %progbits
@@ -94,6 +135,18 @@
     bl _ZN7z3dmods5oot3d17touchFadeViewportEiiii
 .section .expect.base_fade_draw, "", %progbits
     .word 0xE12FFF37 @ blx r7 (glViewport)
+@ The One Screen's Presentation_Target binds the top screen's rows 40 to 360 for a touch screen it
+@ draws there (the pause screens); top_touch_screen.cpp takes rows 0 to 400 for a widened one.
+.section .patch.base_touch_viewport, "ax", %progbits
+    bl _ZN7z3dmods5oot3d13touchViewportEiiii
+.section .expect.base_touch_viewport, "", %progbits
+    .word 0xE12FFF3C @ blx ip (glViewport)
+@ tos_common_backdrop's draw of the touch screen's backdrop (r0 the model), spread over x -40 to
+@ 360 while widened.
+.section .patch.base_backdrop_draw, "ax", %progbits
+    bl _ZN7z3dmods5oot3d12drawBackdropEPv
+.section .expect.base_backdrop_draw, "", %progbits
+    .word 0xE12FFF35 @ blx r5 (the model's draw)
 @ The One Screen's Minimap_Project lifts the minimap clear of the game's B button while mounted;
 @ that button is off the top screen (base_b_ring), so the minimap stays where it is on foot.
 .section .patch.base_minimap, "ax", %progbits

@@ -54,9 +54,11 @@ and "I don't want these fake overlay things either, everything must be RE based"
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.
-- MM3D's title and file select still show the touch screen as an inset beside the top screen;
-  OoT3D's menus (Gear among them) keep the 3DS's 4:3 width inside a 16:9 window. Both are the
-  same work: the game's own menu laid out across the wide screen, found through the decomps.
+- OoT3D's pause screens (items, gear, map, the save prompt) span the top screen: the book behind
+  them across its width, BACK in its corner, their panels in the middle
+  (`patch/oot3d/top_touch_screen.cpp`, the decomp's `docs/pause.md`, `inputtest pause-wide`).
+- MM3D's title and file select still show the touch screen as an inset beside the top screen:
+  the same work, the game's own menu laid out across the wide screen, found through its decomp.
 
 Menu is the item screen and not Pause as first decided: the game's Start in play is only OoT3D's
 "Save your progress?" and does nothing visible in MM3D (`ctl-pad1`), while the item screen is
