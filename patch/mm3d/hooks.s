@@ -123,6 +123,15 @@ actor_update:
     bl _ZN7z3dmods4mm3d17drawMessageWindowEPvS1_ii
 .section .expect.message_window, "", %progbits
     .word 0xEB000006 @ bl 0x17EC58
+@ MapScreen_Draw's queueing of its touch page and of the top screen's info (map_screen.cpp).
+.section .patch.map_page, "ax", %progbits
+    bl _ZN7z3dmods4mm3d11drawMapPageEPvS1_ii
+.section .expect.map_page, "", %progbits
+    .word 0xEBEF9FEF @ bl 0x17EC58
+.section .patch.map_info, "ax", %progbits
+    bl _ZN7z3dmods4mm3d11drawMapInfoEPvS1_ii
+.section .expect.map_info, "", %progbits
+    .word 0xEBEF9FD2 @ bl 0x17EC58
 @ The Items and Masks screens' queueing of their touch layouts: each screen's page and cells, and
 @ ItemScreen_DrawCursor's cursors (item_screens.cpp).
 .section .patch.items_page, "ax", %progbits

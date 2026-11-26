@@ -18,6 +18,8 @@ SECTIONS {
   .patch.interpreter_tail kCutsceneRunScript + 0x28 : { KEEP(*(.patch.interpreter_tail)) }
   .patch.camera_follow kCameraFollow : { KEEP(*(.patch.camera_follow)) }
   .patch.interpreter_state1 kCutsceneStartScript + 0x2C : { KEEP(*(.patch.interpreter_state1)) }
+  .patch.map_page kMapScreenDraw + kMapScreenDrawPageCall : { KEEP(*(.patch.map_page)) }
+  .patch.map_info kMapScreenDraw + kMapScreenDrawInfoCall : { KEEP(*(.patch.map_info)) }
   .patch.minimap kMainScreenDraw + 0xCC : { KEEP(*(.patch.minimap)) }
   .patch.items_page kItemScreenDraw + kItemScreenDrawPageCall : { KEEP(*(.patch.items_page)) }
   .patch.items_cell kItemScreenDraw + kItemScreenDrawCellCall : { KEEP(*(.patch.items_cell)) }

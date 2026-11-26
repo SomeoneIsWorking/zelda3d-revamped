@@ -41,7 +41,9 @@ the top screen (`patch/mm3d/item_screens.cpp`), the grid against the app's slots
 left, Return in the corner and the item's description under the grid (`items21`, `inputtest
 masks-mm3d`, `slots-mm3d`). Gear (2026-11-26) is drawn there too, its page in the middle under
 the title bar with Return in the corner and Options under it (`patch/mm3d/gear_screen.cpp`,
-`gear4` to `gear6`). The map, the notebook and the ocarina are still to follow.
+`gear4` to `gear6`). The Map screen's touch page lies over the top screen's map, the loupe under
+the pointer and A's button in the corner (`patch/mm3d/map_screen.cpp`, `map5` to `map8`). The
+notebook and the ocarina are still to follow.
 
 The Bombers' Notebook (table entry 2) is side by side: its list is on the top screen and the entry
 with Return and Schedule on the touch screen (`mm-pad2`). The ocarina's screen is an inset for as
