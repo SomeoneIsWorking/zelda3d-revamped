@@ -162,6 +162,98 @@
     .float 30.0
 .section .expect.item_place_cursor_left, "", %progbits
     .float 11.0
+@ PauseMenus_Init's call of GearMenu_Init: the gear screen's tabs turned down the left edge once it
+@ is built (pause_screens.cpp).
+.section .patch.gear_menu_init, "ax", %progbits
+    bl _ZN7z3dmods5oot3d12initGearMenuEv
+.section .expect.gear_menu_init, "", %progbits
+    .word 0xEB004524 @ bl GearMenu_Init
+@ GearMenu_Update's hit tests of BACK and the tabs: where the gear screen draws them.
+.section .patch.gear_back_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_back_touch0, "", %progbits
+    .word 0xEBFC6C13 @ bl Touch_InRect
+.section .patch.gear_back_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_back_touch1, "", %progbits
+    .word 0xEBFC6AB4 @ bl Touch_InRect
+.section .patch.gear_gear_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_gear_touch0, "", %progbits
+    .word 0xEBFC6C09 @ bl Touch_InRect
+.section .patch.gear_gear_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_gear_touch1, "", %progbits
+    .word 0xEBFC6AA6 @ bl Touch_InRect
+.section .patch.gear_items_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_items_touch0, "", %progbits
+    .word 0xEBFC6BFC @ bl Touch_InRect
+.section .patch.gear_items_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_items_touch1, "", %progbits
+    .word 0xEBFC6AD5 @ bl Touch_InRect
+.section .patch.gear_map_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_map_touch0, "", %progbits
+    .word 0xEBFC6BF0 @ bl Touch_InRect
+.section .patch.gear_map_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
+.section .expect.gear_map_touch1, "", %progbits
+    .word 0xEBFC6A78 @ bl Touch_InRect
+@ The gear screen's tabs' bar, off the screen as item_tab_bar.
+.section .patch.gear_tab_bar, "a", %progbits
+    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
+.section .expect.gear_tab_bar, "", %progbits
+    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
+@ PauseMenus_Init's call of MapMenu_Init: the map's tabs turned down the left edge once it is built
+@ (pause_screens.cpp).
+.section .patch.map_menu_init, "ax", %progbits
+    bl _ZN7z3dmods5oot3d11initMapMenuEv
+.section .expect.map_menu_init, "", %progbits
+    .word 0xEB0053E9 @ bl MapMenu_Init
+@ MapMenu_Update's hit tests of BACK and the tabs: where the map draws them.
+.section .patch.map_back_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_back_touch0, "", %progbits
+    .word 0xEBFC4863 @ bl Touch_InRect
+.section .patch.map_back_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_back_touch1, "", %progbits
+    .word 0xEBFC47E7 @ bl Touch_InRect
+.section .patch.map_map_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_map_touch0, "", %progbits
+    .word 0xEBFC4859 @ bl Touch_InRect
+.section .patch.map_map_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_map_touch1, "", %progbits
+    .word 0xEBFC47CC @ bl Touch_InRect
+.section .patch.map_items_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_items_touch0, "", %progbits
+    .word 0xEBFC484F @ bl Touch_InRect
+.section .patch.map_items_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_items_touch1, "", %progbits
+    .word 0xEBFC480A @ bl Touch_InRect
+.section .patch.map_gear_touch0, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_gear_touch0, "", %progbits
+    .word 0xEBFC4844 @ bl Touch_InRect
+.section .patch.map_gear_touch1, "ax", %progbits
+    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
+.section .expect.map_gear_touch1, "", %progbits
+    .word 0xEBFC478C @ bl Touch_InRect
+@ The map's tabs' bars, under tabs that are down the left edge now: off the screen, as item_tab_bar.
+.section .patch.map_tab_bar, "a", %progbits
+    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
+.section .expect.map_tab_bar, "", %progbits
+    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
+.section .patch.map_other_tab_bar, "a", %progbits
+    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
+.section .expect.map_other_tab_bar, "", %progbits
+    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
 @ ItemMenu_Update's hit tests of BACK and the tabs (decomp pause.md): where our inventory draws them.
 .section .patch.item_back_touch0, "ax", %progbits
     bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii

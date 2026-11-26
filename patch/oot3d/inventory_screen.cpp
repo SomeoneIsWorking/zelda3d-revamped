@@ -2,15 +2,15 @@
 // and layouts over two layouts of ours from the screen's sheet (menu_pieces.hpp, drawn by
 // tools/z3dmods/menu_art.py): a slate panel nine-sliced around the grid and a rounded cell under
 // each of its items. hooks.s moves the screen's own panel and tabs' bar off the screen, BACK into
-// the bottom left corner and the grid between the tabs and the slot column; the tabs are turned a
-// quarter clockwise down the left edge here, their open sides on the screen's edge, and the
-// screen's hit tests of BACK and the tabs ask where they are drawn.
+// the bottom left corner and the grid between the tabs and the slot column; its tabs go down the
+// left edge (pause_tabs.hpp).
 #include "inventory_screen.hpp"
 
 #include "../common/guest.hpp"
 #include "game.hpp"
 #include "menu_layout.hpp"
 #include "menu_pieces.hpp"
+#include "pause_tabs.hpp"
 #include "symbols.hpp"
 
 #include <stdint.h>
@@ -19,30 +19,6 @@ namespace z3dmods::oot3d {
 namespace {
 
 using TextureGetFn = void *(*)(int32_t slot);
-using TouchInRectFn = int32_t (*)(int32_t x, int32_t y, int32_t width, int32_t height,
-                                  int32_t phase);
-
-// A rect in the touch screen's pixels.
-struct Rect {
-  int32_t x;
-  int32_t y;
-  int32_t width;
-  int32_t height;
-};
-
-// A point in the touch screen's pixels.
-struct Point {
-  float x;
-  float y;
-};
-
-// A quad of the item screen's tables, its place and size.
-struct Box {
-  float x;
-  float y;
-  float width;
-  float height;
-};
 
 // The grid's items, without the column of buttons ItemMenu's cursor also reaches.
 inline constexpr int32_t kGridColumns = kItemMenuColumns - 1;
@@ -54,51 +30,6 @@ inline constexpr int32_t kPanelCorner = 12;
 inline constexpr int32_t kPanelPad = 6;
 // How far a cell reaches past its item, a side.
 inline constexpr int32_t kCellMargin = 3;
-// The tabs: Gear, Map and Items, each a face and three frame quads (decomp pause.md), down the
-// left edge from this row.
-inline constexpr uint32_t kTabs = 3;
-inline constexpr uint32_t kTabFrames = 3;
-inline constexpr float kTabsTop = 6.0F;
-// A quad's UVs in QuadBatch.uvs, two floats a corner: top left, top right, bottom left, bottom
-// right, as its corners.
-inline constexpr uint32_t kUvFloats = 2;
-// A quad's four corners, three floats each, in QuadBatch.corners.
-inline constexpr uint32_t kQuadCorners = 4;
-inline constexpr uint32_t kCornerFloats = 3;
-Box tableQuad(uint32_t quad) {
-  const auto *at = reinterpret_cast<const float *>(kItemMenuQuadPositions);
-  const auto *size = reinterpret_cast<const float *>(kItemMenuQuadSizes);
-  return {at[2 * quad], at[2 * quad + 1], size[2 * quad], size[2 * quad + 1]};
-}
-
-// Quad `quad` of a tab whose quads span `tab` in the tables, turned a quarter clockwise about the
-// tab with its turned top left at `at`: its bottom, the open side, faces left.
-void turnQuad(uintptr_t batch, uint32_t quad, const Box &tab, Point at) {
-  const Box was = tableQuad(quad);
-  const float x = at.x + tab.y + tab.height - was.y - was.height;
-  const float y = at.y + was.x - tab.x;
-  auto *corners =
-      reinterpret_cast<volatile float *>(guest::read<uintptr_t>(batch + kQuadBatchCorners) +
-                                         quad * kQuadCorners * kCornerFloats * sizeof(float));
-  const float places[kQuadCorners][2] = {
-      {x, y}, {x + was.height, y}, {x, y + was.width}, {x + was.height, y + was.width}};
-  for (uint32_t corner = 0; corner < kQuadCorners; ++corner) {
-    corners[corner * kCornerFloats] = places[corner][0];
-    corners[corner * kCornerFloats + 1] = places[corner][1];
-  }
-  auto *uvs = reinterpret_cast<volatile float *>(guest::read<uintptr_t>(batch + kQuadBatchUvs) +
-                                                 quad * kQuadCorners * kUvFloats * sizeof(float));
-  // Each turned corner shows the texel of the corner turned onto it.
-  constexpr uint32_t kFrom[kQuadCorners] = {2, 0, 3, 1};
-  float wasUvs[kQuadCorners * kUvFloats];
-  for (uint32_t at = 0; at < kQuadCorners * kUvFloats; ++at) {
-    wasUvs[at] = uvs[at];
-  }
-  for (uint32_t corner = 0; corner < kQuadCorners; ++corner) {
-    uvs[corner * kUvFloats] = wasUvs[kFrom[corner] * kUvFloats];
-    uvs[corner * kUvFloats + 1] = wasUvs[kFrom[corner] * kUvFloats + 1];
-  }
-}
 
 // The grid's item `node`, from its icon's corners; empty until the screen's first update.
 Rect itemRect(int32_t node) {
@@ -135,7 +66,8 @@ public:
     each([&](const MenuLayout &layout) {
       layout.sheet(sheet, sheetSize[0], sheetSize[1]);
     });
-    turnTabs(screen);
+    tabs_.turn(screen, {kItemMenuQuadPositions, kItemMenuQuadSizes, kItemMenuQuadTabs,
+                        kItemMenuQuadTabFrames, kItemMenuQuadBack});
     for (uint32_t cell = 0; cell < kCells; ++cell) {
       cells_.cell(cell, {kMenuPieceCell.u, kMenuPieceCell.v},
                   {kMenuPieceCell.width, kMenuPieceCell.height});
@@ -168,47 +100,11 @@ public:
     });
   }
 
-  // The game's hit test of BACK or a tab, its rect where the game drew it: where we draw it, the
-  // part on the touch screen; a press beside the touch screen touches its edge (the app).
   [[nodiscard]] int32_t touched(const Rect &asked, int32_t phase) const {
-    Box drawn{static_cast<float>(asked.x), static_cast<float>(asked.y),
-              static_cast<float>(asked.width), static_cast<float>(asked.height)};
-    bool tab = false;
-    for (uint32_t index = 0; index < kTabs; ++index) {
-      if (static_cast<int32_t>(tableQuad(kItemMenuQuadTabs + index).x) == asked.x) {
-        drawn = tabs_[index];
-        tab = true;
-      }
-    }
-    if (!tab) {
-      const Box back = tableQuad(kItemMenuQuadBack);
-      const Box end = tableQuad(kItemMenuQuadBack + 1);
-      drawn = {back.x, back.y, end.x + end.width - back.x, back.height};
-    }
-    const float left = drawn.x > 0.0F ? drawn.x : 0.0F;
-    const float right = drawn.x + drawn.width > 0.0F ? drawn.x + drawn.width : 0.0F;
-    return guest::function<TouchInRectFn>(kTouchInRect)(
-        static_cast<int32_t>(left), static_cast<int32_t>(drawn.y),
-        static_cast<int32_t>(right - left), static_cast<int32_t>(drawn.height), phase);
+    return tabs_.touched(asked, phase);
   }
 
 private:
-  // Each tab's face and frames turned down the left edge, in the order they ran along the bottom.
-  void turnTabs(uintptr_t batch) {
-    const float first = tableQuad(kItemMenuQuadTabs).x;
-    for (uint32_t index = 0; index < kTabs; ++index) {
-      const uint32_t face = kItemMenuQuadTabs + index;
-      const Box tab = tableQuad(face);
-      const float left = -kWideMargin;
-      const float top = kTabsTop + tab.x - first;
-      turnQuad(batch, face, tab, {left, top});
-      for (uint32_t frame = 0; frame < kTabFrames; ++frame) {
-        turnQuad(batch, kItemMenuQuadTabFrames + index * kTabFrames + frame, tab, {left, top});
-      }
-      tabs_[index] = {left, top, tab.height, tab.width};
-    }
-  }
-
   // Each of ours, bottom to top.
   template <typename Fn> void each(Fn fn) const {
     fn(panel_);
@@ -238,7 +134,7 @@ private:
     }
   }
 
-  Box tabs_[kTabs] = {};
+  PauseTabs tabs_;
   MenuLayout panel_;
   MenuLayout cells_;
   bool cellsPlaced_ = false;

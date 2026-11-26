@@ -25,6 +25,24 @@ SECTIONS {
   .patch.item_place_cursor_pitch kItemMenuPlaceCursor + kItemMenuPlaceCursorPitch : { KEEP(*(.patch.item_place_cursor_pitch)) }
   .patch.item_place_cursor_top kItemMenuPlaceCursor + kItemMenuPlaceCursorTop : { KEEP(*(.patch.item_place_cursor_top)) }
   .patch.item_place_cursor_left kItemMenuPlaceCursor + kItemMenuPlaceCursorLeft : { KEEP(*(.patch.item_place_cursor_left)) }
+  .patch.gear_menu_init kPauseMenusInit + kPauseMenusGearMenuInitCall : { KEEP(*(.patch.gear_menu_init)) }
+  .patch.gear_back_touch0 kGearMenuUpdate + kGearMenuBackTouchCall0 : { KEEP(*(.patch.gear_back_touch0)) }
+  .patch.gear_back_touch1 kGearMenuUpdate + kGearMenuBackTouchCall1 : { KEEP(*(.patch.gear_back_touch1)) }
+  .patch.gear_gear_touch0 kGearMenuUpdate + kGearMenuGearTouchCall0 : { KEEP(*(.patch.gear_gear_touch0)) }
+  .patch.gear_gear_touch1 kGearMenuUpdate + kGearMenuGearTouchCall1 : { KEEP(*(.patch.gear_gear_touch1)) }
+  .patch.gear_items_touch0 kGearMenuUpdate + kGearMenuItemsTouchCall0 : { KEEP(*(.patch.gear_items_touch0)) }
+  .patch.gear_items_touch1 kGearMenuUpdate + kGearMenuItemsTouchCall1 : { KEEP(*(.patch.gear_items_touch1)) }
+  .patch.gear_map_touch0 kGearMenuUpdate + kGearMenuMapTouchCall0 : { KEEP(*(.patch.gear_map_touch0)) }
+  .patch.gear_map_touch1 kGearMenuUpdate + kGearMenuMapTouchCall1 : { KEEP(*(.patch.gear_map_touch1)) }
+  .patch.map_menu_init kPauseMenusInit + kPauseMenusMapMenuInitCall : { KEEP(*(.patch.map_menu_init)) }
+  .patch.map_back_touch0 kMapMenuUpdate + kMapMenuBackTouchCall0 : { KEEP(*(.patch.map_back_touch0)) }
+  .patch.map_back_touch1 kMapMenuUpdate + kMapMenuBackTouchCall1 : { KEEP(*(.patch.map_back_touch1)) }
+  .patch.map_map_touch0 kMapMenuUpdate + kMapMenuMapTouchCall0 : { KEEP(*(.patch.map_map_touch0)) }
+  .patch.map_map_touch1 kMapMenuUpdate + kMapMenuMapTouchCall1 : { KEEP(*(.patch.map_map_touch1)) }
+  .patch.map_items_touch0 kMapMenuUpdate + kMapMenuItemsTouchCall0 : { KEEP(*(.patch.map_items_touch0)) }
+  .patch.map_items_touch1 kMapMenuUpdate + kMapMenuItemsTouchCall1 : { KEEP(*(.patch.map_items_touch1)) }
+  .patch.map_gear_touch0 kMapMenuUpdate + kMapMenuGearTouchCall0 : { KEEP(*(.patch.map_gear_touch0)) }
+  .patch.map_gear_touch1 kMapMenuUpdate + kMapMenuGearTouchCall1 : { KEEP(*(.patch.map_gear_touch1)) }
   .patch.item_back_touch0 kItemMenuUpdate + kItemMenuBackTouchCall0 : { KEEP(*(.patch.item_back_touch0)) }
   .patch.item_back_touch1 kItemMenuUpdate + kItemMenuBackTouchCall1 : { KEEP(*(.patch.item_back_touch1)) }
   .patch.item_back_touch2 kItemMenuUpdate + kItemMenuBackTouchCall2 : { KEEP(*(.patch.item_back_touch2)) }
@@ -69,6 +87,9 @@ SECTIONS {
   .patch.item_back kItemMenuQuadPositions + kItemMenuQuadBack * 8 : { KEEP(*(.patch.item_back)) }
   .patch.gear_back_lit kGearMenuQuadPositions + kGearMenuQuadBackLit * 8 : { KEEP(*(.patch.gear_back_lit)) }
   .patch.gear_back kGearMenuQuadPositions + kGearMenuQuadBack * 8 : { KEEP(*(.patch.gear_back)) }
+  .patch.gear_tab_bar kGearMenuQuadPositions + kGearMenuQuadTabBar * 8 : { KEEP(*(.patch.gear_tab_bar)) }
+  .patch.map_tab_bar kMapMenuQuadPositions + kMapMenuQuadTabBar * 8 : { KEEP(*(.patch.map_tab_bar)) }
+  .patch.map_other_tab_bar kMapMenuOtherQuadPositions + kMapMenuOtherQuadTabBar * 8 : { KEEP(*(.patch.map_other_tab_bar)) }
   .patch.map_back_lit kMapMenuQuadPositions + kMapMenuQuadBackLit * 8 : { KEEP(*(.patch.map_back_lit)) }
   .patch.map_back kMapMenuQuadPositions + kMapMenuQuadBack * 8 : { KEEP(*(.patch.map_back)) }
   .patch.map_other_back_lit kMapMenuOtherQuadPositions + kMapMenuOtherQuadBackLit * 8 : { KEEP(*(.patch.map_other_back_lit)) }

@@ -69,12 +69,13 @@ and "I don't want these fake overlay things either, everything must be RE based"
   our pieces in the screen's own sheet, with the game's BACK, tabs, cursor and items on top
   (`patch/oot3d/inventory_screen.cpp`, `tools/z3dmods/menu_art.py`). The book shows behind it, the tabs are turned a quarter down the left edge with their
   open sides on the screen's edge ("rotate the tabs on the bottom 90 and place them on the left";
-  hung along the top their open sides floated), BACK stays in the bottom left corner and the grid
-  fills the space up to the slot column (hooks.s `item_*_pitch`/`_left`/`_top`, decomp
+  hung along the top their open sides floated), the gear and map screens' tabs the same ("Map
+  should have the same tab layout"; `patch/oot3d/pause_tabs.cpp`, `pause_screens.cpp`), BACK stays
+  in the bottom left corner and the grid fills the space up to the slot column (hooks.s `item_*_pitch`/`_left`/`_top`, decomp
   `docs/pause.md`). The game's hit tests of BACK and the tabs ask where they are drawn, and the app
   turns a press beside the touch screen into a touch on its edge column (`GameWindow::pressBeside`).
   The game's panel, which ended flat above BACK and the tabs ("the items border cuts short"), and
-  its tabs' bar are off the screen. `inputtest pause-wide` clicks a cell, BACK and the Map tab.
+  its tabs' bar are off the screen. `inputtest pause-wide` clicks a cell, BACK, the Map tab and the map's Gear tab.
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.

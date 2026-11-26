@@ -1519,8 +1519,8 @@ def _pause_wide(session: Session, pad: Gamepad) -> None:
     """OoT3D's pause screens on the widened top screen: the save prompt's book fills it and BACK
     sits in its corner; B closes it; the item screen is as wide, our inventory between the tabs
     down the left edge and the slot column: a click on a cell moves the cursor there, a click on
-    BACK in the corner closes it and a click on the Map tab, past the touch screen's edge, opens
-    the map."""
+    BACK in the corner closes it, a click on the Map tab, past the touch screen's edge, opens the
+    map, and there a click on its own Gear tab, down the same edge, opens the gear screen."""
     _oot3d_file_1(session)
     session.key("play", "pause")
     session.wait(2)
@@ -1542,6 +1542,9 @@ def _pause_wide(session: Session, pad: Gamepad) -> None:
     session.click_top(15, 90)
     session.wait(2)
     session.shot("map")
+    session.click_top(15, 30)
+    session.wait(2)
+    session.shot("gear")
 
 
 def _files_mm3d(session: Session, pad: Gamepad) -> None:
