@@ -20,10 +20,12 @@ inline constexpr uint8_t kCsStateRunning = 2;
 // R_UPDATE_RATE is SREG(30): the frame-rate divisor.
 inline constexpr uint32_t kUpdateRate = kGameInfoData + sizeof(int16_t) * (kRegsPerGroup + 30);
 
-// The touch screen's width and the top screen's, in pixels. While a menu is widened the touch
-// screen's projection spans x -kWideMargin to 320 + kWideMargin (top_touch_screen.cpp).
+// The touch screen's width, the top screen's and the touch screen's height, in pixels. While a
+// menu is widened the touch screen's projection spans x -kWideMargin to 320 + kWideMargin
+// (top_touch_screen.cpp).
 inline constexpr float kTouchWidth = 320.0F;
 inline constexpr float kTopWidth = 400.0F;
+inline constexpr float kTouchHeight = 240.0F;
 inline constexpr float kWideMargin = (kTopWidth - kTouchWidth) / 2;
 
 // The One Screen 891b60e's Ocarina_Draw: its copy of the ocarina's screen on the top screen

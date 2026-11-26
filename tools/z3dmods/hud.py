@@ -4,7 +4,8 @@ A base mod that edits a vanilla texture changes its Azahar hash, so the texture 
 copy of the vanilla texture no longer applies. Each replacement starts from that copy and redoes the
 mod's edits at the pack's scale, as an edit table lists them (sets/hud/*.json): re-lettered areas keep
 the pack's vanilla art, moved art is copied, new lettering is drawn in port-assets' key font, and
-the 3DS button prompts the mod leaves become port-assets' Xbox pad glyphs. The result is named after
+the 3DS button prompts the mod leaves become port-assets' Xbox pad glyphs, and a "ui" cell is one of
+our own menu pieces (menu_art.py). The result is named after
 the mod's texture, so the pack covers the mod's version too.
 
 With no base mod behind a texture (MM3D) only the prompts change, and the replacement carries the
@@ -30,7 +31,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from typing import TYPE_CHECKING
 
-from z3dmods import ctr, ctxb, gar, glyphs, pica_texture
+from z3dmods import ctr, ctxb, gar, glyphs, menu_art, pica_texture
 from z3dmods.texture_pack import TexturePack
 
 if TYPE_CHECKING:
@@ -310,7 +311,7 @@ def compose(texture: Texture, edits: list[dict], others: dict[str, Texture], fon
     draw = ImageDraw.Draw(covered)
     clear = (0, 0, 0, 0)
     for edit in edits:
-        kind = next(k for k in ("keep", "copy", "clear", "label", "relabel", "shell", "dpad", "glyph", "chord", "art")
+        kind = next(k for k in ("keep", "copy", "clear", "label", "relabel", "shell", "dpad", "glyph", "chord", "art", "ui")
                     if k in edit)
         box = edit["box"] if "box" in edit else edit[kind]
         draw.rectangle((box[0], box[1], box[2] - 1, box[3] - 1), fill=255)
@@ -367,6 +368,9 @@ def compose(texture: Texture, edits: list[dict], others: dict[str, Texture], fon
         elif kind == "art":
             out.paste(clear, (x0, y0, x1, y1))
             out.alpha_composite(_glyph(size, art / f"{edit['art']}.svg", False), (x0, y0))
+        elif kind == "ui":
+            out.paste(clear, (x0, y0, x1, y1))
+            out.alpha_composite(menu_art.draw(edit, size), (x0, y0))
         elif kind == "dpad":
             colour = _dominant(texture.modded.crop(tuple(box)))
             out.paste(clear, (x0, y0, x1, y1))

@@ -79,7 +79,7 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
-@ The item screen's panel without its dark last two rows: item_panel.cpp carries it on below.
+@ The item screen's panel without its dark last two rows: inventory_screen.cpp carries it on below.
 .section .patch.item_panel_size, "a", %progbits
     .float 124.0, 198.0, 124.0, 198.0
 .section .expect.item_panel_size, "", %progbits
@@ -111,7 +111,7 @@
     bl _ZN7z3dmods5oot3d14updateItemGridEPv
 .section .expect.item_grid_update, "", %progbits
     .word 0xEBFB0D54 @ bl HudItemButtons_UpdateAmmo
-@ ItemMenu_Draw's draw of the screen's model: the panel's foot is drawn under it.
+@ ItemMenu_Draw's draw of the screen's model: inventory_screen.cpp draws under it.
 .section .patch.item_menu_draw_model, "ax", %progbits
     bl item_menu_draw_model
 .section .expect.item_menu_draw_model, "", %progbits
@@ -282,7 +282,7 @@ song_list_width:
 @ r0 is the screen's model; its draw is tail-called with the site's return address.
 item_menu_draw_model:
     push {r0, lr}
-    bl _ZN7z3dmods5oot3d17drawItemPanelFootEv
+    bl _ZN7z3dmods5oot3d19drawInventoryScreenEv
     pop {r0, lr}
     ldr r1, [r0]
     ldr r1, [r1, #12]

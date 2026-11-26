@@ -12,7 +12,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from z3dmods import config, ips, options, slot_link, slot_places, symbols
+from z3dmods import config, ips, menu_pieces, options, slot_link, slot_places, symbols
 
 CODE_BASE = 0x00100000
 SHT_PROGBITS, SHT_NOBITS, SHF_ALLOC = 1, 8, 2
@@ -106,6 +106,7 @@ def build(repo: Path, game: str, payload: int, build_dir: Path) -> Patch:
     options.generate(repo, game, generated.header.parent)
     slot_link.generate(generated.header.parent)
     slot_places.generate(repo, game, generated.header.parent)
+    menu_pieces.generate(repo, game, generated.header.parent)
     objects = []
     for path in sorted(source.glob("*.cpp")) + sorted(source.glob("*.s")):
         obj = build_dir / (path.name + ".o")
