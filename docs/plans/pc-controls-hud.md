@@ -51,6 +51,10 @@ and "I don't want these fake overlay things either, everything must be RE based"
   tile's X screen) over it; Esc, View or B go back and the same game plays on, a layout or
   resolution change remaking its screens around it (`inputtest settings`). The game's own Start
   moved to Enter (Pause in play, Start outside it); the pad's map and Select moved to LB with View.
+- OoT3D's item screen still has the app's slot panel over the game's column of item buttons. The
+  column's stone is quads 12 to 24 of the item screen's table and moves with it, but its four
+  letters are drawn from places not found yet (decomp `docs/pause.md`, "Their quads"); without the
+  panel they would float beside the rings, so the panel stays until they are found.
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.
