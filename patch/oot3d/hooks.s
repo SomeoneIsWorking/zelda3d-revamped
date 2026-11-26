@@ -88,6 +88,16 @@
     .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
 .section .expect.item_tab_bar, "", %progbits
     .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
+@ The Map tab's cell from a texel lower: its top row took in the Gear tab's art just above it in the
+@ sheet, a thin line over the tab that the tabs' bar hid.
+.section .patch.item_map_tab_cell, "a", %progbits
+    .float 138.0, 223.0
+.section .expect.item_map_tab_cell, "", %progbits
+    .float 138.0, 222.0
+.section .patch.item_map_tab_cell_size, "a", %progbits
+    .float 54.0, 33.0
+.section .expect.item_map_tab_cell_size, "", %progbits
+    .float 54.0, 34.0
 @ The item screen's column and its four buttons' frames, off the screen: slot_column.cpp draws its own.
 .section .patch.item_column, "a", %progbits
     .float 1256.0, 0.0

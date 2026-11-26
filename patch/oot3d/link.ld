@@ -38,6 +38,8 @@ SECTIONS {
   .patch.item_back_lit kItemMenuQuadPositions + kItemMenuQuadBackLit * 8 : { KEEP(*(.patch.item_back_lit)) }
   .patch.item_panel kItemMenuQuadPositions + kItemMenuQuadPanel * 8 : { KEEP(*(.patch.item_panel)) }
   .patch.item_tab_bar kItemMenuQuadPositions + kItemMenuQuadTabBar * 8 : { KEEP(*(.patch.item_tab_bar)) }
+  .patch.item_map_tab_cell kItemMenuQuadUvs + (kItemMenuQuadTabs + 1) * 8 : { KEEP(*(.patch.item_map_tab_cell)) }
+  .patch.item_map_tab_cell_size kItemMenuQuadUvSizes + (kItemMenuQuadTabs + 1) * 8 : { KEEP(*(.patch.item_map_tab_cell_size)) }
   .patch.item_column kItemMenuQuadPositions + kItemMenuQuadColumn * 8 : { KEEP(*(.patch.item_column)) }
   .patch.item_back kItemMenuQuadPositions + kItemMenuQuadBack * 8 : { KEEP(*(.patch.item_back)) }
   .patch.gear_back_lit kGearMenuQuadPositions + kGearMenuQuadBackLit * 8 : { KEEP(*(.patch.gear_back_lit)) }
