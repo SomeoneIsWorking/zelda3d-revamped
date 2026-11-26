@@ -7,6 +7,7 @@
 #include "../common/guest.hpp"
 #include "../common/slots.hpp"
 #include "game.hpp"
+#include "item_menu_nodes.hpp"
 #include "play_update.hpp"
 #include "song_player.hpp"
 #include "symbols.hpp"
@@ -72,7 +73,7 @@ public:
     if (store->marker != kStoreMarker) {
       seed(store);
     }
-    const bool child = guest::read<int32_t>(kSaveContext + kSaveLinkAge) == kLinkAgeChild;
+    const bool child = linkIsChild();
     if (lanes_.any() && child != lanesChild_) {
       // The age changed with slots on the lanes: the game put them away as the other age's.
       restore(lanesChild_ ? kSaveChildEquips : kSaveAdultEquips, lanesChild_);
@@ -105,19 +106,10 @@ public:
 
   // A saved file has the layout's own items on the buttons, so it reads the same without the patch.
   void beforeSave() {
-    restore(kSaveEquips, guest::read<int32_t>(kSaveContext + kSaveLinkAge) == kLinkAgeChild);
+    restore(kSaveEquips, linkIsChild());
   }
 
 private:
-  static volatile uint8_t *layout(bool child) {
-    return reinterpret_cast<volatile uint8_t *>(kSaveContext +
-                                                (child ? kSaveItemMenuChild : kSaveItemMenuAdult));
-  }
-
-  static uint8_t itemIn(uint8_t inventorySlot) {
-    return guest::read<uint8_t>(kSaveContext + kSaveInventory + kInventoryItems + inventorySlot);
-  }
-
   // A file new to the slots: the items on the game's four buttons, and the ocarina on Down.
   static void seed(volatile Store *store) {
     Slots table(store->table);
@@ -126,7 +118,7 @@ private:
     }
     for (uint32_t age = 0; age < 2; ++age) {
       const uint32_t first = age * kSlotCount;
-      const volatile uint8_t *nodes = layout(age == 0);
+      const volatile uint8_t *nodes = itemMenuNodes(age == 0);
       constexpr uint8_t kFrom[][2] = {{kSlotY, kItemMenuNodeY},
                                       {kSlotB, kItemMenuNodeX},
                                       {kSlotRB, kItemMenuNodeI},
@@ -153,9 +145,9 @@ private:
     if (node < 0 || node >= kItemMenuNodes) {
       return kNoValue;
     }
-    const uint8_t inventorySlot = layout(child)[node];
-    return inventorySlot < kFirstSong && itemIn(inventorySlot) != kItemNone ? inventorySlot
-                                                                            : kNoValue;
+    const uint8_t inventorySlot = itemMenuNodes(child)[node];
+    return inventorySlot < kFirstSong && inventoryItem(inventorySlot) != kItemNone ? inventorySlot
+                                                                                   : kNoValue;
   }
 
   // The ocarina's song list: the slot value of the song on show; none on one not learned.
@@ -286,15 +278,16 @@ private:
   // The item a slot value uses now: a bottle's contents change, and an item can be gone.
   static uint8_t itemOf(const Slots &table, uint32_t index) {
     const uint8_t inventorySlot = inventorySlotOf(table.get(index));
-    return inventorySlot != kSlotNone ? itemIn(inventorySlot) : static_cast<uint8_t>(kItemNone);
+    return inventorySlot != kSlotNone ? inventoryItem(inventorySlot)
+                                      : static_cast<uint8_t>(kItemNone);
   }
 
   // Gives one lane of an age's equips what that age's layout has on its button.
   static void restore(uint32_t equipsOffset, bool child, uint32_t lane) {
     auto *equips = reinterpret_cast<volatile uint8_t *>(kSaveContext + equipsOffset);
-    const uint8_t inventorySlot = layout(child)[kLanes[lane].node];
+    const uint8_t inventorySlot = itemMenuNodes(child)[kLanes[lane].node];
     equips[kEquipsItems + kLanes[lane].equipsItem] =
-        inventorySlot == kSlotNone ? static_cast<uint8_t>(kItemNone) : itemIn(inventorySlot);
+        inventorySlot == kSlotNone ? static_cast<uint8_t>(kItemNone) : inventoryItem(inventorySlot);
     equips[kEquipsSlots + kLanes[lane].equipsSlot] = inventorySlot;
   }
 

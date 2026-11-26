@@ -11,15 +11,8 @@ SECTIONS {
   .patch.draw_camera kGameplayDraw + 0x808 : { KEEP(*(.patch.draw_camera)) }
   .patch.update_camera kPlayUpdate + 0x1540 : { KEEP(*(.patch.update_camera)) }
   .patch.item_node_position kItemMenuNodePosition : { KEEP(*(.patch.item_node_position)) }
-  .patch.item_update_touch_left kItemMenuUpdateTouch + kItemMenuUpdateTouchLeft : { KEEP(*(.patch.item_update_touch_left)) }
-  .patch.item_update_touch_inverse_pitch kItemMenuUpdateTouch + kItemMenuUpdateTouchInversePitch : { KEEP(*(.patch.item_update_touch_inverse_pitch)) }
-  .patch.item_update_touch_top kItemMenuUpdateTouch + kItemMenuUpdateTouchTop : { KEEP(*(.patch.item_update_touch_top)) }
-  .patch.item_update_touch_pitch kItemMenuUpdateTouch + kItemMenuUpdateTouchPitch : { KEEP(*(.patch.item_update_touch_pitch)) }
-  .patch.item_update_cursor_pitch kItemMenuUpdateCursor + kItemMenuUpdateCursorPitch : { KEEP(*(.patch.item_update_cursor_pitch)) }
-  .patch.item_update_cursor_left kItemMenuUpdateCursor + kItemMenuUpdateCursorLeft : { KEEP(*(.patch.item_update_cursor_left)) }
-  .patch.item_update_cursor_top kItemMenuUpdateCursor + kItemMenuUpdateCursorTop : { KEEP(*(.patch.item_update_cursor_top)) }
-  .patch.item_cursor_right kItemMenuUpdateCursor + kItemMenuCursorRightWrap : { KEEP(*(.patch.item_cursor_right)) }
-  .patch.item_cursor_left kItemMenuUpdateCursor + kItemMenuCursorLeftWrap : { KEEP(*(.patch.item_cursor_left)) }
+  .patch.item_update_touch kItemMenuUpdateTouch : { KEEP(*(.patch.item_update_touch)) }
+  .patch.item_update_cursor kItemMenuUpdateCursor : { KEEP(*(.patch.item_update_cursor)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
   .patch.interpreter_catchup kCutsceneRunScript + 0xF0 : { KEEP(*(.patch.interpreter_catchup)) }
   .patch.interpreter_tail kCutsceneRunScript + 0x120 : { KEEP(*(.patch.interpreter_tail)) }

@@ -107,9 +107,7 @@
     .float 256.0, 0.0
     .float 264.0, 0.0, 272.0, 0.0, 264.0, 184.0, 272.0, 184.0, 266.0, 2.0, 266.0, 186.0
     .float 272.0, 70.0, 296.0, 70.0, 274.0, 72.0, 260.0, 122.0, 284.0, 122.0, 262.0, 124.0
-@ ItemMenu_UpdateCursor: the cursor's column wraps before the buttons' column.
-@ The grid's place, ours in inventory_screen.cpp: ItemMenu_NodePosition and ItemMenu_PlaceCursor
-@ overridden, and the copies of it inside ItemMenu_UpdateCursor and ItemMenu_UpdateTouch.
+@ The grid's place and the game's cursor and stylus on it, ours in item_grid.cpp.
 .section .patch.item_node_position, "ax", %progbits
     b _ZN7z3dmods5oot3d16itemNodePositionEiPfS1_
 .section .expect.item_node_position, "", %progbits
@@ -118,39 +116,19 @@
     b _ZN7z3dmods5oot3d15placeItemCursorEv
 .section .expect.item_place_cursor, "", %progbits
     .word 0xE59F30E4 @ ldr r3, [pc, #228]
+.section .patch.item_update_cursor, "ax", %progbits
+    b _ZN7z3dmods5oot3d16updateItemCursorEv
+.section .expect.item_update_cursor, "", %progbits
+    .word 0xE92D4FF0 @ push {r4-r11, lr}
+.section .patch.item_update_touch, "ax", %progbits
+    b _ZN7z3dmods5oot3d15updateItemTouchEi
+.section .expect.item_update_touch, "", %progbits
+    .word 0xE92D4FF0 @ push {r4-r11, lr}
 @ Touch_InRect overridden: BACK and the tabs where the pause screens draw them (pause_screens.cpp).
 .section .patch.touch_in_rect, "ax", %progbits
     b _ZN7z3dmods5oot3d11touchInRectEiiiii
 .section .expect.touch_in_rect, "", %progbits
     .word 0xE92D0070 @ push {r4, r5, r6}
-.section .patch.item_update_cursor_pitch, "a", %progbits
-    .float 52.0
-.section .expect.item_update_cursor_pitch, "", %progbits
-    .float 48.0
-.section .patch.item_update_cursor_left, "a", %progbits
-    .float 30.0
-.section .expect.item_update_cursor_left, "", %progbits
-    .float 11.0
-.section .patch.item_update_cursor_top, "a", %progbits
-    .float 21.0
-.section .expect.item_update_cursor_top, "", %progbits
-    .float 7.0
-.section .patch.item_update_touch_left, "a", %progbits
-    .float 30.0
-.section .expect.item_update_touch_left, "", %progbits
-    .float 11.0
-.section .patch.item_update_touch_inverse_pitch, "a", %progbits
-    .float 0.0192307692
-.section .expect.item_update_touch_inverse_pitch, "", %progbits
-    .float 0.0208333333
-.section .patch.item_update_touch_top, "a", %progbits
-    .float 21.0
-.section .expect.item_update_touch_top, "", %progbits
-    .float 7.0
-.section .patch.item_update_touch_pitch, "a", %progbits
-    .float 52.0
-.section .expect.item_update_touch_pitch, "", %progbits
-    .float 48.0
 @ PauseMenus_Init's call of GearMenu_Init: the gear screen's tabs turned down the left edge once it
 @ is built (pause_screens.cpp).
 .section .patch.gear_menu_init, "ax", %progbits
@@ -177,14 +155,6 @@
     .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
 .section .expect.map_other_tab_bar, "", %progbits
     .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
-.section .patch.item_cursor_right, "ax", %progbits
-    cmp r0, #5
-.section .expect.item_cursor_right, "", %progbits
-    .word 0xE3500006 @ cmp r0, #6
-.section .patch.item_cursor_left, "ax", %progbits
-    movmi r0, #4
-.section .expect.item_cursor_left, "", %progbits
-    .word 0x43A00005 @ movmi r0, #5
 @ ItemMenu_Update's rebuild of the grid's quads.
 .section .patch.item_grid_update, "ax", %progbits
     bl _ZN7z3dmods5oot3d14updateItemGridEPv
