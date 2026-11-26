@@ -71,8 +71,10 @@ and "I don't want these fake overlay things either, everything must be RE based"
   open sides on the screen's edge ("rotate the tabs on the bottom 90 and place them on the left";
   hung along the top their open sides floated), the gear and map screens' tabs the same ("Map
   should have the same tab layout"; `patch/oot3d/pause_tabs.cpp`, `pause_screens.cpp`), BACK stays
-  in the bottom left corner and the grid fills the space up to the slot column (hooks.s `item_*_pitch`/`_left`/`_top`, decomp
-  `docs/pause.md`). The game's hit tests of BACK and the tabs ask where they are drawn, and the app
+  in the bottom left corner and the grid fills the space up to the slot column (`ItemMenu_NodePosition` and `ItemMenu_PlaceCursor`
+  overridden in `inventory_screen.cpp`; `ItemMenu_UpdateCursor`'s and `ItemMenu_UpdateTouch`'s copies
+  of the grid's place are still literal patches in hooks.s; decomp `docs/pause.md`). `Touch_InRect`
+  is overridden (`pause_screens.cpp`) so a pause screen's BACK and tabs answer where they are drawn, and the app
   turns a press beside the touch screen into a touch on its edge column (`GameWindow::pressBeside`).
   The game's panel, which ended flat above BACK and the tabs ("the items border cuts short"), and
   its tabs' bar are off the screen. `inputtest pause-wide` clicks a cell, BACK, the Map tab and the map's Gear tab.

@@ -10,66 +10,35 @@ SECTIONS {
   .patch.instant_off kMessageLayoutText + 0x1B8 : { KEEP(*(.patch.instant_off)) }
   .patch.draw_camera kGameplayDraw + 0x808 : { KEEP(*(.patch.draw_camera)) }
   .patch.update_camera kPlayUpdate + 0x1540 : { KEEP(*(.patch.update_camera)) }
-  .patch.item_cursor_right kItemMenuUpdateCursor + kItemMenuCursorRightWrap : { KEEP(*(.patch.item_cursor_right)) }
-  .patch.item_cursor_left kItemMenuUpdateCursor + kItemMenuCursorLeftWrap : { KEEP(*(.patch.item_cursor_left)) }
-  .patch.item_node_position_top kItemMenuNodePosition + kItemMenuNodePositionTop : { KEEP(*(.patch.item_node_position_top)) }
-  .patch.item_node_position_pitch kItemMenuNodePosition + kItemMenuNodePositionPitch : { KEEP(*(.patch.item_node_position_pitch)) }
-  .patch.item_node_position_left kItemMenuNodePosition + kItemMenuNodePositionLeft : { KEEP(*(.patch.item_node_position_left)) }
-  .patch.item_update_cursor_pitch kItemMenuUpdateCursor + kItemMenuUpdateCursorPitch : { KEEP(*(.patch.item_update_cursor_pitch)) }
-  .patch.item_update_cursor_left kItemMenuUpdateCursor + kItemMenuUpdateCursorLeft : { KEEP(*(.patch.item_update_cursor_left)) }
-  .patch.item_update_cursor_top kItemMenuUpdateCursor + kItemMenuUpdateCursorTop : { KEEP(*(.patch.item_update_cursor_top)) }
+  .patch.item_node_position kItemMenuNodePosition : { KEEP(*(.patch.item_node_position)) }
   .patch.item_update_touch_left kItemMenuUpdateTouch + kItemMenuUpdateTouchLeft : { KEEP(*(.patch.item_update_touch_left)) }
   .patch.item_update_touch_inverse_pitch kItemMenuUpdateTouch + kItemMenuUpdateTouchInversePitch : { KEEP(*(.patch.item_update_touch_inverse_pitch)) }
   .patch.item_update_touch_top kItemMenuUpdateTouch + kItemMenuUpdateTouchTop : { KEEP(*(.patch.item_update_touch_top)) }
   .patch.item_update_touch_pitch kItemMenuUpdateTouch + kItemMenuUpdateTouchPitch : { KEEP(*(.patch.item_update_touch_pitch)) }
-  .patch.item_place_cursor_pitch kItemMenuPlaceCursor + kItemMenuPlaceCursorPitch : { KEEP(*(.patch.item_place_cursor_pitch)) }
-  .patch.item_place_cursor_top kItemMenuPlaceCursor + kItemMenuPlaceCursorTop : { KEEP(*(.patch.item_place_cursor_top)) }
-  .patch.item_place_cursor_left kItemMenuPlaceCursor + kItemMenuPlaceCursorLeft : { KEEP(*(.patch.item_place_cursor_left)) }
-  .patch.gear_menu_init kPauseMenusInit + kPauseMenusGearMenuInitCall : { KEEP(*(.patch.gear_menu_init)) }
-  .patch.gear_back_touch0 kGearMenuUpdate + kGearMenuBackTouchCall0 : { KEEP(*(.patch.gear_back_touch0)) }
-  .patch.gear_back_touch1 kGearMenuUpdate + kGearMenuBackTouchCall1 : { KEEP(*(.patch.gear_back_touch1)) }
-  .patch.gear_gear_touch0 kGearMenuUpdate + kGearMenuGearTouchCall0 : { KEEP(*(.patch.gear_gear_touch0)) }
-  .patch.gear_gear_touch1 kGearMenuUpdate + kGearMenuGearTouchCall1 : { KEEP(*(.patch.gear_gear_touch1)) }
-  .patch.gear_items_touch0 kGearMenuUpdate + kGearMenuItemsTouchCall0 : { KEEP(*(.patch.gear_items_touch0)) }
-  .patch.gear_items_touch1 kGearMenuUpdate + kGearMenuItemsTouchCall1 : { KEEP(*(.patch.gear_items_touch1)) }
-  .patch.gear_map_touch0 kGearMenuUpdate + kGearMenuMapTouchCall0 : { KEEP(*(.patch.gear_map_touch0)) }
-  .patch.gear_map_touch1 kGearMenuUpdate + kGearMenuMapTouchCall1 : { KEEP(*(.patch.gear_map_touch1)) }
-  .patch.map_menu_init kPauseMenusInit + kPauseMenusMapMenuInitCall : { KEEP(*(.patch.map_menu_init)) }
-  .patch.map_back_touch0 kMapMenuUpdate + kMapMenuBackTouchCall0 : { KEEP(*(.patch.map_back_touch0)) }
-  .patch.map_back_touch1 kMapMenuUpdate + kMapMenuBackTouchCall1 : { KEEP(*(.patch.map_back_touch1)) }
-  .patch.map_map_touch0 kMapMenuUpdate + kMapMenuMapTouchCall0 : { KEEP(*(.patch.map_map_touch0)) }
-  .patch.map_map_touch1 kMapMenuUpdate + kMapMenuMapTouchCall1 : { KEEP(*(.patch.map_map_touch1)) }
-  .patch.map_items_touch0 kMapMenuUpdate + kMapMenuItemsTouchCall0 : { KEEP(*(.patch.map_items_touch0)) }
-  .patch.map_items_touch1 kMapMenuUpdate + kMapMenuItemsTouchCall1 : { KEEP(*(.patch.map_items_touch1)) }
-  .patch.map_gear_touch0 kMapMenuUpdate + kMapMenuGearTouchCall0 : { KEEP(*(.patch.map_gear_touch0)) }
-  .patch.map_gear_touch1 kMapMenuUpdate + kMapMenuGearTouchCall1 : { KEEP(*(.patch.map_gear_touch1)) }
-  .patch.item_back_touch0 kItemMenuUpdate + kItemMenuBackTouchCall0 : { KEEP(*(.patch.item_back_touch0)) }
-  .patch.item_back_touch1 kItemMenuUpdate + kItemMenuBackTouchCall1 : { KEEP(*(.patch.item_back_touch1)) }
-  .patch.item_back_touch2 kItemMenuUpdate + kItemMenuBackTouchCall2 : { KEEP(*(.patch.item_back_touch2)) }
-  .patch.item_items_touch0 kItemMenuUpdate + kItemMenuItemsTouchCall0 : { KEEP(*(.patch.item_items_touch0)) }
-  .patch.item_items_touch1 kItemMenuUpdate + kItemMenuItemsTouchCall1 : { KEEP(*(.patch.item_items_touch1)) }
-  .patch.item_items_touch2 kItemMenuUpdate + kItemMenuItemsTouchCall2 : { KEEP(*(.patch.item_items_touch2)) }
-  .patch.item_gear_touch0 kItemMenuUpdate + kItemMenuGearTouchCall0 : { KEEP(*(.patch.item_gear_touch0)) }
-  .patch.item_gear_touch1 kItemMenuUpdate + kItemMenuGearTouchCall1 : { KEEP(*(.patch.item_gear_touch1)) }
-  .patch.item_gear_touch2 kItemMenuUpdate + kItemMenuGearTouchCall2 : { KEEP(*(.patch.item_gear_touch2)) }
-  .patch.item_map_touch0 kItemMenuUpdate + kItemMenuMapTouchCall0 : { KEEP(*(.patch.item_map_touch0)) }
-  .patch.item_map_touch1 kItemMenuUpdate + kItemMenuMapTouchCall1 : { KEEP(*(.patch.item_map_touch1)) }
-  .patch.item_map_touch2 kItemMenuUpdate + kItemMenuMapTouchCall2 : { KEEP(*(.patch.item_map_touch2)) }
+  .patch.item_update_cursor_pitch kItemMenuUpdateCursor + kItemMenuUpdateCursorPitch : { KEEP(*(.patch.item_update_cursor_pitch)) }
+  .patch.item_update_cursor_left kItemMenuUpdateCursor + kItemMenuUpdateCursorLeft : { KEEP(*(.patch.item_update_cursor_left)) }
+  .patch.item_update_cursor_top kItemMenuUpdateCursor + kItemMenuUpdateCursorTop : { KEEP(*(.patch.item_update_cursor_top)) }
+  .patch.item_cursor_right kItemMenuUpdateCursor + kItemMenuCursorRightWrap : { KEEP(*(.patch.item_cursor_right)) }
+  .patch.item_cursor_left kItemMenuUpdateCursor + kItemMenuCursorLeftWrap : { KEEP(*(.patch.item_cursor_left)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
   .patch.interpreter_catchup kCutsceneRunScript + 0xF0 : { KEEP(*(.patch.interpreter_catchup)) }
   .patch.interpreter_tail kCutsceneRunScript + 0x120 : { KEEP(*(.patch.interpreter_tail)) }
+  .patch.touch_in_rect kTouchInRect : { KEEP(*(.patch.touch_in_rect)) }
+  .patch.song_notes kPadRequestData + 0x98 : { KEEP(*(.patch.song_notes)) }
   .patch.touch_projection3 kTouchScreen2DLayer3 + 0x1B8 : { KEEP(*(.patch.touch_projection3)) }
   .patch.touch_projection2 kTouchScreen2DLayer2 + 0x1F0 : { KEEP(*(.patch.touch_projection2)) }
   .patch.touch_projection1 kTouchScreen2DLayer1 + 0x1C4 : { KEEP(*(.patch.touch_projection1)) }
   .patch.touch_projection0 kTouchScreen2DLayer0 + 0x1CC : { KEEP(*(.patch.touch_projection0)) }
-  .patch.song_notes kPadRequestData + 0x98 : { KEEP(*(.patch.song_notes)) }
   .patch.base_b_ring kTopHudUpdateButtons + 0x40 : { KEEP(*(.patch.base_b_ring)) }
   .patch.base_b_item kTopHudDraw + 0x458 : { KEEP(*(.patch.base_b_item)) }
   .patch.item_grid_update kItemMenuUpdate + kItemMenuUpdateItemsCall : { KEEP(*(.patch.item_grid_update)) }
   .patch.item_menu_draw_model kItemMenuDraw + kItemMenuDrawModelCall : { KEEP(*(.patch.item_menu_draw_model)) }
   .patch.item_menu_draw kItemMenuDraw + kItemMenuDrawLayout40Call : { KEEP(*(.patch.item_menu_draw)) }
+  .patch.item_place_cursor kItemMenuPlaceCursor : { KEEP(*(.patch.item_place_cursor)) }
   .patch.play_update kGameplayUpdate + 0x9C : { KEEP(*(.patch.play_update)) }
   .patch.base_camera kGameplayUpdate + 0xA8 : { KEEP(*(.patch.base_camera)) }
+  .patch.gear_menu_init kPauseMenusInit + kPauseMenusGearMenuInitCall : { KEEP(*(.patch.gear_menu_init)) }
+  .patch.map_menu_init kPauseMenusInit + kPauseMenusMapMenuInitCall : { KEEP(*(.patch.map_menu_init)) }
   .patch.static_cell_glyph kTextRendererFillStatic + 0x80 : { KEEP(*(.patch.static_cell_glyph)) }
   .patch.item_menu_init kItemMenuInit + kItemMenuInitLastCall : { KEEP(*(.patch.item_menu_init)) }
   .patch.arrow_turn_move kTargetDraw + kArrowTurnMove : { KEEP(*(.patch.arrow_turn_move)) }

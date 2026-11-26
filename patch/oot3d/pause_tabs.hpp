@@ -1,7 +1,6 @@
-// The pause screens' tabs (Gear, Map, Items) turned a quarter clockwise down the left edge, their
-// open sides on the screen's edge, and the screens' hit tests of BACK and the tabs asked where
-// they are drawn (decomp docs/pause.md). Each screen layout's batch is turned once, after the game
-// builds it from its tables.
+// A pause screen's tabs (Gear, Map, Items) turned a quarter clockwise down the left edge, their
+// open sides on the screen's edge, and where it draws BACK and them for its hit tests (decomp
+// docs/pause.md). Each screen layout's batch is turned once, after the game builds it.
 #pragma once
 
 #include <stdint.h>
@@ -32,21 +31,25 @@ struct PauseLayout {
   uint32_t back;
 };
 
+// A place and size in the touch screen's pixels.
+struct Box {
+  float x;
+  float y;
+  float width;
+  float height;
+};
+
 class PauseTabs {
 public:
   // Turns the tabs of `batch`, built from `layout`'s tables.
   void turn(uintptr_t batch, const PauseLayout &layout);
-  // A screen's hit test of BACK or a tab, Touch_InRect's rect where the game drew it: where we
-  // draw it, the part on the touch screen; the app touches the edge for a press beside it.
-  [[nodiscard]] int32_t touched(const Rect &asked, int32_t phase) const;
+  // Whether `asked`, a hit test's rect, is a tab's where the game drew it, and then where we draw
+  // that tab, in `drawn`.
+  [[nodiscard]] bool tab(const Rect &asked, Box &drawn) const;
+  // Where we draw BACK.
+  [[nodiscard]] Box back() const;
 
 private:
-  struct Box {
-    float x;
-    float y;
-    float width;
-    float height;
-  };
   static constexpr uint32_t kTabs = 3;
 
   [[nodiscard]] static Box tableQuad(const PauseLayout &layout, uint32_t quad);

@@ -2,14 +2,16 @@
 // and layouts over two layouts of ours from the screen's sheet (menu_pieces.hpp, drawn by
 // tools/z3dmods/menu_art.py): a slate panel nine-sliced around the grid and a rounded cell under
 // each of its items. hooks.s moves the screen's own panel and tabs' bar off the screen, BACK into
-// the bottom left corner and the grid between the tabs and the slot column; its tabs go down the
-// left edge (pause_tabs.hpp).
+// the bottom left corner; the grid's place, between the tabs down the left edge
+// (pause_screens.cpp) and the slot column, is ours: ItemMenu_NodePosition and ItemMenu_PlaceCursor
+// are overridden here (hooks.s item_node_position, item_place_cursor).
 #include "inventory_screen.hpp"
 
 #include "../common/guest.hpp"
 #include "game.hpp"
 #include "menu_layout.hpp"
 #include "menu_pieces.hpp"
+#include "pause_screens.hpp"
 #include "pause_tabs.hpp"
 #include "symbols.hpp"
 
@@ -19,6 +21,35 @@ namespace z3dmods::oot3d {
 namespace {
 
 using TextureGetFn = void *(*)(int32_t slot);
+// MenuCursor_Aim(cursor, column, x, y); the game passes floats in VFP registers.
+// NOLINTNEXTLINE(modernize-use-using): only a typedef takes the calling convention.
+typedef void (*AimFn)(void *cursor, int32_t column, float x, float y)
+    __attribute__((pcs("aapcs-vfp")));
+
+// The grid: node (column, row) at left + pitch * column, top + pitch * row, its icon 42 px.
+inline constexpr float kGridLeft = 30.0F;
+inline constexpr float kGridTop = 21.0F;
+inline constexpr float kGridPitch = 52.0F;
+// The cursor's corners sit this far up and left of the node.
+inline constexpr float kCornersOutside = 2.0F;
+// The game's places of the button nodes, which the slot column replaces: their nodes, where
+// ItemMenu_NodePosition puts them and where ItemMenu_PlaceCursor aims the corners at them.
+struct ButtonNode {
+  int32_t node;
+  float x;
+  float y;
+  float cornersX;
+  float cornersY;
+};
+inline constexpr float kGameGridTop = 7.0F;
+inline constexpr ButtonNode kButtonNodes[] = {{5, 271.0F, kGameGridTop, 269.0F, 5.0F},
+                                              {11, 275.0F, 73.0F, 273.0F, 71.0F},
+                                              {17, 263.0F, 125.0F, 261.0F, 123.0F},
+                                              {23, 271.0F, 191.0F, 269.0F, 189.0F}};
+// Where the corners go while no node is aimed at.
+inline constexpr float kCornersOffX = 400.0F;
+inline constexpr float kCornersOffY = 240.0F;
+inline constexpr int32_t kNoColumn = -1;
 
 // The grid's items, without the column of buttons ItemMenu's cursor also reaches.
 inline constexpr int32_t kGridColumns = kItemMenuColumns - 1;
@@ -66,8 +97,7 @@ public:
     each([&](const MenuLayout &layout) {
       layout.sheet(sheet, sheetSize[0], sheetSize[1]);
     });
-    tabs_.turn(screen, {kItemMenuQuadPositions, kItemMenuQuadSizes, kItemMenuQuadTabs,
-                        kItemMenuQuadTabFrames, kItemMenuQuadBack});
+    turnItemTabs(screen);
     for (uint32_t cell = 0; cell < kCells; ++cell) {
       cells_.cell(cell, {kMenuPieceCell.u, kMenuPieceCell.v},
                   {kMenuPieceCell.width, kMenuPieceCell.height});
@@ -100,10 +130,6 @@ public:
     });
   }
 
-  [[nodiscard]] int32_t touched(const Rect &asked, int32_t phase) const {
-    return tabs_.touched(asked, phase);
-  }
-
 private:
   // Each of ours, bottom to top.
   template <typename Fn> void each(Fn fn) const {
@@ -134,7 +160,6 @@ private:
     }
   }
 
-  PauseTabs tabs_;
   MenuLayout panel_;
   MenuLayout cells_;
   bool cellsPlaced_ = false;
@@ -156,8 +181,42 @@ void drawInventoryScreen() {
   inventoryScreen.draw();
 }
 
-int inventoryTouched(int x, int y, int width, int height, int phase) {
-  return inventoryScreen.touched({x, y, width, height}, phase);
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): ItemMenu_NodePosition's own arguments.
+void itemNodePosition(int node, float *x, float *y) {
+  for (const ButtonNode &button : kButtonNodes) {
+    if (button.node == node) {
+      *x = button.x;
+      *y = button.y;
+      return;
+    }
+  }
+  const int column = node % kItemMenuColumns;
+  const int row = node / kItemMenuColumns;
+  *x = kGridLeft + kGridPitch * static_cast<float>(column);
+  *y = kGridTop + kGridPitch * static_cast<float>(row);
+}
+
+void placeItemCursor() {
+  const auto menu = static_cast<uintptr_t>(kItemMenu);
+  const auto node = guest::read<int32_t>(menu + kItemMenuCursorRow) * kItemMenuColumns +
+                    guest::read<int32_t>(menu + kItemMenuCursorColumn);
+  guest::write(reinterpret_cast<void *>(menu), kItemMenuAimedNode, node);
+  const auto column = guest::read<int32_t>(menu + kItemMenuCornersColumn);
+  auto *cursor = guest::read<void *>(menu + kItemMenuCursor);
+  const auto aim = guest::function<AimFn>(kMenuCursorAim);
+  if (column == kNoColumn) {
+    aim(cursor, column, kCornersOffX, kCornersOffY);
+    return;
+  }
+  for (const ButtonNode &button : kButtonNodes) {
+    if (button.node == node) {
+      aim(cursor, column, button.cornersX, button.cornersY);
+      return;
+    }
+  }
+  const auto row = guest::read<int32_t>(menu + kItemMenuCornersRow);
+  aim(cursor, column, kGridLeft + kGridPitch * static_cast<float>(column) - kCornersOutside,
+      kGridTop + kGridPitch * static_cast<float>(row) - kCornersOutside);
 }
 
 } // namespace z3dmods::oot3d

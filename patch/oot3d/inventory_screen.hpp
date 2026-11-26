@@ -10,8 +10,11 @@ void buildInventoryScreen();
 void updateInventoryScreen(float alpha);
 // Before the item screen's model (hooks.s item_menu_draw_model).
 void drawInventoryScreen();
-// ItemMenu_Update's hit tests of BACK and the tabs (hooks.s item_*_touch*), Touch_InRect's
-// arguments: whether the stylus is on it, where we draw it.
-int inventoryTouched(int x, int y, int width, int height, int phase);
+// ItemMenu_NodePosition, overridden (hooks.s item_node_position): node's place, its icon's top
+// left.
+void itemNodePosition(int node, float *x, float *y);
+// ItemMenu_PlaceCursor, overridden (hooks.s item_place_cursor): the cursor's corners aimed at
+// its node.
+void placeItemCursor();
 
 } // namespace z3dmods::oot3d

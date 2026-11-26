@@ -7,9 +7,6 @@
 namespace z3dmods::oot3d {
 namespace {
 
-using TouchInRectFn = int32_t (*)(int32_t x, int32_t y, int32_t width, int32_t height,
-                                  int32_t phase);
-
 // Each tab's face and three frames.
 inline constexpr uint32_t kTabFrames = 3;
 // The first tab's turned top.
@@ -21,7 +18,7 @@ inline constexpr uint32_t kTurnedFrom[kQuadCorners] = {2, 0, 3, 1};
 
 } // namespace
 
-PauseTabs::Box PauseTabs::tableQuad(const PauseLayout &layout, uint32_t quad) {
+Box PauseTabs::tableQuad(const PauseLayout &layout, uint32_t quad) {
   const auto *at = reinterpret_cast<const float *>(layout.positions);
   const auto *size = reinterpret_cast<const float *>(layout.sizes);
   return {at[2 * quad], at[2 * quad + 1], size[2 * quad], size[2 * quad + 1]};
@@ -70,20 +67,24 @@ void PauseTabs::turn(uintptr_t batch, const PauseLayout &layout) {
   }
 }
 
-int32_t PauseTabs::touched(const Rect &asked, int32_t phase) const {
-  const Box back = tableQuad(layout_, layout_.back);
-  const Box end = tableQuad(layout_, layout_.back + 1);
-  Box drawn{back.x, back.y, end.x + end.width - back.x, back.height};
+// The game hit-tests a tab with its face's place across and its size.
+bool PauseTabs::tab(const Rect &asked, Box &drawn) const {
   for (uint32_t index = 0; index < kTabs; ++index) {
-    if (static_cast<int32_t>(tableQuad(layout_, layout_.faces + index).x) == asked.x) {
+    const Box face = tableQuad(layout_, layout_.faces + index);
+    if (static_cast<int32_t>(face.x) == asked.x &&
+        static_cast<int32_t>(face.width) == asked.width &&
+        static_cast<int32_t>(face.height) == asked.height) {
       drawn = tabs_[index];
+      return true;
     }
   }
-  const float left = drawn.x > 0.0F ? drawn.x : 0.0F;
-  const float right = drawn.x + drawn.width > 0.0F ? drawn.x + drawn.width : 0.0F;
-  return guest::function<TouchInRectFn>(kTouchInRect)(
-      static_cast<int32_t>(left), static_cast<int32_t>(drawn.y), static_cast<int32_t>(right - left),
-      static_cast<int32_t>(drawn.height), phase);
+  return false;
+}
+
+Box PauseTabs::back() const {
+  const Box back = tableQuad(layout_, layout_.back);
+  const Box end = tableQuad(layout_, layout_.back + 1);
+  return {back.x, back.y, end.x + end.width - back.x, back.height};
 }
 
 } // namespace z3dmods::oot3d

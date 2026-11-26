@@ -108,20 +108,21 @@
     .float 264.0, 0.0, 272.0, 0.0, 264.0, 184.0, 272.0, 184.0, 266.0, 2.0, 266.0, 186.0
     .float 272.0, 70.0, 296.0, 70.0, 274.0, 72.0, 260.0, 122.0, 284.0, 122.0, 262.0, 124.0
 @ ItemMenu_UpdateCursor: the cursor's column wraps before the buttons' column.
-@ The grid between the tabs on the left and the slot column (inventory_screen.cpp): the four
-@ functions' copies of its place (decomp ITEM_MENU_NODE_POSITION_TOP and on).
-.section .patch.item_node_position_top, "a", %progbits
-    .float 21.0
-.section .expect.item_node_position_top, "", %progbits
-    .float 7.0
-.section .patch.item_node_position_pitch, "a", %progbits
-    .float 52.0
-.section .expect.item_node_position_pitch, "", %progbits
-    .float 48.0
-.section .patch.item_node_position_left, "a", %progbits
-    .float 30.0
-.section .expect.item_node_position_left, "", %progbits
-    .float 11.0
+@ The grid's place, ours in inventory_screen.cpp: ItemMenu_NodePosition and ItemMenu_PlaceCursor
+@ overridden, and the copies of it inside ItemMenu_UpdateCursor and ItemMenu_UpdateTouch.
+.section .patch.item_node_position, "ax", %progbits
+    b _ZN7z3dmods5oot3d16itemNodePositionEiPfS1_
+.section .expect.item_node_position, "", %progbits
+    .word 0xE350000B @ cmp r0, #11
+.section .patch.item_place_cursor, "ax", %progbits
+    b _ZN7z3dmods5oot3d15placeItemCursorEv
+.section .expect.item_place_cursor, "", %progbits
+    .word 0xE59F30E4 @ ldr r3, [pc, #228]
+@ Touch_InRect overridden: BACK and the tabs where the pause screens draw them (pause_screens.cpp).
+.section .patch.touch_in_rect, "ax", %progbits
+    b _ZN7z3dmods5oot3d11touchInRectEiiiii
+.section .expect.touch_in_rect, "", %progbits
+    .word 0xE92D0070 @ push {r4, r5, r6}
 .section .patch.item_update_cursor_pitch, "a", %progbits
     .float 52.0
 .section .expect.item_update_cursor_pitch, "", %progbits
@@ -150,57 +151,12 @@
     .float 52.0
 .section .expect.item_update_touch_pitch, "", %progbits
     .float 48.0
-.section .patch.item_place_cursor_pitch, "a", %progbits
-    .float 52.0
-.section .expect.item_place_cursor_pitch, "", %progbits
-    .float 48.0
-.section .patch.item_place_cursor_top, "a", %progbits
-    .float 21.0
-.section .expect.item_place_cursor_top, "", %progbits
-    .float 7.0
-.section .patch.item_place_cursor_left, "a", %progbits
-    .float 30.0
-.section .expect.item_place_cursor_left, "", %progbits
-    .float 11.0
 @ PauseMenus_Init's call of GearMenu_Init: the gear screen's tabs turned down the left edge once it
 @ is built (pause_screens.cpp).
 .section .patch.gear_menu_init, "ax", %progbits
     bl _ZN7z3dmods5oot3d12initGearMenuEv
 .section .expect.gear_menu_init, "", %progbits
     .word 0xEB004524 @ bl GearMenu_Init
-@ GearMenu_Update's hit tests of BACK and the tabs: where the gear screen draws them.
-.section .patch.gear_back_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_back_touch0, "", %progbits
-    .word 0xEBFC6C13 @ bl Touch_InRect
-.section .patch.gear_back_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_back_touch1, "", %progbits
-    .word 0xEBFC6AB4 @ bl Touch_InRect
-.section .patch.gear_gear_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_gear_touch0, "", %progbits
-    .word 0xEBFC6C09 @ bl Touch_InRect
-.section .patch.gear_gear_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_gear_touch1, "", %progbits
-    .word 0xEBFC6AA6 @ bl Touch_InRect
-.section .patch.gear_items_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_items_touch0, "", %progbits
-    .word 0xEBFC6BFC @ bl Touch_InRect
-.section .patch.gear_items_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_items_touch1, "", %progbits
-    .word 0xEBFC6AD5 @ bl Touch_InRect
-.section .patch.gear_map_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_map_touch0, "", %progbits
-    .word 0xEBFC6BF0 @ bl Touch_InRect
-.section .patch.gear_map_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11gearTouchedEiiiii
-.section .expect.gear_map_touch1, "", %progbits
-    .word 0xEBFC6A78 @ bl Touch_InRect
 @ The gear screen's tabs' bar, off the screen as item_tab_bar.
 .section .patch.gear_tab_bar, "a", %progbits
     .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
@@ -212,39 +168,6 @@
     bl _ZN7z3dmods5oot3d11initMapMenuEv
 .section .expect.map_menu_init, "", %progbits
     .word 0xEB0053E9 @ bl MapMenu_Init
-@ MapMenu_Update's hit tests of BACK and the tabs: where the map draws them.
-.section .patch.map_back_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_back_touch0, "", %progbits
-    .word 0xEBFC4863 @ bl Touch_InRect
-.section .patch.map_back_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_back_touch1, "", %progbits
-    .word 0xEBFC47E7 @ bl Touch_InRect
-.section .patch.map_map_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_map_touch0, "", %progbits
-    .word 0xEBFC4859 @ bl Touch_InRect
-.section .patch.map_map_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_map_touch1, "", %progbits
-    .word 0xEBFC47CC @ bl Touch_InRect
-.section .patch.map_items_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_items_touch0, "", %progbits
-    .word 0xEBFC484F @ bl Touch_InRect
-.section .patch.map_items_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_items_touch1, "", %progbits
-    .word 0xEBFC480A @ bl Touch_InRect
-.section .patch.map_gear_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_gear_touch0, "", %progbits
-    .word 0xEBFC4844 @ bl Touch_InRect
-.section .patch.map_gear_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10mapTouchedEiiiii
-.section .expect.map_gear_touch1, "", %progbits
-    .word 0xEBFC478C @ bl Touch_InRect
 @ The map's tabs' bars, under tabs that are down the left edge now: off the screen, as item_tab_bar.
 .section .patch.map_tab_bar, "a", %progbits
     .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
@@ -254,55 +177,6 @@
     .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
 .section .expect.map_other_tab_bar, "", %progbits
     .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
-@ ItemMenu_Update's hit tests of BACK and the tabs (decomp pause.md): where our inventory draws them.
-.section .patch.item_back_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_back_touch0, "", %progbits
-    .word 0xEBFC2E14 @ bl Touch_InRect
-.section .patch.item_back_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_back_touch1, "", %progbits
-    .word 0xEBFC2DB6 @ bl Touch_InRect
-.section .patch.item_back_touch2, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_back_touch2, "", %progbits
-    .word 0xEBFC2C84 @ bl Touch_InRect
-.section .patch.item_items_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_items_touch0, "", %progbits
-    .word 0xEBFC2E0A @ bl Touch_InRect
-.section .patch.item_items_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_items_touch1, "", %progbits
-    .word 0xEBFC2DC4 @ bl Touch_InRect
-.section .patch.item_items_touch2, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_items_touch2, "", %progbits
-    .word 0xEBFC2C69 @ bl Touch_InRect
-.section .patch.item_gear_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_gear_touch0, "", %progbits
-    .word 0xEBFC2E00 @ bl Touch_InRect
-.section .patch.item_gear_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_gear_touch1, "", %progbits
-    .word 0xEBFC2DE5 @ bl Touch_InRect
-.section .patch.item_gear_touch2, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_gear_touch2, "", %progbits
-    .word 0xEBFC2C4E @ bl Touch_InRect
-.section .patch.item_map_touch0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_map_touch0, "", %progbits
-    .word 0xEBFC2DF5 @ bl Touch_InRect
-.section .patch.item_map_touch1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_map_touch1, "", %progbits
-    .word 0xEBFC2D9E @ bl Touch_InRect
-.section .patch.item_map_touch2, "ax", %progbits
-    bl _ZN7z3dmods5oot3d16inventoryTouchedEiiiii
-.section .expect.item_map_touch2, "", %progbits
-    .word 0xEBFC2C33 @ bl Touch_InRect
 .section .patch.item_cursor_right, "ax", %progbits
     cmp r0, #5
 .section .expect.item_cursor_right, "", %progbits
