@@ -51,11 +51,15 @@ and "I don't want these fake overlay things either, everything must be RE based"
   tile's X screen) over it; Esc, View or B go back and the same game plays on, a layout or
   resolution change remaking its screens around it (`inputtest settings`). The game's own Start
   moved to Enter (Pause in play, Start outside it); the pad's map and Select moved to LB with View.
-- OoT3D's item screen: the slots sit on the game's own column of stone, moved to the widened
-  screen's right edge, in place of its four buttons; their frames, the items on them, their counts
-  and their letters go off the screen and the cursor stays on the grid
-  (`patch/oot3d/item_column.cpp`; decomp `docs/pause.md`, "Their quads"). The ocarina's song list
-  keeps the app's panel.
+- OoT3D's item screen and song list: the game draws the slots, not the app ("don't draw panels
+  over the game, mod the game to add those panels"). The patch builds layouts of the item screen's
+  own kind: its column of stone at the top screen's right edge, one of its round buttons for each
+  slot with the slot's item and count, and each slot's label from the message text's prompt sheet,
+  which the texture pack draws as the pad's glyph or, while the keyboard is in use, the slot's key.
+  The item screen's own four buttons, their items, counts and letters go off the screen and the
+  cursor stays on the grid. On the song list the same column is drawn after The One Screen's top
+  screen copy of it. Places come from hud.toml's `[[slot]]`s (`patch/oot3d/slot_column.cpp`,
+  `tools/z3dmods/slot_places.py`; decomp `docs/pause.md`, `docs/ocarina.md`).
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.

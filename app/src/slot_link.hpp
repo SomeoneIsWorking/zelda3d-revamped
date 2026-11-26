@@ -67,6 +67,7 @@ private:
     uint32_t charge = 0;
     uint32_t look = 0;
     uint32_t options = 0;
+    uint32_t device = 0;
   };
 
   void update();

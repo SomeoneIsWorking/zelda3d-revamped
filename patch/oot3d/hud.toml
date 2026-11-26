@@ -347,189 +347,129 @@ label = { at = ["gTopHud", "TopHud.doAction"], bytes = 4 }
 rect = [352, 38, 22, 22]
 
 
-# The item screen and the ocarina's song list: every slot at the right edge. A slot's input puts
-# the item under the cursor, or the song on show, on it. On the item screen the slots sit on the
-# game's own column of stone in place of its four buttons (patch/oot3d/item_column.cpp); the song
-# list has a panel.
+# The item screen and the ocarina's song list: every slot at the right edge, drawn by the game
+# (patch/oot3d/slot_column.cpp, from tools/z3dmods/slot_places.py), not the app. A slot's input
+# puts the item under the cursor, or the song on show, on it. Each `[[slot]]` is a stone of the
+# item screen's round buttons with the slot's item and count, on the screen's column of stone,
+# which the patch draws in place of the game's and its four buttons; unless `bare`, its label
+# hangs off its top left corner. Labels are cells of `[slot_labels]`'s sheet (`size` in its
+# pixels), slot n's at `row` plus n cells across; its keyboard image shows each slot's key
+# (sets/hud). A `[[slot_label]]` stands alone.
 
-[[element]]
-kind = "panel"
-frame = "panel"
-assign = true
-rect = [326, 0, 74, 240]
-# OCARINA_SCREEN_SONG_LIST
-when = [{ at = ["gOcarinaScreenState"], bytes = 4, equals = 4 }]
+[slot_labels]
+sheet = "rom:/message/parts.ctxb"
+size = [256, 128]
+cell = 16
+row = [0, 96]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 0
 rect = [354, 12, 22, 22]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 1
 rect = [376, 34, 22, 22]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 2
 rect = [382, 6, 18, 18]
 
-[[element]]
-kind = "prompt"
+# The D-pad's cross.
+[[slot_label]]
 device = "pad"
-assign = true
-glyph = "dpad"
+cell = [128, 16]
 rect = [359, 95, 16, 16]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 bare = true
 slot = 3
 rect = [358, 74, 18, 18]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 bare = true
 slot = 4
 rect = [376, 94, 18, 18]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 bare = true
 slot = 5
 rect = [358, 114, 18, 18]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 bare = true
 slot = 6
 rect = [340, 94, 18, 18]
 
-[[element]]
-kind = "prompt"
+# LB, held for the four slots under it.
+[[slot_label]]
 device = "pad"
-assign = true
-chord = true
-rect = [336, 152, 22, 14]
+cell = [144, 16]
+rect = [339, 151, 16, 16]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 10
 rect = [357, 164, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 9
 rect = [337, 184, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 8
 rect = [377, 184, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "pad"
-frame = "ring"
-assign = true
 slot = 7
 rect = [357, 204, 20, 20]
 
-# The keyboard's slots on the same panel: the number keys down one column. The slots behind the
-# pad's chord have no key.
-
-[[element]]
-kind = "button"
+# The keyboard's: the number keys down one column. The slots behind the pad's chord have no key.
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 0
-rect = [345, 10, 20, 20]
+rect = [358, 10, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 1
-rect = [345, 38, 20, 20]
+rect = [358, 38, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 2
-rect = [345, 66, 20, 20]
+rect = [358, 66, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 3
-rect = [345, 94, 20, 20]
+rect = [358, 94, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 4
-rect = [345, 122, 20, 20]
+rect = [358, 122, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 5
-rect = [345, 150, 20, 20]
+rect = [358, 150, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 6
-rect = [345, 178, 20, 20]
+rect = [358, 178, 20, 20]
 
-[[element]]
-kind = "button"
+[[slot]]
 device = "keyboard"
-frame = "ring"
-assign = true
 slot = 7
-rect = [345, 206, 20, 20]
-
+rect = [358, 206, 20, 20]

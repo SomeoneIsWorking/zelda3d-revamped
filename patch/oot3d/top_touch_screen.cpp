@@ -18,9 +18,6 @@ using SetMatricesFn = void (*)(void *camera, float *projection, const float *vie
 using ViewportFn = void (*)(int x, int y, int width, int height);
 using DrawFn = void (*)(void *model);
 
-// The touch screen's width and the top screen's, in pixels.
-inline constexpr float kTouchWidth = 320.0F;
-inline constexpr float kTopWidth = 400.0F;
 // The projection's row for clip y, of a 4x4 row-major matrix; x is the touch screen's across.
 inline constexpr int kClipYScale = 4;
 inline constexpr int kClipYOffset = 7;
@@ -56,8 +53,7 @@ void touchProjection(void *camera, float *projection, const float *view) {
     // Clip y of x is the game's of x' = (x + margin) * 320 / 400, so x -40 to 360 spans what
     // 0 to 320 did.
     constexpr float squeeze = kTouchWidth / kTopWidth;
-    constexpr float margin = (kTopWidth - kTouchWidth) / 2;
-    projection[kClipYOffset] += projection[kClipYScale] * margin * squeeze;
+    projection[kClipYOffset] += projection[kClipYScale] * kWideMargin * squeeze;
     projection[kClipYScale] *= squeeze;
   }
   guest::function<SetMatricesFn>(kCamera2DSetMatrices)(camera, projection, view);

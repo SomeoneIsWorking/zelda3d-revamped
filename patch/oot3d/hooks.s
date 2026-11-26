@@ -44,6 +44,11 @@
     b kGameplayDraw
 .section .expect.base_camera, "", %progbits
     .word 0xEA070C77 @ b tos_after
+@ The One Screen's Hud_Draw, its ocarina's screen: the song list's slots go over it.
+.section .patch.base_ocarina_draw, "ax", %progbits
+    bl _ZN7z3dmods5oot3d14drawTopOcarinaEv
+.section .expect.base_ocarina_draw, "", %progbits
+    .word 0xEBFFF1D5 @ bl Ocarina_Draw
 @ The One Screen's Hud_Submit: its HUD is never visible; ours is drawn by the app (hud.toml).
 .section .patch.base_hud, "ax", %progbits
     mov r0, #0
@@ -69,10 +74,9 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
-@ The item screen's column (item_column.cpp): its stone at the widened screen's right edge, its four
-@ buttons' frames off the screen.
+@ The item screen's column and its four buttons' frames, off the screen: slot_column.cpp draws its own.
 .section .patch.item_column, "a", %progbits
-    .float 296.0, 0.0
+    .float 1256.0, 0.0
     .float 1264.0, 0.0, 1272.0, 0.0, 1264.0, 184.0, 1272.0, 184.0, 1266.0, 2.0, 1266.0, 186.0
     .float 1272.0, 70.0, 1296.0, 70.0, 1274.0, 72.0, 1260.0, 122.0, 1284.0, 122.0, 1262.0, 124.0
 .section .expect.item_column, "", %progbits
@@ -93,6 +97,16 @@
     bl _ZN7z3dmods5oot3d14updateItemGridEPv
 .section .expect.item_grid_update, "", %progbits
     .word 0xEBFB0D54 @ bl HudItemButtons_UpdateAmmo
+@ ItemMenu_Draw's draw of the layout at +0x40: the slots' layouts are drawn before it.
+.section .patch.item_menu_draw, "ax", %progbits
+    bl _ZN7z3dmods5oot3d14drawItemColumnEPv
+.section .expect.item_menu_draw, "", %progbits
+    .word 0xEBFB0AC8 @ bl HudItemButtons_Draw
+@ ItemMenu_Init's last call: the slots' layouts are built after the screen's.
+.section .patch.item_menu_init, "ax", %progbits
+    bl _ZN7z3dmods5oot3d13resetItemMenuEv
+.section .expect.item_menu_init, "", %progbits
+    .word 0xEBF9FF2F @ bl ItemMenu_Reset
 .section .patch.gear_back_lit, "a", %progbits
     .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
 .section .expect.gear_back_lit, "", %progbits

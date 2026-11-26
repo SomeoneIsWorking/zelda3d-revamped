@@ -31,10 +31,13 @@ FIELDS = (
     Field("look", "int16_t", 2, 2, "app: the mouse's turn of the free camera not yet taken, right then down, in binary angles; the patch takes it and writes 0"),
     Field("draw_fraction", "float", 4, 1, "app: in an in-between's draw, how far it is from the newer tick's in ticks (t - 1); 0 in every real draw"),
     Field("options", "uint8_t", 1, 1, "patch: one more each time the game asks for the app's options in place of its own Options screen"),
+    Field("device", "uint8_t", 1, 1, "app: the HostDevice the player last used, whose slots a screen that assigns them shows"),
 )
 
 # PadMode, in the app's order (app/src/pad_input.hpp).
 MODES = ("ByName", "Play", "Assign")
+# HostDevice, in the app's order (app/src/pad_input.hpp).
+DEVICES = ("Pad", "Keyboard")
 
 
 def _offsets() -> dict[str, int]:
@@ -53,7 +56,8 @@ def generate(out: Path) -> Path:
              f"inline constexpr uint32_t kSlotCount = {SLOTS};",
              "inline constexpr uint8_t kSlotEmpty = 0xFF;",
              "inline constexpr uint8_t kSlotCharged = 0xFF;", "",
-             "enum class PadMode : uint8_t { " + ", ".join(MODES) + " };", "", "struct SlotLink {"]
+             "enum class PadMode : uint8_t { " + ", ".join(MODES) + " };",
+             "enum class HostDevice : uint8_t { " + ", ".join(DEVICES) + " };", "", "struct SlotLink {"]
     for field in FIELDS:
         array = f"[{field.count}]" if field.count > 1 else ""
         lines.append(f"  {field.kind} {field.name}{array}; // {field.comment}")

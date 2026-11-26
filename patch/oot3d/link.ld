@@ -23,9 +23,11 @@ SECTIONS {
   .patch.base_b_ring kTopHudUpdateButtons + 0x40 : { KEEP(*(.patch.base_b_ring)) }
   .patch.base_b_item kTopHudDraw + 0x458 : { KEEP(*(.patch.base_b_item)) }
   .patch.item_grid_update kItemMenuUpdate + kItemMenuUpdateItemsCall : { KEEP(*(.patch.item_grid_update)) }
+  .patch.item_menu_draw kItemMenuDraw + kItemMenuDrawLayout40Call : { KEEP(*(.patch.item_menu_draw)) }
   .patch.play_update kGameplayUpdate + 0x9C : { KEEP(*(.patch.play_update)) }
   .patch.base_camera kGameplayUpdate + 0xA8 : { KEEP(*(.patch.base_camera)) }
   .patch.static_cell_glyph kTextRendererFillStatic + 0x80 : { KEEP(*(.patch.static_cell_glyph)) }
+  .patch.item_menu_init kItemMenuInit + kItemMenuInitLastCall : { KEEP(*(.patch.item_menu_init)) }
   .patch.arrow_turn_move kTargetDraw + kArrowTurnMove : { KEEP(*(.patch.arrow_turn_move)) }
   .patch.arrow_turn_convert kTargetDraw + kArrowTurnConvert : { KEEP(*(.patch.arrow_turn_convert)) }
   /* File select's quad places (hooks.s back_lit, back_button), two floats a quad. */
@@ -45,6 +47,8 @@ SECTIONS {
   .patch.save_back kSaveMenuQuadPositions + kSaveMenuQuadBack * 8 : { KEEP(*(.patch.save_back)) }
   /* The One Screen 891b60e's payload (decomp docs/hud.md): Hud_Submit's visible flag. */
   .patch.base_hud 0x612C84 : { KEEP(*(.patch.base_hud)) }
+  /* Hud_Draw's call of Ocarina_Draw, the song list on the top screen. */
+  .patch.base_ocarina_draw 0x61462C : { KEEP(*(.patch.base_ocarina_draw)) }
   /* Minimap_Project's mounted test. */
   .patch.base_minimap 0x6148C8 : { KEEP(*(.patch.base_minimap)) }
   /* Presentation_Target's file-select pass on the top screen: its viewport's first row and rows. */

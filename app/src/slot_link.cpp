@@ -62,7 +62,7 @@ SlotLink::SlotLink(Emulator &emulator, PadInput &pad, const std::filesystem::pat
                    address(*link, "items", manifest), address(*link, "songs", manifest),
                    address(*link, "lanes", manifest), address(*link, "beat", manifest),
                    address(*link, "charge", manifest), address(*link, "look", manifest),
-                   address(*link, "options", manifest)};
+                   address(*link, "options", manifest), address(*link, "device", manifest)};
   emulator_.onFrame([this] {
     update();
   });
@@ -86,6 +86,7 @@ void SlotLink::update() {
   const uint16_t held = pad_.slotsHeld();
   const std::array<uint8_t, 2> heldBytes{static_cast<uint8_t>(held),
                                          static_cast<uint8_t>(held >> 8)};
+  const std::array<uint8_t, 1> device{static_cast<uint8_t>(pad_.lastDevice())};
   std::array<uint8_t, 1> mode{};
   std::array<uint8_t, kSlotCount> items{};
   std::array<uint8_t, kSlotCount> songs{};
@@ -93,7 +94,8 @@ void SlotLink::update() {
   std::array<uint8_t, 1> beat{};
   std::array<uint8_t, kSlotCount> charge{};
   // A process without the patch's pages (a game still loading) has no slots yet.
-  if (!emulator_.write(layout_->held, heldBytes) || !emulator_.read(layout_->mode, mode) ||
+  if (!emulator_.write(layout_->held, heldBytes) || !emulator_.write(layout_->device, device) ||
+      !emulator_.read(layout_->mode, mode) ||
       !emulator_.read(layout_->items, items) || !emulator_.read(layout_->songs, songs) ||
       !emulator_.read(layout_->lanes, lanes) || !emulator_.read(layout_->beat, beat) ||
       !emulator_.read(layout_->charge, charge) || mode[0] > static_cast<uint8_t>(PadMode::Assign)) {
