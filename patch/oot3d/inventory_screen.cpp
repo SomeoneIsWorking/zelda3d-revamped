@@ -2,8 +2,8 @@
 // and layouts over three layouts of ours from the screen's sheet (menu_pieces.hpp, drawn by
 // tools/z3dmods/menu_art.py): a dark backdrop over the whole widened screen in place of the book,
 // a slate panel nine-sliced around the grid, and a rounded cell under each of the grid's items.
-// hooks.s moves the screen's own panel and tabs' bar off the screen, its BACK to the top left
-// corner, its tabs along the top and the grid down under them.
+// hooks.s moves the screen's own panel and tabs' bar off the screen; its BACK, cornered, and its
+// tabs stay at the bottom, where their art opens onto the screen's edge.
 #include "inventory_screen.hpp"
 
 #include "../common/guest.hpp"

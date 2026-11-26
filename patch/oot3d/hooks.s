@@ -70,43 +70,15 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.back_button, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
-@ The pause screens' BACK and BACK lit (decomp docs/pause.md), the same way; our inventory's in the
-@ top left corner, its tabs along the top (inventory_screen.cpp).
+@ The pause screens' BACK and BACK lit (decomp docs/pause.md), the same way.
 .section .patch.item_back_lit, "a", %progbits
-    .float -40.0, 0.0, 10.0, 0.0, -40.0, 2.0
+    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
 .section .expect.item_back_lit, "", %progbits
     .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
 .section .patch.item_back, "a", %progbits
-    .float -40.0, 2.0, 0.0, 2.0
+    .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
-.section .patch.item_tabs, "a", %progbits
-    .float 66.0, 2.0, 124.0, 2.0, 182.0, 2.0
-.section .expect.item_tabs, "", %progbits
-    .float 66.0, 206.0, 124.0, 206.0, 182.0, 198.0
-.section .patch.item_tab_frames, "a", %progbits
-    .float 66.0, 2.0, 82.0, 2.0, 104.0, 2.0, 124.0, 2.0, 140.0, 2.0, 162.0, 2.0
-    .float 182.0, 2.0, 198.0, 2.0, 238.0, 2.0
-.section .expect.item_tab_frames, "", %progbits
-    .float 66.0, 206.0, 82.0, 206.0, 104.0, 206.0, 124.0, 206.0, 140.0, 206.0, 162.0, 206.0
-    .float 182.0, 198.0, 198.0, 198.0, 238.0, 198.0
-@ The grid's top, under the tabs: its items, cursor, touches and cursor's corners (decomp pause.md).
-.section .patch.item_grid_top, "a", %progbits
-    .float 46.0
-.section .expect.item_grid_top, "", %progbits
-    .float 7.0
-.section .patch.item_cursor_top, "a", %progbits
-    .float 46.0
-.section .expect.item_cursor_top, "", %progbits
-    .float 7.0
-.section .patch.item_touch_top, "a", %progbits
-    .float 46.0
-.section .expect.item_touch_top, "", %progbits
-    .float 7.0
-.section .patch.item_cursor_corners_top, "a", %progbits
-    .float 46.0
-.section .expect.item_cursor_corners_top, "", %progbits
-    .float 7.0
 @ The item screen's panel and the tabs' bar, off the screen: inventory_screen.cpp draws our panel.
 .section .patch.item_panel, "a", %progbits
     .float 1004.0, 0.0, 1128.0, 0.0
@@ -136,56 +108,8 @@
     .float 264.0, 0.0, 272.0, 0.0, 264.0, 184.0, 272.0, 184.0, 266.0, 2.0, 266.0, 186.0
     .float 272.0, 70.0, 296.0, 70.0, 274.0, 72.0, 260.0, 122.0, 284.0, 122.0, 262.0, 124.0
 @ ItemMenu_UpdateCursor: the cursor's column wraps before the buttons' column.
-@ ItemMenu_Update's hit tests of BACK and the tabs (decomp pause.md), moved with their quads; BACK's
-@ to the part of it on the touch screen.
-.section .patch.item_back_touch_y0, "ax", %progbits
-    mov r1, #2
-.section .expect.item_back_touch_y0, "", %progbits
-    .word 0xE3A010CC @ mov r1, #204
-.section .patch.item_back_touch_y1, "ax", %progbits
-    mov r1, #2
-.section .expect.item_back_touch_y1, "", %progbits
-    .word 0xE3A010CC @ mov r1, #204
-.section .patch.item_back_touch_y2, "ax", %progbits
-    mov r1, #2
-.section .expect.item_back_touch_y2, "", %progbits
-    .word 0xE3A010CC @ mov r1, #204
-.section .patch.item_items_touch_y0, "ax", %progbits
-    mov r1, #2
-.section .expect.item_items_touch_y0, "", %progbits
-    .word 0xE3A010C6 @ mov r1, #198
-.section .patch.item_items_touch_y1, "ax", %progbits
-    mov r1, #2
-.section .expect.item_items_touch_y1, "", %progbits
-    .word 0xE3A010C6 @ mov r1, #198
-.section .patch.item_items_touch_y2, "ax", %progbits
-    mov r1, #2
-.section .expect.item_items_touch_y2, "", %progbits
-    .word 0xE3A010C6 @ mov r1, #198
-.section .patch.item_gear_touch_y0, "ax", %progbits
-    mov r1, #0
-.section .expect.item_gear_touch_y0, "", %progbits
-    .word 0xE3A010CC @ mov r1, #204
-.section .patch.item_gear_touch_y1, "ax", %progbits
-    mov r1, #0
-.section .expect.item_gear_touch_y1, "", %progbits
-    .word 0xE3A010CC @ mov r1, #204
-.section .patch.item_gear_touch_y2, "ax", %progbits
-    mov r1, #0
-.section .expect.item_gear_touch_y2, "", %progbits
-    .word 0xE3A010CC @ mov r1, #204
-.section .patch.item_map_touch_y0, "ax", %progbits
-    mov r1, #2
-.section .expect.item_map_touch_y0, "", %progbits
-    .word 0xE3A010CE @ mov r1, #206
-.section .patch.item_map_touch_y1, "ax", %progbits
-    mov r1, #2
-.section .expect.item_map_touch_y1, "", %progbits
-    .word 0xE3A010CE @ mov r1, #206
-.section .patch.item_map_touch_y2, "ax", %progbits
-    mov r1, #2
-.section .expect.item_map_touch_y2, "", %progbits
-    .word 0xE3A010CE @ mov r1, #206
+@ ItemMenu_Update's hit tests of BACK (decomp pause.md): the part of it moved into the corner that is
+@ still on the touch screen.
 .section .patch.item_back_touch_x0, "ax", %progbits
     mov r0, #0
 .section .expect.item_back_touch_x0, "", %progbits
