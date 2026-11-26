@@ -1517,7 +1517,9 @@ def _file_fade(session: Session, pad: Gamepad) -> None:
 
 def _pause_wide(session: Session, pad: Gamepad) -> None:
     """OoT3D's pause screens on the widened top screen: the save prompt's book fills it and BACK
-    sits in its corner; B closes it; the item screen is as wide."""
+    sits in its corner; B closes it; the item screen is as wide, our inventory under the tabs along
+    the top: a click on a cell moves the cursor there, a click on BACK in the corner closes it and
+    a click on the Map tab opens the map."""
     _oot3d_file_1(session)
     session.key("play", "pause")
     session.wait(2)
@@ -1528,6 +1530,17 @@ def _pause_wide(session: Session, pad: Gamepad) -> None:
     session.key("play", "item_screen")
     session.wait(2)
     session.shot("items")
+    session.click_top(170, 170)
+    session.wait(1)
+    session.shot("cell")
+    session.click_top(46, 16)
+    session.wait(2)
+    session.shot("back")
+    session.key("play", "item_screen")
+    session.wait(2)
+    session.click_top(190, 16)
+    session.wait(2)
+    session.shot("map")
 
 
 def _files_mm3d(session: Session, pad: Gamepad) -> None:

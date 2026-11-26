@@ -1,8 +1,9 @@
 // Our inventory. The item screen keeps its own BACK, tabs, cursor and items, drawn by its model
 // and layouts over three layouts of ours from the screen's sheet (menu_pieces.hpp, drawn by
 // tools/z3dmods/menu_art.py): a dark backdrop over the whole widened screen in place of the book,
-// a slate panel nine-sliced where the screen's own panel was (hooks.s item_panel moves that and
-// the tabs' bar off the screen), and a rounded cell under each of the grid's items.
+// a slate panel nine-sliced around the grid, and a rounded cell under each of the grid's items.
+// hooks.s moves the screen's own panel and tabs' bar off the screen, its BACK to the top left
+// corner, its tabs along the top and the grid down under them.
 #include "inventory_screen.hpp"
 
 #include "../common/guest.hpp"
@@ -29,11 +30,11 @@ struct Rect {
 // The grid's items, without the column of buttons ItemMenu's cursor also reaches.
 inline constexpr int32_t kGridColumns = kItemMenuColumns - 1;
 inline constexpr uint32_t kCells = kGridColumns * kItemMenuRows;
-// The panel's nine slices: its corners' side, in the menu's pixels, and its inset from the
-// screen's panel at the top and bottom, clear of the screen's edge and the tabs.
+// The panel's nine slices: its corners' side and how far it reaches past the grid, in the menu's
+// pixels.
 inline constexpr int32_t kSlices = 3;
 inline constexpr int32_t kPanelCorner = 12;
-inline constexpr int32_t kPanelInset = 1;
+inline constexpr int32_t kPanelPad = 6;
 // How far a cell reaches past its item, a side.
 inline constexpr int32_t kCellMargin = 1;
 // A quad's four corners, three floats each, in QuadBatch.corners.
@@ -41,17 +42,6 @@ inline constexpr uint32_t kQuadCorners = 4;
 inline constexpr uint32_t kCornerFloats = 3;
 // The backdrop's cell is sampled this far inside its sides, clear of its neighbours.
 inline constexpr float kBackdropInset = 1.0F;
-// Off the screen by the item_panel patch.
-inline constexpr float kMovedOff = 1000.0F;
-
-// Quad `quad` of the item screen's tables, where the game put it.
-Rect screenQuad(uint32_t quad) {
-  const auto *at = reinterpret_cast<const float *>(kItemMenuQuadPositions);
-  const auto *size = reinterpret_cast<const float *>(kItemMenuQuadSizes);
-  return {static_cast<int32_t>(at[2 * quad] - kMovedOff), static_cast<int32_t>(at[2 * quad + 1]),
-          static_cast<int32_t>(size[2 * quad]), static_cast<int32_t>(size[2 * quad + 1])};
-}
-
 // The grid's item `node`, from its icon's corners; empty until the screen's first update.
 Rect itemRect(int32_t node) {
   const auto items = guest::read<uintptr_t>(kItemMenu + kItemMenuItems);
@@ -92,7 +82,6 @@ public:
                    {kMenuPieceBackdrop.width - 2 * kBackdropInset, kMenuPieceBackdrop.height});
     backdrop_.place(0, -static_cast<int32_t>(kWideMargin), 0, static_cast<int32_t>(kTopWidth),
                     static_cast<int32_t>(kTouchHeight));
-    buildPanel();
     for (uint32_t cell = 0; cell < kCells; ++cell) {
       cells_.cell(cell, {kMenuPieceCell.u, kMenuPieceCell.v},
                   {kMenuPieceCell.width, kMenuPieceCell.height});
@@ -100,9 +89,10 @@ public:
     cellsPlaced_ = false;
   }
 
-  // The grid's places are set in the screen's first update, so its cells go there then.
+  // The grid's places are set in the screen's first update, so its panel and cells go there then.
   void update(float alpha) {
     if (!cellsPlaced_ && itemRect(0).width > 0) {
+      placePanel();
       for (int32_t row = 0; row < kItemMenuRows; ++row) {
         for (int32_t column = 0; column < kGridColumns; ++column) {
           const Rect item = itemRect(row * kItemMenuColumns + column);
@@ -132,15 +122,16 @@ private:
     fn(cells_);
   }
 
-  // Over the screen's panel, its two halves: each slice of the piece stretched between its
-  // corners.
-  void buildPanel() const {
-    const Rect leftHalf = screenQuad(kItemMenuQuadPanel);
-    const Rect rightHalf = screenQuad(kItemMenuQuadPanel + 1);
-    const int32_t top = leftHalf.y + kPanelInset;
-    const int32_t bottom = leftHalf.y + leftHalf.height - kPanelInset;
-    const int32_t right = rightHalf.x + rightHalf.width;
-    const int32_t xs[] = {leftHalf.x, leftHalf.x + kPanelCorner, right - kPanelCorner, right};
+  // Around the grid, from its first item to its last: each slice of the piece stretched between
+  // its corners.
+  void placePanel() const {
+    const Rect first = itemRect(0);
+    const Rect last = itemRect((kItemMenuRows - 1) * kItemMenuColumns + kGridColumns - 1);
+    const int32_t left = first.x - kPanelPad;
+    const int32_t top = first.y - kPanelPad;
+    const int32_t right = last.x + last.width + kPanelPad;
+    const int32_t bottom = last.y + last.height + kPanelPad;
+    const int32_t xs[] = {left, left + kPanelCorner, right - kPanelCorner, right};
     const int32_t ys[] = {top, top + kPanelCorner, bottom - kPanelCorner, bottom};
     const float piece = kMenuPiecePanel.width;
     const float cuts[] = {0.0F, static_cast<float>(kPanelCorner), piece - kPanelCorner, piece};

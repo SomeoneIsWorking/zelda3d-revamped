@@ -54,6 +54,8 @@ inline constexpr float kDigitShare = 0.5F;
 inline constexpr float kDigitHang = 1.0F / 3.0F;
 // A quad's first corner's alpha in QuadBatch.colors: RGBA.
 inline constexpr uint32_t kAlpha = 3 * sizeof(float);
+// A quad's colours in QuadBatch.colors: four corners' RGBA.
+inline constexpr uint32_t kQuadColorBytes = 16 * sizeof(float);
 // A slot's label, as wide as this percent of its ring, hangs a quarter of its side off the
 // ring's top left corner.
 inline constexpr int32_t kLabelPercent = 46;
@@ -255,9 +257,10 @@ void updateItemGrid(void *grid) {
       moveAllOff(guest::read<uintptr_t>(count + kHudCountQuads));
     }
   }
-  // The inventory and the column fade with the grid: its first icon's alpha.
-  const auto alpha =
-      guest::read<float>(guest::read<uintptr_t>(quadsOf(layout) + kQuadBatchColors) + kAlpha);
+  // The inventory and the column fade with the screen: its Gear tab's alpha, a quad always drawn.
+  const auto screen = guest::read<uintptr_t>(kItemMenu + kItemMenuQuads);
+  const auto alpha = guest::read<float>(guest::read<uintptr_t>(screen + kQuadBatchColors) +
+                                        kItemMenuQuadTabs * kQuadColorBytes + kAlpha);
   updateInventoryScreen(alpha);
   slotColumn.update(alpha, -kWideMargin);
 }

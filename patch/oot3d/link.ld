@@ -12,6 +12,28 @@ SECTIONS {
   .patch.update_camera kPlayUpdate + 0x1540 : { KEEP(*(.patch.update_camera)) }
   .patch.item_cursor_right kItemMenuUpdateCursor + kItemMenuCursorRightWrap : { KEEP(*(.patch.item_cursor_right)) }
   .patch.item_cursor_left kItemMenuUpdateCursor + kItemMenuCursorLeftWrap : { KEEP(*(.patch.item_cursor_left)) }
+  .patch.item_grid_top kItemMenuNodePosition + kItemMenuNodePositionTop : { KEEP(*(.patch.item_grid_top)) }
+  .patch.item_touch_top kItemMenuUpdateTouch + kItemMenuUpdateTouchTop : { KEEP(*(.patch.item_touch_top)) }
+  .patch.item_cursor_top kItemMenuUpdateCursor + kItemMenuUpdateCursorTop : { KEEP(*(.patch.item_cursor_top)) }
+  .patch.item_cursor_corners_top kItemMenuPlaceCursor + kItemMenuPlaceCursorTop : { KEEP(*(.patch.item_cursor_corners_top)) }
+  .patch.item_back_touch_y0 kItemMenuUpdate + kItemMenuBackTouchY0 : { KEEP(*(.patch.item_back_touch_y0)) }
+  .patch.item_back_touch_y1 kItemMenuUpdate + kItemMenuBackTouchY1 : { KEEP(*(.patch.item_back_touch_y1)) }
+  .patch.item_back_touch_y2 kItemMenuUpdate + kItemMenuBackTouchY2 : { KEEP(*(.patch.item_back_touch_y2)) }
+  .patch.item_items_touch_y0 kItemMenuUpdate + kItemMenuItemsTouchY0 : { KEEP(*(.patch.item_items_touch_y0)) }
+  .patch.item_items_touch_y1 kItemMenuUpdate + kItemMenuItemsTouchY1 : { KEEP(*(.patch.item_items_touch_y1)) }
+  .patch.item_items_touch_y2 kItemMenuUpdate + kItemMenuItemsTouchY2 : { KEEP(*(.patch.item_items_touch_y2)) }
+  .patch.item_gear_touch_y0 kItemMenuUpdate + kItemMenuGearTouchY0 : { KEEP(*(.patch.item_gear_touch_y0)) }
+  .patch.item_gear_touch_y1 kItemMenuUpdate + kItemMenuGearTouchY1 : { KEEP(*(.patch.item_gear_touch_y1)) }
+  .patch.item_gear_touch_y2 kItemMenuUpdate + kItemMenuGearTouchY2 : { KEEP(*(.patch.item_gear_touch_y2)) }
+  .patch.item_map_touch_y0 kItemMenuUpdate + kItemMenuMapTouchY0 : { KEEP(*(.patch.item_map_touch_y0)) }
+  .patch.item_map_touch_y1 kItemMenuUpdate + kItemMenuMapTouchY1 : { KEEP(*(.patch.item_map_touch_y1)) }
+  .patch.item_map_touch_y2 kItemMenuUpdate + kItemMenuMapTouchY2 : { KEEP(*(.patch.item_map_touch_y2)) }
+  .patch.item_back_touch_x0 kItemMenuUpdate + kItemMenuBackTouchY0 + 4 : { KEEP(*(.patch.item_back_touch_x0)) }
+  .patch.item_back_touch_width0 kItemMenuUpdate + kItemMenuBackTouchY0 - 4 : { KEEP(*(.patch.item_back_touch_width0)) }
+  .patch.item_back_touch_x1 kItemMenuUpdate + kItemMenuBackTouchY1 + 4 : { KEEP(*(.patch.item_back_touch_x1)) }
+  .patch.item_back_touch_width1 kItemMenuUpdate + kItemMenuBackTouchY1 - 4 : { KEEP(*(.patch.item_back_touch_width1)) }
+  .patch.item_back_touch_x2 kItemMenuUpdate + kItemMenuBackTouchY2 + 4 : { KEEP(*(.patch.item_back_touch_x2)) }
+  .patch.item_back_touch_width2 kItemMenuUpdate + kItemMenuBackTouchY2 - 4 : { KEEP(*(.patch.item_back_touch_width2)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
   .patch.interpreter_catchup kCutsceneRunScript + 0xF0 : { KEEP(*(.patch.interpreter_catchup)) }
   .patch.interpreter_tail kCutsceneRunScript + 0x120 : { KEEP(*(.patch.interpreter_tail)) }
@@ -36,6 +58,8 @@ SECTIONS {
   .patch.back_button kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBack * 8 : { KEEP(*(.patch.back_button)) }
   /* The pause screens' (hooks.s <screen>_back_lit, <screen>_back). */
   .patch.item_back_lit kItemMenuQuadPositions + kItemMenuQuadBackLit * 8 : { KEEP(*(.patch.item_back_lit)) }
+  .patch.item_tabs kItemMenuQuadPositions + kItemMenuQuadTabs * 8 : { KEEP(*(.patch.item_tabs)) }
+  .patch.item_tab_frames kItemMenuQuadPositions + kItemMenuQuadTabFrames * 8 : { KEEP(*(.patch.item_tab_frames)) }
   .patch.item_panel kItemMenuQuadPositions + kItemMenuQuadPanel * 8 : { KEEP(*(.patch.item_panel)) }
   .patch.item_tab_bar kItemMenuQuadPositions + kItemMenuQuadTabBar * 8 : { KEEP(*(.patch.item_tab_bar)) }
   .patch.item_map_tab_cell kItemMenuQuadUvs + (kItemMenuQuadTabs + 1) * 8 : { KEEP(*(.patch.item_map_tab_cell)) }

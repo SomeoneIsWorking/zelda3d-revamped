@@ -67,10 +67,12 @@ and "I don't want these fake overlay things either, everything must be RE based"
   screen is our inventory ("make a custom inventory UI", "retain the game's style, especially the
   game's own Back button"): a slate panel with a rounded cell under each item over a dark backdrop,
   our pieces in the screen's own sheet, with the game's BACK, tabs, cursor and items on top
-  (`patch/oot3d/inventory_screen.cpp`, `tools/z3dmods/menu_art.py`). The game's panel, which ended
-  flat above BACK and the tabs ("the items border cuts short"), and its tabs' bar are off the
-  screen. A mirrored bevel along that panel's bottom looked bad, and so did the tab bar stretched
-  under it.
+  (`patch/oot3d/inventory_screen.cpp`, `tools/z3dmods/menu_art.py`). It is laid out as the mockup:
+  BACK in the top left corner, the tabs along the top and the grid under them, its cursor and
+  touches moved with it (hooks.s `item_*_top`, `item_*_touch_*`; decomp `docs/pause.md`). The
+  game's panel, which ended flat above BACK and the tabs ("the items border cuts short"), and its
+  tabs' bar are off the screen. A mirrored bevel along that panel's bottom looked bad, and so did
+  the tab bar stretched under it. `inputtest pause-wide` clicks a cell, BACK and the Map tab.
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.
