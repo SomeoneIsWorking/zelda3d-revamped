@@ -355,7 +355,8 @@ rect = [352, 38, 22, 22]
 # corner. The ring and the labels are cells of `[slot_sheet]`'s sheet (`size` in its pixels): the
 # `ring`, and slot n's label at `labels` plus n cells across, whose keyboard image shows the
 # slot's key (sets/hud). A `[[slot_label]]` stands alone. The pad's keep 6 pixels inside the column
-# (x 336 to 400) and centre on its middle, x 368.
+# (x 336 to 400) and centre on its middle, x 368; their three groups and the keyboard's column
+# spread down the column's height with even gaps.
 
 [slot_sheet]
 sheet = "rom:/message/parts.ctxb"
@@ -383,57 +384,57 @@ rect = [374, 8, 18, 18]
 [[slot_label]]
 device = "pad"
 cell = [128, 16]
-rect = [360, 90, 16, 16]
+rect = [360, 103, 16, 16]
 
 [[slot]]
 device = "pad"
 bare = true
 slot = 3
-rect = [360, 72, 16, 16]
+rect = [360, 85, 16, 16]
 
 [[slot]]
 device = "pad"
 bare = true
 slot = 4
-rect = [376, 90, 16, 16]
+rect = [376, 103, 16, 16]
 
 [[slot]]
 device = "pad"
 bare = true
 slot = 5
-rect = [360, 108, 16, 16]
+rect = [360, 121, 16, 16]
 
 [[slot]]
 device = "pad"
 bare = true
 slot = 6
-rect = [344, 90, 16, 16]
+rect = [344, 103, 16, 16]
 
 # LB, held for the four slots under it.
 [[slot_label]]
 device = "pad"
 cell = [144, 16]
-rect = [342, 140, 16, 16]
+rect = [342, 168, 16, 16]
 
 [[slot]]
 device = "pad"
 slot = 10
-rect = [360, 150, 18, 18]
+rect = [360, 178, 18, 18]
 
 [[slot]]
 device = "pad"
 slot = 9
-rect = [344, 168, 18, 18]
+rect = [344, 196, 18, 18]
 
 [[slot]]
 device = "pad"
 slot = 8
-rect = [376, 168, 18, 18]
+rect = [376, 196, 18, 18]
 
 [[slot]]
 device = "pad"
 slot = 7
-rect = [360, 186, 18, 18]
+rect = [360, 214, 18, 18]
 
 # The keyboard's: the number keys down one column. The slots behind the pad's chord have no key.
 [[slot]]
@@ -444,34 +445,34 @@ rect = [358, 10, 20, 20]
 [[slot]]
 device = "keyboard"
 slot = 1
-rect = [358, 38, 20, 20]
+rect = [358, 39, 20, 20]
 
 [[slot]]
 device = "keyboard"
 slot = 2
-rect = [358, 66, 20, 20]
+rect = [358, 68, 20, 20]
 
 [[slot]]
 device = "keyboard"
 slot = 3
-rect = [358, 94, 20, 20]
+rect = [358, 97, 20, 20]
 
 [[slot]]
 device = "keyboard"
 slot = 4
-rect = [358, 122, 20, 20]
+rect = [358, 126, 20, 20]
 
 [[slot]]
 device = "keyboard"
 slot = 5
-rect = [358, 150, 20, 20]
+rect = [358, 155, 20, 20]
 
 [[slot]]
 device = "keyboard"
 slot = 6
-rect = [358, 178, 20, 20]
+rect = [358, 184, 20, 20]
 
 [[slot]]
 device = "keyboard"
 slot = 7
-rect = [358, 206, 20, 20]
+rect = [358, 213, 20, 20]

@@ -61,7 +61,11 @@ and "I don't want these fake overlay things either, everything must be RE based"
   The item screen's own four buttons, their items, counts and letters go off the screen and the
   cursor stays on the grid. On the song list the same column is drawn after The One Screen's top
   screen copy of it. Places come from hud.toml's `[[slot]]`s (`patch/oot3d/slot_column.cpp`,
-  `tools/z3dmods/slot_places.py`; decomp `docs/pause.md`, `docs/ocarina.md`).
+  `tools/z3dmods/slot_places.py`; decomp `docs/pause.md`, `docs/ocarina.md`). The pad's three
+  groups and the keyboard's column spread down the column's height ("empty space here"), and the
+  song list centres in the space left of the column (hooks.s `base_song_list_width`). With BACK
+  moved into the corner, the item screen's tab bar starts 6 pixels past it, as it does past BACK
+  in the game, so the bar runs under the panel's whole width ("the items border cuts short").
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.

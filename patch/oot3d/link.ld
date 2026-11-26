@@ -35,6 +35,8 @@ SECTIONS {
   .patch.back_button kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBack * 8 : { KEEP(*(.patch.back_button)) }
   /* The pause screens' (hooks.s <screen>_back_lit, <screen>_back). */
   .patch.item_back_lit kItemMenuQuadPositions + kItemMenuQuadBackLit * 8 : { KEEP(*(.patch.item_back_lit)) }
+  .patch.item_tab_bar kItemMenuQuadPositions + kItemMenuQuadTabBar * 8 : { KEEP(*(.patch.item_tab_bar)) }
+  .patch.item_tab_bar_width kItemMenuQuadSizes + (kItemMenuQuadTabBar + 1) * 8 : { KEEP(*(.patch.item_tab_bar_width)) }
   .patch.item_column kItemMenuQuadPositions + kItemMenuQuadColumn * 8 : { KEEP(*(.patch.item_column)) }
   .patch.item_back kItemMenuQuadPositions + kItemMenuQuadBack * 8 : { KEEP(*(.patch.item_back)) }
   .patch.gear_back_lit kGearMenuQuadPositions + kGearMenuQuadBackLit * 8 : { KEEP(*(.patch.gear_back_lit)) }
@@ -45,7 +47,10 @@ SECTIONS {
   .patch.map_other_back kMapMenuOtherQuadPositions + kMapMenuOtherQuadBack * 8 : { KEEP(*(.patch.map_other_back)) }
   .patch.save_back_lit kSaveMenuQuadPositions + kSaveMenuQuadBackLit * 8 : { KEEP(*(.patch.save_back_lit)) }
   .patch.save_back kSaveMenuQuadPositions + kSaveMenuQuadBack * 8 : { KEEP(*(.patch.save_back)) }
-  /* The One Screen 891b60e's payload (decomp docs/hud.md): Hud_Submit's visible flag. */
+  /* The One Screen 891b60e's payload (decomp docs/hud.md). Ocarina_Draw's songs transform: the
+     top screen's width it centres the song list in. */
+  .patch.base_song_list_width 0x610EB0 : { KEEP(*(.patch.base_song_list_width)) }
+  /* Hud_Submit's visible flag. */
   .patch.base_hud 0x612C84 : { KEEP(*(.patch.base_hud)) }
   /* Hud_Draw's call of Ocarina_Draw, the song list on the top screen. */
   .patch.base_ocarina_draw 0x61462C : { KEEP(*(.patch.base_ocarina_draw)) }

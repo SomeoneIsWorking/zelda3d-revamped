@@ -49,6 +49,11 @@
     bl _ZN7z3dmods5oot3d14drawTopOcarinaEv
 .section .expect.base_ocarina_draw, "", %progbits
     .word 0xEBFFF1D5 @ bl Ocarina_Draw
+@ The One Screen's Ocarina_Draw, the song list's transform: the width it centres the list in.
+.section .patch.base_song_list_width, "ax", %progbits
+    bl song_list_width
+.section .expect.base_song_list_width, "", %progbits
+    .word 0xED9F3A27 @ vldr s6, [pc, #156] (400.0)
 @ The One Screen's Hud_Submit: its HUD is never visible; ours is drawn by the app (hud.toml).
 .section .patch.base_hud, "ax", %progbits
     mov r0, #0
@@ -74,6 +79,16 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
+@ The tabs' bar from 6 pixels past BACK lit's moved end, as from its own in the game, over the
+@ panel's bottom.
+.section .patch.item_tab_bar, "a", %progbits
+    .float 24.0, 202.0, 32.0, 202.0
+.section .expect.item_tab_bar, "", %progbits
+    .float 64.0, 202.0, 72.0, 202.0
+.section .patch.item_tab_bar_width, "a", %progbits
+    .float 216.0
+.section .expect.item_tab_bar_width, "", %progbits
+    .float 176.0
 @ The item screen's column and its four buttons' frames, off the screen: slot_column.cpp draws its own.
 .section .patch.item_column, "a", %progbits
     .float 1256.0, 0.0
@@ -252,6 +267,14 @@ arrow_turn:
     vpop {d0}
     vmov s0, r0
     pop {r4, pc}
+@ s0, s2 and s4 hold the transform's terms and r2 the ocarina's state.
+song_list_width:
+    push {r0-r5, r12, lr}
+    vpush {d0-d3}
+    bl _ZN7z3dmods5oot3d13songListWidthEv
+    vpop {d0-d3}
+    vmov s6, r0
+    pop {r0-r5, r12, pc}
 @ r0 to r3 are set after the site.
 glyph_texture_mode:
     push {r4, lr}

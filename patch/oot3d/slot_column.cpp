@@ -10,6 +10,7 @@
 // docs/pause.md.
 #include "../common/guest.hpp"
 #include "game.hpp"
+#include "menu_layout.hpp"
 #include "slot_link.hpp"
 #include "slot_places.hpp"
 #include "symbols.hpp"
@@ -19,17 +20,9 @@
 namespace z3dmods::oot3d {
 namespace {
 
-using NewFn = void *(*)(uint32_t size);
-using InitFn = void *(*)(void *layout, int32_t count, int32_t kind, int32_t noCounts);
-using LayoutFn = void (*)(void *layout);
 using SetIconFn = void (*)(void *layout, int32_t node, int32_t item);
-using SetRectFn = void (*)(void *layout, int32_t node, int32_t x, int32_t y, int32_t width,
-                           int32_t height);
-using SetUvsFn = void (*)(void *batch, const float *corner, const float *size, int32_t count,
-                          int32_t first);
+using LayoutFn = void (*)(void *layout);
 using TextureGetFn = void *(*)(int32_t slot);
-using SetTextureFn = void (*)(void *model, int32_t unit, void *texture, uint16_t minFilter,
-                              uint16_t magFilter, uint16_t wrapS, uint16_t wrapT);
 using ResetFn = void (*)();
 using MbstowcsFn = uint32_t (*)(uint16_t *wide, const char *text, uint32_t length);
 using FileRequestNewFn = void *(*)(const uint16_t *path, int32_t, int32_t, uint8_t);
@@ -40,9 +33,6 @@ using FreeFn = void (*)(void *memory);
 using AllocFn = void *(*)(void *allocator, uint32_t size);
 // The game passes floats in VFP registers; the patch is built softfp.
 // NOLINTNEXTLINE(modernize-use-using): only a typedef takes the calling convention.
-typedef void (*SetAlphaFn)(void *layout, int32_t node, float alpha)
-    __attribute__((pcs("aapcs-vfp")));
-// NOLINTNEXTLINE(modernize-use-using): only a typedef takes the calling convention.
 typedef void (*SetRectsFn)(void *batch, const float *corner, const float *size, int32_t count,
                            int32_t first, float z) __attribute__((pcs("aapcs-vfp")));
 
@@ -50,11 +40,6 @@ typedef void (*SetRectsFn)(void *batch, const float *corner, const float *size, 
 inline constexpr float kOffScreen = 1000.0F;
 inline constexpr int32_t kButtonNodes[] = {kItemMenuNodeI, kItemMenuNodeX, kItemMenuNodeY,
                                            kItemMenuNodeII};
-// HudItemButtons_Init's kind for a layout of items.
-inline constexpr int32_t kItemsKind = 0;
-// GL_LINEAR and GL_CLAMP_TO_EDGE, as ItemMenu_Init binds the screen's sheet.
-inline constexpr uint16_t kLinear = 0x2601;
-inline constexpr uint16_t kClampToEdge = 0x812F;
 // The column's cell is sampled this far inside its left edge, in its sheet's pixels: the texture
 // pack's copy carries a neighbouring sprite's edge in the cell's first texels, which drew as a
 // light line down the column.
@@ -118,43 +103,39 @@ class SlotColumn {
 public:
   // After ItemMenu_Init has built the item screen's layouts.
   void build() {
-    column_ = layout(1);
-    rings_ = layout(kSlotCount);
-    items_ = layout(kSlotCount);
-    labels_ = layout(kLabelQuads);
+    column_.create(1);
+    rings_.create(kSlotCount);
+    items_.create(kSlotCount);
+    labels_.create(kLabelQuads);
     // The column is the item screen's cell of it, drawn at the cell's size.
     const auto screen = guest::read<uintptr_t>(kItemMenu + kItemMenuQuads);
     const auto *screenSize =
         reinterpret_cast<const volatile float *>(screen + kQuadBatchTextureSize);
-    sheet(column_, guest::function<TextureGetFn>(kMenuTextureGet)(kMenuTextureItemParts),
-          screenSize[0], screenSize[1]);
+    column_.sheet(guest::function<TextureGetFn>(kMenuTextureGet)(kMenuTextureItemParts),
+                  screenSize[0], screenSize[1]);
     const auto *cells = reinterpret_cast<const float *>(kItemMenuQuadUvs);
     const auto *sizes = reinterpret_cast<const float *>(kItemMenuQuadUvSizes);
-    const auto setUvs = guest::function<SetUvsFn>(kQuadBatchSetUvs);
-    const float stone[2] = {cells[2 * kItemMenuQuadColumn] + kColumnInset,
-                            cells[2 * kItemMenuQuadColumn + 1]};
-    const float stoneSize[2] = {sizes[2 * kItemMenuQuadColumn] - kColumnInset,
-                                sizes[2 * kItemMenuQuadColumn + 1]};
-    setUvs(reinterpret_cast<void *>(quadsOf(column_)), stone, stoneSize, 1, 0);
+    column_.cell(
+        0, {cells[2 * kItemMenuQuadColumn] + kColumnInset, cells[2 * kItemMenuQuadColumn + 1]},
+        {sizes[2 * kItemMenuQuadColumn] - kColumnInset, sizes[2 * kItemMenuQuadColumn + 1]});
     columnWidth_ = static_cast<int32_t>(sizes[2 * kItemMenuQuadColumn]);
     columnHeight_ = static_cast<int32_t>(sizes[2 * kItemMenuQuadColumn + 1]);
     // Each ring is the ring's cell; the labels are slot n's cell, then each lone label's.
     void *slotSheet = loadTexture(kSlotSheet);
-    sheet(rings_, slotSheet, kSlotSheetSize[0], kSlotSheetSize[1]);
-    sheet(labels_, slotSheet, kSlotSheetSize[0], kSlotSheetSize[1]);
+    rings_.sheet(slotSheet, kSlotSheetSize[0], kSlotSheetSize[1]);
+    labels_.sheet(slotSheet, kSlotSheetSize[0], kSlotSheetSize[1]);
     const float cell[2] = {kSlotSheetCell, kSlotSheetCell};
-    const float ring[2] = {kSlotRingCell[0], kSlotRingCell[1]};
     for (uint32_t slot = 0; slot < kSlotCount; ++slot) {
-      setUvs(reinterpret_cast<void *>(quadsOf(rings_)), ring, cell, 1, static_cast<int32_t>(slot));
-      const float at[2] = {static_cast<float>(kSlotLabelRow[0] + slot * kSlotSheetCell),
-                           static_cast<float>(kSlotLabelRow[1])};
-      setUvs(reinterpret_cast<void *>(quadsOf(labels_)), at, cell, 1, static_cast<int32_t>(slot));
+      rings_.cell(slot, {kSlotRingCell[0], kSlotRingCell[1]}, cell);
+      labels_.cell(slot,
+                   {static_cast<float>(kSlotLabelRow[0] + slot * kSlotSheetCell),
+                    static_cast<float>(kSlotLabelRow[1])},
+                   cell);
     }
     for (uint32_t lone = 0; lone < kLoneLabels; ++lone) {
-      const float at[2] = {static_cast<float>(kSlotLabels[lone].u),
-                           static_cast<float>(kSlotLabels[lone].v)};
-      setUvs(reinterpret_cast<void *>(quadsOf(labels_)), at, cell, 1,
-             static_cast<int32_t>(kSlotCount + lone));
+      labels_.cell(
+          kSlotCount + lone,
+          {static_cast<float>(kSlotLabels[lone].u), static_cast<float>(kSlotLabels[lone].v)}, cell);
     }
   }
 
@@ -163,13 +144,9 @@ public:
   void update(float alpha, float left) {
     const volatile SlotLink &link = slotLink();
     const auto device = static_cast<HostDevice>(link.device);
-    const auto setRect = guest::function<SetRectFn>(kHudItemButtonsSetRect2D);
-    auto *rings = reinterpret_cast<void *>(rings_);
-    auto *items = reinterpret_cast<void *>(items_);
-    auto *labels = reinterpret_cast<void *>(labels_);
     const auto offset = static_cast<int32_t>(left);
-    setRect(reinterpret_cast<void *>(column_), 0,
-            static_cast<int32_t>(left + kTopWidth) - columnWidth_, 0, columnWidth_, columnHeight_);
+    column_.place(0, static_cast<int32_t>(left + kTopWidth) - columnWidth_, 0, columnWidth_,
+                  columnHeight_);
     for (uint32_t node = 0; node < kSlotCount; ++node) {
       // A slot the device has no place for is drawn past the edge.
       const SlotPlace *place = nullptr;
@@ -181,40 +158,44 @@ public:
       const int32_t size = place != nullptr ? place->size : 0;
       const int32_t x = place != nullptr ? place->x + offset : static_cast<int32_t>(kOffScreen);
       const int32_t y = place != nullptr ? place->y : 0;
-      const auto at = static_cast<int32_t>(node);
-      setRect(rings, at, x, y, size, size);
+      rings_.place(node, x, y, size, size);
       const int32_t icon = share(size, kIconPercent);
       const int32_t inset = (size - icon) / 2;
       const uint8_t song = link.songs[node];
       guest::function<SetIconFn>(kHudItemButtonsSetIcon)(
-          items, at, song != 0 ? kItemSongMinuet + song - 1 : link.items[node]);
-      setRect(items, at, x + inset, y + inset, icon, icon);
+          reinterpret_cast<void *>(items_.address()), static_cast<int32_t>(node),
+          song != 0 ? kItemSongMinuet + song - 1 : link.items[node]);
+      items_.place(node, x + inset, y + inset, icon, icon);
       placeCount(node, static_cast<float>(x + inset + icon), static_cast<float>(y + inset + icon),
                  static_cast<float>(icon));
       const bool labelled = place != nullptr && place->labelled;
       const int32_t label = share(size, kLabelPercent);
-      setRect(labels, at, labelled ? x - label / 4 : static_cast<int32_t>(kOffScreen),
-              y - label / 4, label, label);
+      labels_.place(node, labelled ? x - label / 4 : static_cast<int32_t>(kOffScreen),
+                    y - label / 4, label, label);
     }
     for (uint32_t lone = 0; lone < kLoneLabels; ++lone) {
       const SlotLabel &label = kSlotLabels[lone];
-      setRect(labels, static_cast<int32_t>(kSlotCount + lone),
-              label.device == device ? label.x + offset : static_cast<int32_t>(kOffScreen), label.y,
-              label.size, label.size);
+      labels_.place(kSlotCount + lone,
+                    label.device == device ? label.x + offset : static_cast<int32_t>(kOffScreen),
+                    label.y, label.size, label.size);
     }
-    fade(column_, 1, alpha);
-    fade(rings_, kSlotCount, alpha);
-    fade(items_, kSlotCount, alpha);
-    fade(labels_, kLabelQuads, alpha);
+    column_.fade(alpha);
+    rings_.fade(alpha);
+    items_.fade(alpha);
+    labels_.fade(alpha);
+  }
+
+  // The top screen's width left of the column.
+  [[nodiscard]] float spaceLeft() const {
+    return kTopWidth - static_cast<float>(columnWidth_);
   }
 
   // Bottom to top: the column, the rings, the items and their counts, the labels.
   void draw() const {
-    const auto draw = guest::function<LayoutFn>(kHudItemButtonsDraw);
-    const uintptr_t layouts[] = {column_, rings_, items_, labels_};
-    for (const uintptr_t each : layouts) {
-      draw(reinterpret_cast<void *>(each));
-    }
+    column_.draw();
+    rings_.draw();
+    items_.draw();
+    labels_.draw();
   }
 
 private:
@@ -222,7 +203,7 @@ private:
   // corner, the ones rightmost, with `right` and `bottom` the icon's edges.
   void placeCount(uint32_t node, float right, float bottom, float icon) const {
     const auto count =
-        guest::read<uintptr_t>(items_ + kHudItemButtonsCounts + node * sizeof(uint32_t));
+        guest::read<uintptr_t>(items_.address() + kHudItemButtonsCounts + node * sizeof(uint32_t));
     if (count == 0) {
       return;
     }
@@ -237,36 +218,10 @@ private:
     }
   }
 
-  // A layout's `count` quads at `alpha`, uploaded with its counts.
-  static void fade(uintptr_t layout, uint32_t count, float alpha) {
-    auto *at = reinterpret_cast<void *>(layout);
-    for (uint32_t quad = 0; quad < count; ++quad) {
-      guest::function<SetAlphaFn>(kHudItemButtonsSetAlpha)(at, static_cast<int32_t>(quad), alpha);
-    }
-    guest::function<LayoutFn>(kHudItemButtonsUpdateAmmo)(at);
-  }
-
-  // A layout with counts: one without draws its quads blended as the icons' plain white.
-  static uintptr_t layout(uint32_t count) {
-    void *memory = guest::function<NewFn>(kHeapNew)(kHudItemButtonsSize);
-    return reinterpret_cast<uintptr_t>(guest::function<InitFn>(kHudItemButtonsInit)(
-        memory, static_cast<int32_t>(count), kItemsKind, 0));
-  }
-
-  // A layout's quads drawn from `texture`, `width` by `height` pixels.
-  static void sheet(uintptr_t layout, void *texture, float width, float height) {
-    auto *size = reinterpret_cast<volatile float *>(quadsOf(layout) + kQuadBatchTextureSize);
-    size[0] = width;
-    size[1] = height;
-    guest::function<SetTextureFn>(kMenuModelSetTexture)(
-        guest::read<void *>(layout + kHudItemButtonsModel), 0, texture, kLinear, kLinear,
-        kClampToEdge, kClampToEdge);
-  }
-
-  uintptr_t column_ = 0;
-  uintptr_t rings_ = 0;
-  uintptr_t items_ = 0;
-  uintptr_t labels_ = 0;
+  MenuLayout column_;
+  MenuLayout rings_;
+  MenuLayout items_;
+  MenuLayout labels_;
   int32_t columnWidth_ = 0;
   int32_t columnHeight_ = 0;
 };
@@ -299,9 +254,9 @@ void updateItemGrid(void *grid) {
     }
   }
   // The column fades with the grid: its first icon's alpha.
-  slotColumn.update(
-      guest::read<float>(guest::read<uintptr_t>(quadsOf(layout) + kQuadBatchColors) + kAlpha),
-      -kWideMargin);
+  const auto alpha =
+      guest::read<float>(guest::read<uintptr_t>(quadsOf(layout) + kQuadBatchColors) + kAlpha);
+  slotColumn.update(alpha, -kWideMargin);
 }
 
 // ItemMenu_Draw's draw of the layout at +0x40 (hooks.s item_menu_draw): the column goes under it.
@@ -318,6 +273,12 @@ void drawTopOcarina() {
     slotColumn.update(1.0F, 0.0F);
     slotColumn.draw();
   }
+}
+
+// The One Screen's song list transform (hooks.s base_song_list_width): the list centres in the
+// space left of the column rather than on the whole top screen.
+float songListWidth() {
+  return slotColumn.spaceLeft();
 }
 
 } // namespace z3dmods::oot3d
