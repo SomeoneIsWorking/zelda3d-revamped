@@ -9,6 +9,7 @@
 #include "../common/guest.hpp"
 #include "symbols.hpp"
 #include "top_touch_screen.hpp"
+#include "touch_page.hpp"
 #include "ui_widget.hpp"
 
 #include <stddef.h>
@@ -29,8 +30,9 @@ inline constexpr float kGridRight = 255.0F;
 // The grid's bottom in the touch screen's pixels, above the tabs.
 inline constexpr float kGridBottom = 200.0F;
 inline constexpr float kPageScale = 0.75F;
-inline constexpr float kPageLeft = kPanelLeft - kPageScale * kGridRight;
-inline constexpr float kGridBottomOnTop = kTitleBarHeight + kPageScale * kGridBottom;
+inline constexpr PageFrame kFrame{kPanelLeft - kPageScale * kGridRight, kTitleBarHeight,
+                                  kPageScale};
+inline constexpr float kGridBottomOnTop = kFrame.y(kGridBottom);
 // Return's place on the touch screen, which it keeps on the top screen, and its right edge.
 inline constexpr float kReturnX = 0.0F;
 inline constexpr float kReturnY = 202.0F;
@@ -52,79 +54,12 @@ void queueTop(void *manager, void *layout, int32_t order) {
   guest::function<LayoutDrawFn>(kLayoutDrawManagerDraw)(manager, layout, kDrawQueueTop2, order);
 }
 
-// The roots the game places itself in the touch screen's pixels (cells, cursors, icons), put where
-// the page takes them. The game's own place is kept, so a root it has not moved since is not
-// placed twice.
-class Roots {
-public:
-  void place(void *layout) {
-    uint8_t *root = ui::root(layout);
-    Entry &entry = find(root);
-    const Place now = read(root);
-    if (entry.root != root || !(now == entry.placed)) {
-      entry.root = root;
-      entry.game = now;
-    }
-    ui::place(root, kPageLeft + kPageScale * entry.game.x,
-              kTitleBarHeight + kPageScale * entry.game.y, kPageScale * entry.game.scaleX,
-              kPageScale * entry.game.scaleY);
-    entry.placed = read(root);
-    entry.used = ++clock_;
-  }
-
-private:
-  struct Place {
-    float x;
-    float y;
-    float scaleX;
-    float scaleY;
-
-    bool operator==(const Place &other) const {
-      return x == other.x && y == other.y && scaleX == other.scaleX && scaleY == other.scaleY;
-    }
-  };
-  struct Entry {
-    uint8_t *root;
-    Place game;
-    Place placed;
-    uint32_t used;
-  };
-  // Both screens' cells, cursors, icons and the two others ItemScreen_DrawBase queues.
-  static constexpr size_t kCapacity = 64;
-
-  static Place read(const uint8_t *root) {
-    return {guest::read<float>(root, kUiWidgetTranslate),
-            guest::read<float>(root, kUiWidgetTranslate + sizeof(float)),
-            guest::read<float>(root, kUiWidgetScale),
-            guest::read<float>(root, kUiWidgetScale + sizeof(float))};
-  }
-
-  // The root's entry, or the least recently used one for a root not seen before.
-  Entry &find(const uint8_t *root) {
-    Entry *oldest = &entries_[0];
-    for (Entry &entry : entries_) {
-      if (entry.root == root) {
-        return entry;
-      }
-      if (entry.used < oldest->used) {
-        oldest = &entry;
-      }
-    }
-    oldest->root = nullptr;
-    return *oldest;
-  }
-
-  Entry entries_[kCapacity] = {};
-  uint32_t clock_ = 0;
-};
-
-// The page, with Return and the tabs kept off its scale at their own places: each one's own
-// layout's root carries it there, since their translates are animated, and each tab's touch area
-// (its bb pane) goes with it. Found once for each page layout.
+// The page, with Return and the tabs kept off its scale at their own places, each tab's touch area
+// (its bb pane) with it. Found once for each page layout.
 class Page {
 public:
   void place(void *layout) {
-    ui::place(ui::root(layout), kPageLeft, kTitleBarHeight, kPageScale);
+    kFrame.place(layout);
     if (layout != layout_) {
       layout_ = layout;
       return_ = ui::find(layout, "btn_return_l");
@@ -137,32 +72,15 @@ public:
     if (column_ != nullptr) {
       ui::hide(column_);
     }
-    unscale(return_, kReturnX, kReturnY, kReturnX, kReturnY);
+    kFrame.unscale(return_, kReturnX, kReturnY, kReturnX, kReturnY);
     for (size_t i = 0; i < 2; ++i) {
       const float toY = kTabsTop + kTabPitch * static_cast<float>(i);
-      unscale(tabs_[i], kTabX[i], kTabsY, kTabsLeft, toY);
-      if (areas_[i] != nullptr) {
-        ui::place(areas_[i], (kTabsLeft - kPageLeft - kTabX[i]) / kPageScale,
-                  (toY - kTitleBarHeight - kTabsY) / kPageScale, 1.0F / kPageScale);
-      }
+      kFrame.unscale(tabs_[i], kTabX[i], kTabsY, kTabsLeft, toY);
+      kFrame.moveArea(areas_[i], kTabX[i], kTabsY, kTabsLeft, toY);
     }
   }
 
 private:
-  // A child with its own layout, whose point (x, y) on the touch screen is drawn at full size at
-  // (toX, toY).
-  static void unscale(uint8_t *child, float x, float y, float toX, float toY) {
-    if (child == nullptr) {
-      return;
-    }
-    ui::scale(child, 1.0F / kPageScale, 1.0F / kPageScale);
-    const float childX = guest::read<float>(child, kUiWidgetTranslate);
-    const float childY = guest::read<float>(child, kUiWidgetTranslate + sizeof(float));
-    ui::place(ui::root(guest::read<void *>(child, kUiWidgetLayout)),
-              toX - kPageLeft - x + (1.0F - kPageScale) * childX,
-              toY - kTitleBarHeight - y + (1.0F - kPageScale) * childY, 1.0F);
-  }
-
   void *layout_ = nullptr;
   uint8_t *return_ = nullptr;
   uint8_t *tabs_[2] = {};
@@ -199,12 +117,12 @@ private:
   float gameScale_ = 1.0F;
 };
 
-constinit Roots roots;
+constinit FrameRoots roots;
 constinit Page pages[2];
 constinit Description description;
 
 void drawPlaced(void *manager, void *layout, int32_t order) {
-  roots.place(layout);
+  roots.place(layout, kFrame);
   queueTop(manager, layout, order);
 }
 
