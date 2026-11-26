@@ -87,6 +87,10 @@ class Config:
                                "github.com/SomeoneIsWorking/port-assets there or set PORT_ASSETS_DIR")
         return glyphs
 
+    def hud_set(self) -> Path:
+        """port-assets' HUD frames (SVG): the button rings and the rest the play HUD is drawn from."""
+        return self.glyph_set().parent / "hud"
+
 
 # The picker's font, in the checkout: Open Sans Bold (SIL Open Font License 1.1, OpenSans-OFL.txt
 # beside it), from github.com/googlefonts/opensans fonts/ttf.

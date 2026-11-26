@@ -239,7 +239,7 @@ def install(cfg: Config, game: GameSet) -> Path:
         print(f"Stone layers, {name}: {'stone' if stairs_stone.reads_as_stone(steps) else 'painted'}"
               f" (hue {steps.hue:.0f}, saturation {steps.saturation:.2f})")
     menus, keyboard = (hud.build(rom.romfs(), base_romfs, pack, cfg.repo / "sets" / game.hud, cfg.key_font(),
-                                 cfg.glyph_set(), AppKeys(cfg))
+                                 cfg.glyph_set(), cfg.hud_set(), AppKeys(cfg))
                        if game.hud else ({}, {}))
 
     words, letters = _text(cfg, game, rom, base_romfs, pack)

@@ -301,7 +301,7 @@ def _darkest(image: Image.Image, mask: Image.Image) -> tuple[int, int, int]:
 
 
 def compose(texture: Texture, edits: list[dict], others: dict[str, Texture], font: Path,
-            glyphs: Path, keys: AppKeys | None = None) -> Image.Image:
+            glyphs: Path, art: Path, keys: AppKeys | None = None) -> Image.Image:
     """The pack's vanilla copy with the mod's edits redone at its scale; with `keys`, each
     prompt cell is the cap of its key."""
     scale = texture.scale
@@ -310,7 +310,7 @@ def compose(texture: Texture, edits: list[dict], others: dict[str, Texture], fon
     draw = ImageDraw.Draw(covered)
     clear = (0, 0, 0, 0)
     for edit in edits:
-        kind = next(k for k in ("keep", "copy", "clear", "label", "relabel", "shell", "dpad", "glyph", "chord")
+        kind = next(k for k in ("keep", "copy", "clear", "label", "relabel", "shell", "dpad", "glyph", "chord", "art")
                     if k in edit)
         box = edit["box"] if "box" in edit else edit[kind]
         draw.rectangle((box[0], box[1], box[2] - 1, box[3] - 1), fill=255)
@@ -364,6 +364,9 @@ def compose(texture: Texture, edits: list[dict], others: dict[str, Texture], fon
                 out.alpha_composite(_key_cap(size, edit, keys, glyphs, font), (x0, y0))
             else:
                 out.alpha_composite(_chord(size, glyphs / f"{held}.svg", glyphs / f"{pressed}.svg"), (x0, y0))
+        elif kind == "art":
+            out.paste(clear, (x0, y0, x1, y1))
+            out.alpha_composite(_glyph(size, art / f"{edit['art']}.svg", False), (x0, y0))
         elif kind == "dpad":
             colour = _dominant(texture.modded.crop(tuple(box)))
             out.paste(clear, (x0, y0, x1, y1))
@@ -425,7 +428,7 @@ def _png(image: Image.Image) -> bytes:
 
 
 def build(romfs: ctr.Romfs, base_romfs: Path | None, pack: TexturePack, table: Path, font: Path,
-          glyphs: Path, keys: AppKeys) -> tuple[dict[str, bytes], dict[str, bytes]]:
+          glyphs: Path, art: Path, keys: AppKeys) -> tuple[dict[str, bytes], dict[str, bytes]]:
     """Pack file name -> PNG for every texture in the edit table, and for the keyboard images of
     those whose prompts name keys."""
     document = json.loads(table.read_text())
@@ -459,9 +462,9 @@ def build(romfs: ctr.Romfs, base_romfs: Path | None, pack: TexturePack, table: P
     for path, texture in textures.items():
         name = pack.name(texture.modded, texture.modded_data, texture.gl_format)
         try:
-            out[name] = _png(compose(texture, edits[path], textures, font, glyphs))
+            out[name] = _png(compose(texture, edits[path], textures, font, glyphs, art))
             if _keyed(edits[path]):
-                keyboard[name] = _png(compose(texture, edits[path], textures, font, glyphs, keys))
+                keyboard[name] = _png(compose(texture, edits[path], textures, font, glyphs, art, keys))
         except ValueError as error:
             raise ValueError(f"{path}: {error}") from error
     return out, keyboard

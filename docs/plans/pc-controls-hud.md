@@ -53,9 +53,11 @@ and "I don't want these fake overlay things either, everything must be RE based"
   moved to Enter (Pause in play, Start outside it); the pad's map and Select moved to LB with View.
 - OoT3D's item screen and song list: the game draws the slots, not the app ("don't draw panels
   over the game, mod the game to add those panels"). The patch builds layouts of the item screen's
-  own kind: its column of stone at the top screen's right edge, one of its round buttons for each
-  slot with the slot's item and count, and each slot's label from the message text's prompt sheet,
-  which the texture pack draws as the pad's glyph or, while the keyboard is in use, the slot's key.
+  own kind: its column of stone at the top screen's right edge and, for each slot, the play HUD's
+  ring ("our circles ... would match the ingame HUD") with the slot's item and count, and its label.
+  The ring and the labels are cells of the message text's prompt sheet that the texture pack draws:
+  the pad's glyph or, while the keyboard is in use, the slot's key. The pad's slots keep inside the
+  column ("too close to border").
   The item screen's own four buttons, their items, counts and letters go off the screen and the
   cursor stays on the grid. On the song list the same column is drawn after The One Screen's top
   screen copy of it. Places come from hud.toml's `[[slot]]`s (`patch/oot3d/slot_column.cpp`,
