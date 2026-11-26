@@ -11,7 +11,7 @@ outside = "touch_menus"
 [screens]
 UI_SCREEN_BLACK = "top_only"
 UI_SCREEN_MAIN = { layout = "play", hidden = "top_only" }
-UI_SCREEN_OCARINA = "ocarina"
+UI_SCREEN_OCARINA = "touch_menus"
 UI_SCREEN_GEAR = "touch_menus"
 UI_SCREEN_ITEMS = "touch_menus"
 UI_SCREEN_MASKS = "touch_menus"
@@ -21,16 +21,14 @@ UI_SCREEN_SCHEDULE = "split"
 [layouts.top_only]
 pieces = []
 
-# The game draws the title's, file select's and the Items, Masks, Gear and Map screens' touch
-# menus across the top screen (item_screens.cpp, gear_screen.cpp, map_screen.cpp) and hit-tests touches where it draws
+# The game draws the title's, file select's and the Items, Masks, Gear, Map and Ocarina screens'
+# touch menus across the top screen (item_screens.cpp, gear_screen.cpp, map_screen.cpp,
+# ocarina_screen.cpp) and hit-tests touches where it draws
 # them: the pointer over the top screen is the stylus over the touch screen, whose 320 columns the
 # game spreads back over the 400 (top_touch_screen.cpp readTouch).
 [layouts.touch_menus]
 pieces = []
 touch = [0, 0, 400, 240]
-
-[layouts.ocarina]
-pieces = [{ from = [0, 0, 320, 240], to = [4, 4, 128, 96], radius = 8, opacity = 0.85 }]
 
 # Play: the top screen alone, under our own HUD (hud.toml).
 [layouts.play]

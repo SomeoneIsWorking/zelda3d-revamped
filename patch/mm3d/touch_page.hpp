@@ -29,24 +29,23 @@ struct PageFrame {
   // A touch area (a bb pane) whose touch point (touchX, touchY) is hit-tested at full size at
   // (toX, toY).
   void moveArea(uint8_t *area, float touchX, float touchY, float toX, float toY) const;
+  // A group at the page's origin, its widgets drawn and hit-tested at full size at their own touch
+  // pixels.
+  void keepFullSize(uint8_t *group) const;
 };
 
 // The roots the game places itself in touch pixels (cells, cursors, icons), put where a frame takes
-// them. The game's own place is kept, so a root it has not moved since is not placed twice.
+// them. The game's own place is kept field by field, since it may write the translate alone, so
+// a field it has not written since is not placed twice.
 class FrameRoots {
 public:
   void place(void *layout, const PageFrame &frame);
 
 private:
+  // The translate's and the scale's fields.
+  static constexpr size_t kFields = 4;
   struct Place {
-    float x;
-    float y;
-    float scaleX;
-    float scaleY;
-
-    bool operator==(const Place &other) const {
-      return x == other.x && y == other.y && scaleX == other.scaleX && scaleY == other.scaleY;
-    }
+    float fields[kFields];
   };
   struct Entry {
     uint8_t *root;

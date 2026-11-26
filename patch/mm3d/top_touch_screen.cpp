@@ -22,6 +22,11 @@ using LayoutDrawFn = void (*)(void *manager, void *layout, int32_t queue, int32_
 using DrawQueueFn = void (*)(void *manager, int32_t queue, void *context);
 using ReadTouchFn = bool (*)(void *reader, void *status);
 
+// The touch screens the patch has the game draw on the top screen.
+inline constexpr uintptr_t kScreensOnTop[] = {kTitleUiScreen,  kFileSelectUiScreen, kItemsUiScreen,
+                                              kMasksUiScreen,  kGearUiScreen,       kMapUiScreen,
+                                              kOcarinaUiScreen};
+
 // PRESS START, under the title's logo.
 inline constexpr float kPressStartDrop = 44.0F;
 
@@ -34,6 +39,15 @@ struct Placement {
 // The touch screen's frame in the middle of the top screen.
 inline constexpr Placement kCentred{kTouchLeft, 0.0F, 1.0F};
 inline constexpr Placement kPressStart{kCentred.x, kPressStartDrop, 1.0F};
+
+bool onTop(uintptr_t screen) {
+  for (const uintptr_t each : kScreensOnTop) {
+    if (each == screen) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void place(void *layout, const Placement &at) {
   ui::place(ui::root(layout), at.x, at.y, at.scale);
@@ -123,8 +137,7 @@ void drawFileDialogs(void *manager, void *layout, int32_t /*queue*/, int32_t ord
 bool readTouch(void *reader, void *status) {
   const bool read = guest::function<ReadTouchFn>(kTouchPanelReadLatest)(reader, status);
   const auto active = guest::read<uintptr_t>(kUiScreenContext + kUiActiveScreen);
-  if (active == kTitleUiScreen || active == kFileSelectUiScreen || active == kItemsUiScreen ||
-      active == kMasksUiScreen || active == kGearUiScreen || active == kMapUiScreen) {
+  if (onTop(active)) {
     const auto x = guest::read<uint16_t>(status, kTouchStatusX);
     guest::write(status, kTouchStatusX,
                  static_cast<uint16_t>(static_cast<float>(x) * kTopWidth / kTouchWidth + 0.5F));

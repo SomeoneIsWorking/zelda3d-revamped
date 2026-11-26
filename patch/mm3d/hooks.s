@@ -163,6 +163,20 @@ actor_update:
     bl _ZN7z3dmods4mm3d14drawGearCursorEPvS1_ii
 .section .expect.gear_cursor, "", %progbits
     .word 0xEBEF6328 @ bl 0x17EC58
+@ OcarinaScreen_Draw's queueing of its pages and the song list's cursor, two of them tail calls
+@ (ocarina_screen.cpp).
+.section .patch.ocarina_play, "ax", %progbits
+    b _ZN7z3dmods4mm3d15drawOcarinaPlayEPvS1_ii
+.section .expect.ocarina_play, "", %progbits
+    .word 0xEAEF5DCC @ b 0x17EC58
+.section .patch.ocarina_list, "ax", %progbits
+    bl _ZN7z3dmods4mm3d15drawOcarinaListEPvS1_ii
+.section .expect.ocarina_list, "", %progbits
+    .word 0xEBEF5DC4 @ bl 0x17EC58
+.section .patch.ocarina_cursor, "ax", %progbits
+    b _ZN7z3dmods4mm3d17drawOcarinaCursorEPvS1_ii
+.section .expect.ocarina_cursor, "", %progbits
+    .word 0xEAEF5DB1 @ b 0x17EC58
 @ TitleScreen_Draw's tail call queueing PRESS START.
 .section .patch.title_press_start, "ax", %progbits
     b _ZN7z3dmods4mm3d19drawTitlePressStartEPvS1_ii

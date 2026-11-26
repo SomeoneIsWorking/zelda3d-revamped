@@ -569,11 +569,10 @@ def _mm3d(session: Session, pad: Gamepad) -> None:
     session.shot("skipped-to-woods")
 
 
-# The ocarina screen's song list button on the touch screen, and where the overlay layout draws
-# that screen on the top one (patch/mm3d/overlay.toml, layouts.ocarina).
+# The ocarina screen's song list button on the touch screen, and the place and scale the patch has
+# the game draw that screen at on the top one (patch/mm3d/ocarina_screen.cpp).
 MM3D_SONG_LIST = (290, 215)
-MM3D_OCARINA_PIECE = (4, 4, 128, 96)
-TOUCH_SCREEN = (320, 240)
+MM3D_OCARINA_FRAME = (4, 4, 0.55)
 
 
 def _slots_mm3d(session: Session, pad: Gamepad) -> None:
@@ -628,9 +627,8 @@ def _slots_mm3d(session: Session, pad: Gamepad) -> None:
     pad.dpad("down")
     session.wait(3)
     session.shot("ocarina")
-    piece = MM3D_OCARINA_PIECE
-    session.click_top(piece[0] + MM3D_SONG_LIST[0] * piece[2] / TOUCH_SCREEN[0],
-                      piece[1] + MM3D_SONG_LIST[1] * piece[3] / TOUCH_SCREEN[1])
+    left, top, scale = MM3D_OCARINA_FRAME
+    session.click_top(left + MM3D_SONG_LIST[0] * scale, top + MM3D_SONG_LIST[1] * scale)
     session.wait(1.5)
     pad.dpad("up")
     session.wait(0.5)

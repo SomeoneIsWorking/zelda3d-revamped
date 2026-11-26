@@ -289,11 +289,10 @@ of the game's touch screens (and one for while its HUD visibility hides that scr
   below). No part of the touch screen is drawn in play;
 - `top_only` (the game blanks the touch screen, or its HUD visibility hides the main one: an
   area's title card, a cutscene): the top screen alone;
-- `ocarina`: the whole touch screen as a small inset, since the notes play on the top screen;
-- `touch_menus` (outside play: boot, the title, file select; Items, Masks, Gear and the map): the
-  top screen alone, where the patch has the game draw those touch menus across the top screen
-  (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, `item_screens.cpp`,
-  `gear_screen.cpp`, `map_screen.cpp`). Its `touch` rectangle is the part of the top screen the touch screen's
+- `touch_menus` (outside play: boot, the title, file select; Items, Masks, Gear, the map and the
+  ocarina): the top screen alone, where the patch has the game draw those touch menus across the
+  top screen (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, `item_screens.cpp`,
+  `gear_screen.cpp`, `map_screen.cpp`, `ocarina_screen.cpp`). Its `touch` rectangle is the part of the top screen the touch screen's
   320x240 spans, the whole of it: the game hit-tests touches where it draws them and the patch
   spreads the stylus's 320 columns back over the top screen's 400, so a click touches the pixel
   under it. The core keeps the touch screen drawn fully transparent (`custom_second_layer_opacity`

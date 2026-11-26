@@ -42,13 +42,15 @@ left, Return in the corner and the item's description under the grid (`items21`,
 masks-mm3d`, `slots-mm3d`). Gear (2026-11-26) is drawn there too, its page in the middle under
 the title bar with Return in the corner and Options under it (`patch/mm3d/gear_screen.cpp`,
 `gear4` to `gear6`). The Map screen's touch page lies over the top screen's map, the loupe under
-the pointer and A's button in the corner (`patch/mm3d/map_screen.cpp`, `map5` to `map8`). The
-notebook and the ocarina are still to follow.
+the pointer and A's button in the corner (`patch/mm3d/map_screen.cpp`, `map5` to `map8`).
 
-The Bombers' Notebook (table entry 2) is side by side: its list is on the top screen and the entry
-with Return and Schedule on the touch screen (`mm-pad2`). The ocarina's screen is an inset for as
-long as it is up (`mm-oc3`): the game sets the HUD visibility that hides the main screen while
-Link plays, and only the main screen follows it.
+The ocarina's pages (2026-11-26) are drawn by the game in the top screen's top left corner at
+0.55, clear of Link, with Cancel in the bottom left corner (`patch/mm3d/ocarina_screen.cpp`,
+`oc4` to `oc6`, `inputtest slots-mm3d`).
+
+The Bombers' Notebook (table entry 2) stays side by side: its list fills the top screen (400 by
+210 under the title bar) and the entry with Return and Schedule fills the touch screen (320 by
+213), so one screen would halve both (`mm-pad2`, `note2`).
 
 Left:
 - The Song of Soaring map and the Pictograph Box have not been seen in this layout.
