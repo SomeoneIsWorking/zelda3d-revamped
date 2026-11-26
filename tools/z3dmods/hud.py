@@ -370,7 +370,7 @@ def compose(texture: Texture, edits: list[dict], others: dict[str, Texture], fon
             out.alpha_composite(_glyph(size, art / f"{edit['art']}.svg", False), (x0, y0))
         elif kind == "ui":
             out.paste(clear, (x0, y0, x1, y1))
-            out.alpha_composite(menu_art.draw(edit, size), (x0, y0))
+            out.alpha_composite(menu_art.draw(edit, size, scale), (x0, y0))
         elif kind == "dpad":
             colour = _dominant(texture.modded.crop(tuple(box)))
             out.paste(clear, (x0, y0, x1, y1))

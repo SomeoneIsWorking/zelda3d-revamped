@@ -79,15 +79,15 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
-@ The item screen's panel without its dark last two rows: inventory_screen.cpp carries it on below.
-.section .patch.item_panel_size, "a", %progbits
-    .float 124.0, 198.0, 124.0, 198.0
-.section .expect.item_panel_size, "", %progbits
-    .float 124.0, 200.0, 124.0, 200.0
-.section .patch.item_panel_cell, "a", %progbits
-    .float 124.0, 198.0, -124.0, 198.0
-.section .expect.item_panel_cell, "", %progbits
-    .float 124.0, 200.0, -124.0, 200.0
+@ The item screen's panel and the tabs' bar, off the screen: inventory_screen.cpp draws our panel.
+.section .patch.item_panel, "a", %progbits
+    .float 1004.0, 0.0, 1128.0, 0.0
+.section .expect.item_panel, "", %progbits
+    .float 4.0, 0.0, 128.0, 0.0
+.section .patch.item_tab_bar, "a", %progbits
+    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
+.section .expect.item_tab_bar, "", %progbits
+    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
 @ The item screen's column and its four buttons' frames, off the screen: slot_column.cpp draws its own.
 .section .patch.item_column, "a", %progbits
     .float 1256.0, 0.0
@@ -111,7 +111,7 @@
     bl _ZN7z3dmods5oot3d14updateItemGridEPv
 .section .expect.item_grid_update, "", %progbits
     .word 0xEBFB0D54 @ bl HudItemButtons_UpdateAmmo
-@ ItemMenu_Draw's draw of the screen's model: inventory_screen.cpp draws under it.
+@ ItemMenu_Draw's draw of the screen's model: inventory_screen.cpp draws ours under it.
 .section .patch.item_menu_draw_model, "ax", %progbits
     bl item_menu_draw_model
 .section .expect.item_menu_draw_model, "", %progbits
