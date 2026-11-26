@@ -69,6 +69,30 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
+@ The item screen's column (item_column.cpp): its stone at the widened screen's right edge, its four
+@ buttons' frames off the screen.
+.section .patch.item_column, "a", %progbits
+    .float 296.0, 0.0
+    .float 1264.0, 0.0, 1272.0, 0.0, 1264.0, 184.0, 1272.0, 184.0, 1266.0, 2.0, 1266.0, 186.0
+    .float 1272.0, 70.0, 1296.0, 70.0, 1274.0, 72.0, 1260.0, 122.0, 1284.0, 122.0, 1262.0, 124.0
+.section .expect.item_column, "", %progbits
+    .float 256.0, 0.0
+    .float 264.0, 0.0, 272.0, 0.0, 264.0, 184.0, 272.0, 184.0, 266.0, 2.0, 266.0, 186.0
+    .float 272.0, 70.0, 296.0, 70.0, 274.0, 72.0, 260.0, 122.0, 284.0, 122.0, 262.0, 124.0
+@ ItemMenu_UpdateCursor: the cursor's column wraps before the buttons' column.
+.section .patch.item_cursor_right, "ax", %progbits
+    cmp r0, #5
+.section .expect.item_cursor_right, "", %progbits
+    .word 0xE3500006 @ cmp r0, #6
+.section .patch.item_cursor_left, "ax", %progbits
+    movmi r0, #4
+.section .expect.item_cursor_left, "", %progbits
+    .word 0x43A00005 @ movmi r0, #5
+@ ItemMenu_Update's rebuild of the grid's quads.
+.section .patch.item_grid_update, "ax", %progbits
+    bl _ZN7z3dmods5oot3d14updateItemGridEPv
+.section .expect.item_grid_update, "", %progbits
+    .word 0xEBFB0D54 @ bl HudItemButtons_UpdateAmmo
 .section .patch.gear_back_lit, "a", %progbits
     .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
 .section .expect.gear_back_lit, "", %progbits

@@ -10,6 +10,8 @@ SECTIONS {
   .patch.instant_off kMessageLayoutText + 0x1B8 : { KEEP(*(.patch.instant_off)) }
   .patch.draw_camera kGameplayDraw + 0x808 : { KEEP(*(.patch.draw_camera)) }
   .patch.update_camera kPlayUpdate + 0x1540 : { KEEP(*(.patch.update_camera)) }
+  .patch.item_cursor_right kItemMenuUpdateCursor + kItemMenuCursorRightWrap : { KEEP(*(.patch.item_cursor_right)) }
+  .patch.item_cursor_left kItemMenuUpdateCursor + kItemMenuCursorLeftWrap : { KEEP(*(.patch.item_cursor_left)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
   .patch.interpreter_catchup kCutsceneRunScript + 0xF0 : { KEEP(*(.patch.interpreter_catchup)) }
   .patch.interpreter_tail kCutsceneRunScript + 0x120 : { KEEP(*(.patch.interpreter_tail)) }
@@ -20,6 +22,7 @@ SECTIONS {
   .patch.song_notes kPadRequestData + 0x98 : { KEEP(*(.patch.song_notes)) }
   .patch.base_b_ring kTopHudUpdateButtons + 0x40 : { KEEP(*(.patch.base_b_ring)) }
   .patch.base_b_item kTopHudDraw + 0x458 : { KEEP(*(.patch.base_b_item)) }
+  .patch.item_grid_update kItemMenuUpdate + kItemMenuUpdateItemsCall : { KEEP(*(.patch.item_grid_update)) }
   .patch.play_update kGameplayUpdate + 0x9C : { KEEP(*(.patch.play_update)) }
   .patch.base_camera kGameplayUpdate + 0xA8 : { KEEP(*(.patch.base_camera)) }
   .patch.static_cell_glyph kTextRendererFillStatic + 0x80 : { KEEP(*(.patch.static_cell_glyph)) }
@@ -30,6 +33,7 @@ SECTIONS {
   .patch.back_button kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBack * 8 : { KEEP(*(.patch.back_button)) }
   /* The pause screens' (hooks.s <screen>_back_lit, <screen>_back). */
   .patch.item_back_lit kItemMenuQuadPositions + kItemMenuQuadBackLit * 8 : { KEEP(*(.patch.item_back_lit)) }
+  .patch.item_column kItemMenuQuadPositions + kItemMenuQuadColumn * 8 : { KEEP(*(.patch.item_column)) }
   .patch.item_back kItemMenuQuadPositions + kItemMenuQuadBack * 8 : { KEEP(*(.patch.item_back)) }
   .patch.gear_back_lit kGearMenuQuadPositions + kGearMenuQuadBackLit * 8 : { KEEP(*(.patch.gear_back_lit)) }
   .patch.gear_back kGearMenuQuadPositions + kGearMenuQuadBack * 8 : { KEEP(*(.patch.gear_back)) }

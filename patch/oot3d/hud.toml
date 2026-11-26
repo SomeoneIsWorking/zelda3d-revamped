@@ -347,16 +347,10 @@ label = { at = ["gTopHud", "TopHud.doAction"], bytes = 4 }
 rect = [352, 38, 22, 22]
 
 
-# The item screen and the ocarina's song list: every slot on a panel at the right edge. A slot's
-# input puts the item under the cursor, or the song on show, on it. On the item screen the panel
-# covers the game's own four buttons, which the slots replace.
-
-[[element]]
-kind = "panel"
-frame = "panel"
-assign = true
-rect = [294, 0, 106, 240]
-when = [{ at = ["gItemMenuState"], bytes = 4, least = 1, most = 255 }]
+# The item screen and the ocarina's song list: every slot at the right edge. A slot's input puts
+# the item under the cursor, or the song on show, on it. On the item screen the slots sit on the
+# game's own column of stone in place of its four buttons (patch/oot3d/item_column.cpp); the song
+# list has a panel.
 
 [[element]]
 kind = "panel"
@@ -372,7 +366,7 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 0
-rect = [348, 12, 22, 22]
+rect = [354, 12, 22, 22]
 
 [[element]]
 kind = "button"
@@ -380,7 +374,7 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 1
-rect = [372, 34, 22, 22]
+rect = [376, 34, 22, 22]
 
 [[element]]
 kind = "button"
@@ -388,14 +382,14 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 2
-rect = [378, 6, 18, 18]
+rect = [382, 6, 18, 18]
 
 [[element]]
 kind = "prompt"
 device = "pad"
 assign = true
 glyph = "dpad"
-rect = [353, 95, 16, 16]
+rect = [359, 95, 16, 16]
 
 [[element]]
 kind = "button"
@@ -404,7 +398,7 @@ frame = "ring"
 assign = true
 bare = true
 slot = 3
-rect = [352, 74, 18, 18]
+rect = [358, 74, 18, 18]
 
 [[element]]
 kind = "button"
@@ -413,7 +407,7 @@ frame = "ring"
 assign = true
 bare = true
 slot = 4
-rect = [372, 94, 18, 18]
+rect = [376, 94, 18, 18]
 
 [[element]]
 kind = "button"
@@ -422,7 +416,7 @@ frame = "ring"
 assign = true
 bare = true
 slot = 5
-rect = [352, 114, 18, 18]
+rect = [358, 114, 18, 18]
 
 [[element]]
 kind = "button"
@@ -431,14 +425,14 @@ frame = "ring"
 assign = true
 bare = true
 slot = 6
-rect = [332, 94, 18, 18]
+rect = [340, 94, 18, 18]
 
 [[element]]
 kind = "prompt"
 device = "pad"
 assign = true
 chord = true
-rect = [328, 152, 22, 14]
+rect = [336, 152, 22, 14]
 
 [[element]]
 kind = "button"
@@ -446,7 +440,7 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 10
-rect = [351, 164, 20, 20]
+rect = [357, 164, 20, 20]
 
 [[element]]
 kind = "button"
@@ -454,7 +448,7 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 9
-rect = [329, 184, 20, 20]
+rect = [337, 184, 20, 20]
 
 [[element]]
 kind = "button"
@@ -462,7 +456,7 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 8
-rect = [373, 184, 20, 20]
+rect = [377, 184, 20, 20]
 
 [[element]]
 kind = "button"
@@ -470,7 +464,7 @@ device = "pad"
 frame = "ring"
 assign = true
 slot = 7
-rect = [351, 204, 20, 20]
+rect = [357, 204, 20, 20]
 
 # The keyboard's slots on the same panel: the number keys down one column. The slots behind the
 # pad's chord have no key.
@@ -481,7 +475,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 0
-rect = [338, 10, 20, 20]
+rect = [345, 10, 20, 20]
 
 [[element]]
 kind = "button"
@@ -489,7 +483,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 1
-rect = [338, 38, 20, 20]
+rect = [345, 38, 20, 20]
 
 [[element]]
 kind = "button"
@@ -497,7 +491,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 2
-rect = [338, 66, 20, 20]
+rect = [345, 66, 20, 20]
 
 [[element]]
 kind = "button"
@@ -505,7 +499,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 3
-rect = [338, 94, 20, 20]
+rect = [345, 94, 20, 20]
 
 [[element]]
 kind = "button"
@@ -513,7 +507,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 4
-rect = [338, 122, 20, 20]
+rect = [345, 122, 20, 20]
 
 [[element]]
 kind = "button"
@@ -521,7 +515,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 5
-rect = [338, 150, 20, 20]
+rect = [345, 150, 20, 20]
 
 [[element]]
 kind = "button"
@@ -529,7 +523,7 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 6
-rect = [338, 178, 20, 20]
+rect = [345, 178, 20, 20]
 
 [[element]]
 kind = "button"
@@ -537,5 +531,5 @@ device = "keyboard"
 frame = "ring"
 assign = true
 slot = 7
-rect = [338, 206, 20, 20]
+rect = [345, 206, 20, 20]
 

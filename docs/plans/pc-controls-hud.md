@@ -51,10 +51,11 @@ and "I don't want these fake overlay things either, everything must be RE based"
   tile's X screen) over it; Esc, View or B go back and the same game plays on, a layout or
   resolution change remaking its screens around it (`inputtest settings`). The game's own Start
   moved to Enter (Pause in play, Start outside it); the pad's map and Select moved to LB with View.
-- OoT3D's item screen still has the app's slot panel over the game's column of item buttons. The
-  column's stone is quads 12 to 24 of the item screen's table and moves with it, but its four
-  letters are drawn from places not found yet (decomp `docs/pause.md`, "Their quads"); without the
-  panel they would float beside the rings, so the panel stays until they are found.
+- OoT3D's item screen: the slots sit on the game's own column of stone, moved to the widened
+  screen's right edge, in place of its four buttons; their frames, the items on them, their counts
+  and their letters go off the screen and the cursor stays on the grid
+  (`patch/oot3d/item_column.cpp`; decomp `docs/pause.md`, "Their quads"). The ocarina's song list
+  keeps the app's panel.
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.
@@ -131,9 +132,9 @@ RE based instead of copying patches of bottom screen".
   held the diamond shows slots 8 to 11. A slot with a song shows a note.
 - The keyboard has its own layout in the same corner ("I think keyboard needs its own HUD"): a bar
   of slots 1 to 8 under their number caps, then the sword on the left mouse button and the action
-  on E with its word. The item screen's panel lists the number keys' slots in a column. The
-  keyboard has no chord ("we don't need chords for keyboard"): Shift+1 to 3 are gone. An
-  element's `device` (`pad` or `keyboard`, both without it) says which layout it belongs to.
+  on E with its word. On the item screen the number keys' slots stand in a column on the game's
+  stone. The keyboard has no chord ("we don't need chords for keyboard"): Shift+1 to 3 are gone.
+  An element's `device` (`pad` or `keyboard`, both without it) says which layout it belongs to.
 - Options: "HUD size" (0.5x to 1.5x, each element grown about the top screen's corner nearest its
   middle) and "HUD opacity" (25% to 100%), the app's own rows for a set with a HUD ("need options
   for HUD size and opacity").
