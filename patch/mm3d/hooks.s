@@ -145,6 +145,15 @@ actor_update:
     bl _ZN7z3dmods4mm3d14drawItemCursorEPvS1_ii
 .section .expect.item_cursor, "", %progbits
     .word 0xEBEF748C @ bl 0x17EC58
+@ GearScreen_Draw's queueing of its page and its cursor (gear_screen.cpp).
+.section .patch.gear_page, "ax", %progbits
+    bl _ZN7z3dmods4mm3d12drawGearPageEPvS1_ii
+.section .expect.gear_page, "", %progbits
+    .word 0xEBEF6330 @ bl 0x17EC58
+.section .patch.gear_cursor, "ax", %progbits
+    bl _ZN7z3dmods4mm3d14drawGearCursorEPvS1_ii
+.section .expect.gear_cursor, "", %progbits
+    .word 0xEBEF6328 @ bl 0x17EC58
 @ TitleScreen_Draw's tail call queueing PRESS START.
 .section .patch.title_press_start, "ax", %progbits
     b _ZN7z3dmods4mm3d19drawTitlePressStartEPvS1_ii

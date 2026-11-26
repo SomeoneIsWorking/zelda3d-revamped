@@ -24,6 +24,8 @@ SECTIONS {
   .patch.masks_page kMaskScreenDraw + kMaskScreenDrawPageCall : { KEEP(*(.patch.masks_page)) }
   .patch.masks_cell kMaskScreenDraw + kMaskScreenDrawCellCall : { KEEP(*(.patch.masks_cell)) }
   .patch.item_cursor kItemScreenDrawCursor + kItemScreenDrawCursorCall : { KEEP(*(.patch.item_cursor)) }
+  .patch.gear_page kGearScreenDraw + kGearScreenDrawPageCall : { KEEP(*(.patch.gear_page)) }
+  .patch.gear_cursor kGearScreenDraw + kGearScreenDrawCursorCall : { KEEP(*(.patch.gear_cursor)) }
   .patch.title_press_start kTitleScreenDraw + kTitlePressStartCall : { KEEP(*(.patch.title_press_start)) }
   .patch.file_details kFileSelectScreenDraw + kFileSelectDetailsCall : { KEEP(*(.patch.file_details)) }
   .patch.file_title_bar kFileSelectScreenDraw + kFileSelectTitleBarCall : { KEEP(*(.patch.file_title_bar)) }

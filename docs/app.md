@@ -287,13 +287,13 @@ of the game's touch screens (and one for while its HUD visibility hides that scr
 
 - `play` (the main touch screen): the top screen alone, under our own HUD (`hud = true`; "HUD"
   below). No part of the touch screen is drawn in play;
-- `menu` (Gear): the whole touch screen, large, under the menu's title bar;
 - `top_only` (the game blanks the touch screen, or its HUD visibility hides the main one: an
   area's title card, a cutscene): the top screen alone;
 - `ocarina`: the whole touch screen as a small inset, since the notes play on the top screen;
-- `touch_menus` (outside play: boot, the title, file select; Items and Masks): the top screen
-  alone, where the patch has the game draw those touch menus across the top screen
-  (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, `item_screens.cpp`). Its `touch` rectangle is the part of the top screen the touch screen's
+- `touch_menus` (outside play: boot, the title, file select; Items, Masks and Gear): the top
+  screen alone, where the patch has the game draw those touch menus across the top screen
+  (`patch/mm3d/top_touch_screen.cpp`, `file_start_page.cpp`, `item_screens.cpp`,
+  `gear_screen.cpp`). Its `touch` rectangle is the part of the top screen the touch screen's
   320x240 spans, the whole of it: the game hit-tests touches where it draws them and the patch
   spreads the stylus's 320 columns back over the top screen's 400, so a click touches the pixel
   under it. The core keeps the touch screen drawn fully transparent (`custom_second_layer_opacity`
