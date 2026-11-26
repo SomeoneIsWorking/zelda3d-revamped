@@ -1,8 +1,8 @@
 // Right-stick free camera: after the game's own camera update, the C-stick, and the mouse through
 // the slot link, orbit the eye around the game's look-at point. The game keeps its at, quake,
-// water and setting changes; the orbit holds only while the game runs Link's follow camera, so
-// Z-targeting, first person, talking, climbing, horses, cutscenes and fixed or scripted settings
-// hand control back.
+// water and setting changes; the orbit holds only while the game runs Link's follow camera (a
+// ledge's pull-up included), so Z-targeting, first person, talking, climbing, horses, cutscenes
+// and fixed or scripted settings hand control back.
 // It replaces The One Screen's orbit camera, whose hook hooks.s takes back.
 #include "../common/cstick.hpp"
 #include "../common/guest.hpp"
@@ -174,9 +174,10 @@ private:
                                 kCameraModeFunction);
   }
 
-  // Link's own follow camera, on the ground or in a jump; every other function frames something.
+  // Link's own follow camera, on the ground, in a jump or pulling up onto a ledge; every other
+  // function frames something.
   static bool follows(int16_t function) {
-    return function == kCamFuncNorm1 || function == kCamFuncJump1;
+    return function == kCamFuncNorm1 || function == kCamFuncJump1 || function == kCamFuncUniq1;
   }
 
   static bool eligible(void *camera) {

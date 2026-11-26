@@ -13,10 +13,11 @@ The app feeds the host's right stick to the 3DS C-stick and the triggers to ZL/Z
 - The orbit is ours: yaw and pitch from the stick around the game's own look-at point, the radius
   the game's, the eye pulled in front of collision at once and let out again gradually. The
   game's camera still runs first, so its look-at point, quake and setting changes stay.
-- It holds only while the game runs Link's follow camera (`Camera_Normal1`, or `Camera_Jump1` in
-  a jump), read from the game's own settings table: Z-targeting, first person and aimed items,
-  talking, climbing, hanging, the horse, crawlspaces, cutscenes, scene changes and fixed or
-  scripted camera settings hand the view back. L recenters behind Link because Z-targeting does.
+- It holds only while the game runs Link's follow camera (`Camera_Normal1`, `Camera_Jump1` in
+  a jump, or `Camera_Unique1` hanging from or pulling up onto a ledge, as Link does stepping back
+  onto Kokiri Forest's fences), read from the game's own settings table: Z-targeting, first person
+  and aimed items, talking, climbing, the horse, crawlspaces, cutscenes, scene changes and fixed
+  or scripted camera settings hand the view back. L recenters behind Link because Z-targeting does.
   Options: on/off, invert X, invert Y (`patch/oot3d/options.toml`); a Master Quest file's mirrored
   world turns the stick's x around.
 - Hooks: both `bl Camera_Update` calls for the active camera (`Play_Update`, and `Gameplay_Draw`'s
