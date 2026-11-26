@@ -65,14 +65,16 @@ and "I don't want these fake overlay things either, everything must be RE based"
   groups and the keyboard's column spread down the column's height ("empty space here"), and the
   song list centres in the space left of the column (hooks.s `base_song_list_width`). The item
   screen is our inventory ("make a custom inventory UI", "retain the game's style, especially the
-  game's own Back button"): a slate panel with a rounded cell under each item over a dark backdrop,
+  game's own Back button"): a slate panel with a rounded cell under each item,
   our pieces in the screen's own sheet, with the game's BACK, tabs, cursor and items on top
-  (`patch/oot3d/inventory_screen.cpp`, `tools/z3dmods/menu_art.py`). BACK, cornered, and the tabs stay at
-  the bottom: their art opens onto the screen's edge, and hung along the top, as in the mockup,
-  their open sides floated ("you can't see how the tabs and the back looks"). The
-  game's panel, which ended flat above BACK and the tabs ("the items border cuts short"), and its
-  tabs' bar are off the screen. A mirrored bevel along that panel's bottom looked bad, and so did
-  the tab bar stretched under it. `inputtest pause-wide` clicks a cell, BACK and the Map tab.
+  (`patch/oot3d/inventory_screen.cpp`, `tools/z3dmods/menu_art.py`). The book shows behind it, the tabs are turned a quarter down the left edge with their
+  open sides on the screen's edge ("rotate the tabs on the bottom 90 and place them on the left";
+  hung along the top their open sides floated), BACK stays in the bottom left corner and the grid
+  fills the space up to the slot column (hooks.s `item_*_pitch`/`_left`/`_top`, decomp
+  `docs/pause.md`). The game's hit tests of BACK and the tabs ask where they are drawn, and the app
+  turns a press beside the touch screen into a touch on its edge column (`GameWindow::pressBeside`).
+  The game's panel, which ended flat above BACK and the tabs ("the items border cuts short"), and
+  its tabs' bar are off the screen. `inputtest pause-wide` clicks a cell, BACK and the Map tab.
 - Nothing composited that the game does not draw: the item screen's column of number-key slots
   and the menus' whole touch screen (the stopgap below) give way to the game's own screens,
   extended through its code (decomp-named state), never a picture laid over them.

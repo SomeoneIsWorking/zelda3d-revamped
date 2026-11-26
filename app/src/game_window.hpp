@@ -146,6 +146,9 @@ private:
   void updateLayout();
   // Window coordinates to framebuffer pixels.
   void touch(SDL_FPoint at, bool pressed);
+  // A single screen lays the touch screen over the top screen's middle; a press beside it on the
+  // top screen, where the menus draw past its edges, touches its nearest column.
+  bool pressBeside(unsigned x, unsigned y);
 
   PadInput &pad_;
   bool hidden_;

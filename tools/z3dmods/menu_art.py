@@ -1,12 +1,11 @@
 """Our own menu pieces, drawn at a texture pack's scale into a menu sheet's empty cells (hud.py's
-"ui" edits): the inventory's backdrop, a dark gradient from top to bottom, its panel cut for
-nine-slicing and its rounded item cell (patch/oot3d/inventory_screen.cpp)."""
+"ui" edits): the inventory's panel cut for nine-slicing and its rounded item
+cell (patch/oot3d/inventory_screen.cpp)."""
 
 from __future__ import annotations
 
 from PIL import Image, ImageDraw
 
-BACKDROP = ((16, 23, 32), (7, 10, 15))
 # The panel and the cells in the game's slate blue, edged lighter.
 SLATE = (18, 28, 37, 245)
 SLATE_EDGE = (96, 120, 136, 255)
@@ -39,11 +38,4 @@ def draw(edit: dict, size: tuple[int, int], scale: int) -> Image.Image:
         lit.paste((0, 0, 0, 0), (0, size[1] // 2, size[0], size[1]))
         cell.alpha_composite(lit)
         return cell
-    if name == "backdrop":
-        top, bottom = BACKDROP
-        column = Image.new("RGBA", (1, size[1]))
-        for y in range(size[1]):
-            t = y / max(1, size[1] - 1)
-            column.putpixel((0, y), (*(round(a + (b - a) * t) for a, b in zip(top, bottom)), 255))
-        return column.resize(size)
     raise ValueError(f"no menu piece {name!r}")

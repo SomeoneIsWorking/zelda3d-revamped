@@ -12,12 +12,31 @@ SECTIONS {
   .patch.update_camera kPlayUpdate + 0x1540 : { KEEP(*(.patch.update_camera)) }
   .patch.item_cursor_right kItemMenuUpdateCursor + kItemMenuCursorRightWrap : { KEEP(*(.patch.item_cursor_right)) }
   .patch.item_cursor_left kItemMenuUpdateCursor + kItemMenuCursorLeftWrap : { KEEP(*(.patch.item_cursor_left)) }
-  .patch.item_back_touch_x0 kItemMenuUpdate + kItemMenuBackTouchY0 + 4 : { KEEP(*(.patch.item_back_touch_x0)) }
-  .patch.item_back_touch_width0 kItemMenuUpdate + kItemMenuBackTouchY0 - 4 : { KEEP(*(.patch.item_back_touch_width0)) }
-  .patch.item_back_touch_x1 kItemMenuUpdate + kItemMenuBackTouchY1 + 4 : { KEEP(*(.patch.item_back_touch_x1)) }
-  .patch.item_back_touch_width1 kItemMenuUpdate + kItemMenuBackTouchY1 - 4 : { KEEP(*(.patch.item_back_touch_width1)) }
-  .patch.item_back_touch_x2 kItemMenuUpdate + kItemMenuBackTouchY2 + 4 : { KEEP(*(.patch.item_back_touch_x2)) }
-  .patch.item_back_touch_width2 kItemMenuUpdate + kItemMenuBackTouchY2 - 4 : { KEEP(*(.patch.item_back_touch_width2)) }
+  .patch.item_node_position_top kItemMenuNodePosition + kItemMenuNodePositionTop : { KEEP(*(.patch.item_node_position_top)) }
+  .patch.item_node_position_pitch kItemMenuNodePosition + kItemMenuNodePositionPitch : { KEEP(*(.patch.item_node_position_pitch)) }
+  .patch.item_node_position_left kItemMenuNodePosition + kItemMenuNodePositionLeft : { KEEP(*(.patch.item_node_position_left)) }
+  .patch.item_update_cursor_pitch kItemMenuUpdateCursor + kItemMenuUpdateCursorPitch : { KEEP(*(.patch.item_update_cursor_pitch)) }
+  .patch.item_update_cursor_left kItemMenuUpdateCursor + kItemMenuUpdateCursorLeft : { KEEP(*(.patch.item_update_cursor_left)) }
+  .patch.item_update_cursor_top kItemMenuUpdateCursor + kItemMenuUpdateCursorTop : { KEEP(*(.patch.item_update_cursor_top)) }
+  .patch.item_update_touch_left kItemMenuUpdateTouch + kItemMenuUpdateTouchLeft : { KEEP(*(.patch.item_update_touch_left)) }
+  .patch.item_update_touch_inverse_pitch kItemMenuUpdateTouch + kItemMenuUpdateTouchInversePitch : { KEEP(*(.patch.item_update_touch_inverse_pitch)) }
+  .patch.item_update_touch_top kItemMenuUpdateTouch + kItemMenuUpdateTouchTop : { KEEP(*(.patch.item_update_touch_top)) }
+  .patch.item_update_touch_pitch kItemMenuUpdateTouch + kItemMenuUpdateTouchPitch : { KEEP(*(.patch.item_update_touch_pitch)) }
+  .patch.item_place_cursor_pitch kItemMenuPlaceCursor + kItemMenuPlaceCursorPitch : { KEEP(*(.patch.item_place_cursor_pitch)) }
+  .patch.item_place_cursor_top kItemMenuPlaceCursor + kItemMenuPlaceCursorTop : { KEEP(*(.patch.item_place_cursor_top)) }
+  .patch.item_place_cursor_left kItemMenuPlaceCursor + kItemMenuPlaceCursorLeft : { KEEP(*(.patch.item_place_cursor_left)) }
+  .patch.item_back_touch0 kItemMenuUpdate + kItemMenuBackTouchCall0 : { KEEP(*(.patch.item_back_touch0)) }
+  .patch.item_back_touch1 kItemMenuUpdate + kItemMenuBackTouchCall1 : { KEEP(*(.patch.item_back_touch1)) }
+  .patch.item_back_touch2 kItemMenuUpdate + kItemMenuBackTouchCall2 : { KEEP(*(.patch.item_back_touch2)) }
+  .patch.item_items_touch0 kItemMenuUpdate + kItemMenuItemsTouchCall0 : { KEEP(*(.patch.item_items_touch0)) }
+  .patch.item_items_touch1 kItemMenuUpdate + kItemMenuItemsTouchCall1 : { KEEP(*(.patch.item_items_touch1)) }
+  .patch.item_items_touch2 kItemMenuUpdate + kItemMenuItemsTouchCall2 : { KEEP(*(.patch.item_items_touch2)) }
+  .patch.item_gear_touch0 kItemMenuUpdate + kItemMenuGearTouchCall0 : { KEEP(*(.patch.item_gear_touch0)) }
+  .patch.item_gear_touch1 kItemMenuUpdate + kItemMenuGearTouchCall1 : { KEEP(*(.patch.item_gear_touch1)) }
+  .patch.item_gear_touch2 kItemMenuUpdate + kItemMenuGearTouchCall2 : { KEEP(*(.patch.item_gear_touch2)) }
+  .patch.item_map_touch0 kItemMenuUpdate + kItemMenuMapTouchCall0 : { KEEP(*(.patch.item_map_touch0)) }
+  .patch.item_map_touch1 kItemMenuUpdate + kItemMenuMapTouchCall1 : { KEEP(*(.patch.item_map_touch1)) }
+  .patch.item_map_touch2 kItemMenuUpdate + kItemMenuMapTouchCall2 : { KEEP(*(.patch.item_map_touch2)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
   .patch.interpreter_catchup kCutsceneRunScript + 0xF0 : { KEEP(*(.patch.interpreter_catchup)) }
   .patch.interpreter_tail kCutsceneRunScript + 0x120 : { KEEP(*(.patch.interpreter_tail)) }

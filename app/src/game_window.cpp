@@ -329,8 +329,20 @@ void GameWindow::touch(SDL_FPoint at, bool pressed) {
   } else if (touching_) {
     TouchMoved(px, py);
   } else {
-    touching_ = TouchPressed(px, py);
+    touching_ = TouchPressed(px, py) || pressBeside(px, py);
   }
+}
+
+bool GameWindow::pressBeside(unsigned x, unsigned y) {
+  const auto &layout = GetFramebufferLayout();
+  const auto &top = layout.top_screen;
+  const auto &bottom = layout.bottom_screen;
+  const bool over = bottom.left >= top.left && bottom.right <= top.right && bottom.top >= top.top &&
+                    bottom.bottom <= top.bottom;
+  if (!over || x < top.left || x >= top.right || y < bottom.top || y >= bottom.bottom) {
+    return false;
+  }
+  return TouchPressed(std::clamp(x, bottom.left, bottom.right - 1), y);
 }
 
 } // namespace z3d::app
