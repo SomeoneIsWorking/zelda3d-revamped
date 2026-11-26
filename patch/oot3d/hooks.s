@@ -79,16 +79,15 @@
     .float -40.0, 204.0, 0.0, 204.0
 .section .expect.item_back, "", %progbits
     .float 0.0, 204.0, 40.0, 204.0
-@ The tabs' bar from 6 pixels past BACK lit's moved end, as from its own in the game, over the
-@ panel's bottom.
-.section .patch.item_tab_bar, "a", %progbits
-    .float 24.0, 202.0, 32.0, 202.0
-.section .expect.item_tab_bar, "", %progbits
-    .float 64.0, 202.0, 72.0, 202.0
-.section .patch.item_tab_bar_width, "a", %progbits
-    .float 216.0
-.section .expect.item_tab_bar_width, "", %progbits
-    .float 176.0
+@ The item screen's panel without its dark last two rows: item_panel.cpp carries it on below.
+.section .patch.item_panel_size, "a", %progbits
+    .float 124.0, 198.0, 124.0, 198.0
+.section .expect.item_panel_size, "", %progbits
+    .float 124.0, 200.0, 124.0, 200.0
+.section .patch.item_panel_cell, "a", %progbits
+    .float 124.0, 198.0, -124.0, 198.0
+.section .expect.item_panel_cell, "", %progbits
+    .float 124.0, 200.0, -124.0, 200.0
 @ The item screen's column and its four buttons' frames, off the screen: slot_column.cpp draws its own.
 .section .patch.item_column, "a", %progbits
     .float 1256.0, 0.0
@@ -112,6 +111,11 @@
     bl _ZN7z3dmods5oot3d14updateItemGridEPv
 .section .expect.item_grid_update, "", %progbits
     .word 0xEBFB0D54 @ bl HudItemButtons_UpdateAmmo
+@ ItemMenu_Draw's draw of the screen's model: the panel's foot is drawn under it.
+.section .patch.item_menu_draw_model, "ax", %progbits
+    bl item_menu_draw_model
+.section .expect.item_menu_draw_model, "", %progbits
+    .word 0xE12FFF31 @ blx r1
 @ ItemMenu_Draw's draw of the layout at +0x40: the slots' layouts are drawn before it.
 .section .patch.item_menu_draw, "ax", %progbits
     bl _ZN7z3dmods5oot3d14drawItemColumnEPv
@@ -275,6 +279,14 @@ song_list_width:
     vpop {d0-d3}
     vmov s6, r0
     pop {r0-r5, r12, pc}
+@ r0 is the screen's model; its draw is tail-called with the site's return address.
+item_menu_draw_model:
+    push {r0, lr}
+    bl _ZN7z3dmods5oot3d17drawItemPanelFootEv
+    pop {r0, lr}
+    ldr r1, [r0]
+    ldr r1, [r1, #12]
+    bx r1
 @ r0 to r3 are set after the site.
 glyph_texture_mode:
     push {r4, lr}

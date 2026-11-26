@@ -10,6 +10,7 @@
 // docs/pause.md.
 #include "../common/guest.hpp"
 #include "game.hpp"
+#include "item_panel.hpp"
 #include "menu_layout.hpp"
 #include "slot_link.hpp"
 #include "slot_places.hpp"
@@ -233,6 +234,7 @@ constinit SlotColumn slotColumn;
 // ItemMenu_Init's last call (hooks.s item_menu_init): the screen is built.
 void resetItemMenu() {
   guest::function<ResetFn>(kItemMenuReset)();
+  buildItemPanelFoot();
   slotColumn.build();
 }
 
@@ -253,9 +255,10 @@ void updateItemGrid(void *grid) {
       moveAllOff(guest::read<uintptr_t>(count + kHudCountQuads));
     }
   }
-  // The column fades with the grid: its first icon's alpha.
+  // The column and the panel's foot fade with the grid: its first icon's alpha.
   const auto alpha =
       guest::read<float>(guest::read<uintptr_t>(quadsOf(layout) + kQuadBatchColors) + kAlpha);
+  updateItemPanelFoot(alpha);
   slotColumn.update(alpha, -kWideMargin);
 }
 
