@@ -1792,7 +1792,7 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
 # the app runs them as fast as it can.
 UNPACED = ("report", "settings", "options", "options-oot3d", "menu-pad", "picker", "setup", "setup-archive",
            "setup-different-mod", "setup-missing-mod", "setup-wrong-dump", "first-run", "hotswap", "slots",
-           "slots-small", "slots-mm3d", "slots-mm3d-small", "oot3d", "mm3d", "files-mm3d", "pause-wide",
+           "slots-small", "slots-mm3d", "slots-mm3d-small", "oot3d", "mm3d", "pause-wide",
            "masks-mm3d", "notebook-mm3d")
 RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",
             "interp-scenes-mm3d")
