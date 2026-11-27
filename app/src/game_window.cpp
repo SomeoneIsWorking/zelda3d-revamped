@@ -116,6 +116,8 @@ void GameWindow::PollEvents() {
 }
 
 std::vector<SDL_FPoint> GameWindow::pollMenu(const std::function<void(const SDL_Event &)> &each) {
+  // Outside play the mouse is the menus' pointer; MouseAim takes it again in play.
+  captureMouse(false);
   clicks_.clear();
   pump(false, each);
   return std::exchange(clicks_, {});
@@ -300,6 +302,7 @@ void GameWindow::captureMouse(bool captured) {
     return;
   }
   mouseCaptured_ = captured;
+  lucent::info("z3d", "mouse {}", captured ? "captured" : "released");
   mouseMotion_ = {};
   if (captured) {
     touchScreen(std::nullopt);
