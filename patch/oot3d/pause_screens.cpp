@@ -26,6 +26,7 @@ namespace {
 
 using SetUvsFn = void (*)(void *batch, const float *corner, const float *size, int32_t count,
                           int32_t first);
+using DrawFn = void (*)(void *object);
 
 // Touch_InRect's phases, each with its flag in gTouch; a phase past them asks no flag.
 inline constexpr uint32_t kPhaseFlags[] = {kTouchPhase0, kTouchPhase1, kTouchPhase2, kTouchPhase3};
@@ -38,6 +39,10 @@ inline constexpr uint32_t kBackLitQuads = 3;
 inline constexpr uint32_t kMapBackLitQuads = 5;
 // The Map tab's face, the item screen's middle tab.
 inline constexpr uint32_t kMapTab = 1;
+// A model's draw in its vtable.
+inline constexpr uint32_t kModelDrawSlot = 3;
+// gItemMenuDrawFlags' words; the first is not read.
+inline constexpr uint32_t kItemMenuDrawFlagCount = 4;
 
 constinit PauseQuads itemQuads;
 constinit PauseQuads gearQuads;
@@ -87,7 +92,55 @@ void trimMapTabCell(uintptr_t batch) {
                                               static_cast<int32_t>(quad));
 }
 
+template <typename T> T itemMenuField(uint32_t offset) {
+  return guest::read<T>(kItemMenu + offset);
+}
+
+void draw(uint32_t function, uint32_t field) {
+  guest::function<DrawFn>(function)(itemMenuField<void *>(field));
+}
+
+void drawModel(uintptr_t model) {
+  guest::function<DrawFn>(
+      guest::read<uintptr_t>(guest::read<uintptr_t>(model) + kModelDrawSlot * sizeof(uint32_t)))(
+      reinterpret_cast<void *>(model));
+}
+
 } // namespace
+
+void drawItemMenu() {
+  if (guest::read<int32_t>(kItemMenuState) == kMenuScreenClosed) {
+    return;
+  }
+  drawInventoryScreen();
+  drawModel(itemMenuField<uintptr_t>(kItemMenuDrawn));
+  if (itemMenuField<int32_t>(kItemMenuCloseTimer) != 0) {
+    return;
+  }
+  const auto delay = itemMenuField<int32_t>(kItemMenuItemsDelay);
+  if (delay == 0) {
+    draw(kHudItemButtonsDraw, kItemMenuItems);
+  } else if (delay > 0) {
+    guest::write<int32_t>(reinterpret_cast<void *>(kItemMenu), kItemMenuItemsDelay, delay - 1);
+  }
+  draw(kMenuPartDraw, kItemMenuCursor);
+  draw(kMenuPartDraw, kItemMenuTargetCursor);
+  draw(kMenuPartDraw, kItemMenuButtonLetters);
+  draw(kItemMenuDrawUnk4C, kItemMenuUnk4C);
+  drawSlotColumn();
+  draw(kHudItemButtonsDraw, kItemMenuUnk40);
+  draw(kHudItemButtonsDraw, kItemMenuHeld);
+  draw(kHudItemButtonsDraw, kItemMenuUnk48);
+  for (uint32_t flag = 1; flag < kItemMenuDrawFlagCount; ++flag) {
+    if (guest::read<int32_t>(kItemMenuDrawFlags + flag * sizeof(int32_t)) == 1) {
+      draw(kMenuPartDraw, kItemMenuUnk2C);
+      break;
+    }
+  }
+  if (itemMenuField<int32_t>(kItemMenuStateStep) >= 2) {
+    draw(kMenuPartDraw, kItemMenuUnk28);
+  }
+}
 
 void initItemMenu() {
   itemMenuGame();

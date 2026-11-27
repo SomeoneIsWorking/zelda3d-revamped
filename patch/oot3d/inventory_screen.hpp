@@ -8,7 +8,7 @@ namespace z3dmods::oot3d {
 void buildInventoryScreen();
 // Each frame of the item screen, at the screen's `alpha`.
 void updateInventoryScreen(float alpha);
-// Before the item screen's model (hooks.s item_menu_draw_model).
+// Before the item screen's model (pause_screens.cpp drawItemMenu).
 void drawInventoryScreen();
 
 } // namespace z3dmods::oot3d

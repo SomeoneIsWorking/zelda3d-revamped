@@ -94,21 +94,16 @@
     b _ZN7z3dmods5oot3d11touchInRectEiiiii
 .section .expect.touch_in_rect, "", %progbits
     .word 0xE92D0070 @ push {r4, r5, r6}
-@ ItemMenu_Update's rebuild of the grid's quads.
-.section .patch.item_grid_update, "ax", %progbits
-    bl _ZN7z3dmods5oot3d14updateItemGridEPv
-.section .expect.item_grid_update, "", %progbits
-    .word 0xEBFB0D54 @ bl HudItemButtons_UpdateAmmo
-@ ItemMenu_Draw's draw of the screen's model: inventory_screen.cpp draws ours under it.
-.section .patch.item_menu_draw_model, "ax", %progbits
-    bl item_menu_draw_model
-.section .expect.item_menu_draw_model, "", %progbits
-    .word 0xE12FFF31 @ blx r1
-@ ItemMenu_Draw's draw of the layout at +0x40: the slots' layouts are drawn before it.
+@ HudItemButtons_UpdateAmmo overridden: the item screen's grid rebuilt our way (slot_column.cpp).
+.section .patch.item_buttons_update, "ax", %progbits
+    b _ZN7z3dmods5oot3d17updateItemButtonsEPv
+.section .expect.item_buttons_update, "", %progbits
+    .word 0xE92D4FF0 @ push {r4-r11, lr}
+@ ItemMenu_Draw overridden: the game's pieces with ours between them (pause_screens.cpp).
 .section .patch.item_menu_draw, "ax", %progbits
-    bl _ZN7z3dmods5oot3d14drawItemColumnEPv
+    b _ZN7z3dmods5oot3d12drawItemMenuEv
 .section .expect.item_menu_draw, "", %progbits
-    .word 0xEBFB0AC8 @ bl HudItemButtons_Draw
+    .word 0xE92D4070 @ push {r4-r6, lr}
 @ The touch screen's 2D layers (TouchScreen2D_BeginLayer0 to 3): each one's projection, widened
 @ while file select is up.
 .section .patch.touch_projection0, "ax", %progbits
@@ -230,14 +225,6 @@ song_list_width:
     vpop {d0-d3}
     vmov s6, r0
     pop {r0-r5, r12, pc}
-@ r0 is the screen's model; its draw is tail-called with the site's return address.
-item_menu_draw_model:
-    push {r0, lr}
-    bl _ZN7z3dmods5oot3d19drawInventoryScreenEv
-    pop {r0, lr}
-    ldr r1, [r0]
-    ldr r1, [r1, #12]
-    bx r1
 @ r0 to r3 are set after the site.
 glyph_texture_mode:
     push {r4, lr}
@@ -305,3 +292,7 @@ _ZN7z3dmods5oot3d8playGameEPv:
 _ZN7z3dmods5oot3d10cameraGameEPvS1_:
     push {r4, r5, r6, r7, r8, r9, r10, r11, lr}
     b kCameraUpdate + 4
+.global _ZN7z3dmods5oot3d15itemButtonsGameEPv
+_ZN7z3dmods5oot3d15itemButtonsGameEPv:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, lr}
+    b kHudItemButtonsUpdateAmmo + 4

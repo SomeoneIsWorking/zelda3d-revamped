@@ -14,6 +14,7 @@ SECTIONS {
   .patch.item_node_position kItemMenuNodePosition : { KEEP(*(.patch.item_node_position)) }
   .patch.item_update_touch kItemMenuUpdateTouch : { KEEP(*(.patch.item_update_touch)) }
   .patch.item_update_cursor kItemMenuUpdateCursor : { KEEP(*(.patch.item_update_cursor)) }
+  .patch.item_buttons_update kHudItemButtonsUpdateAmmo : { KEEP(*(.patch.item_buttons_update)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
   .patch.touch_in_rect kTouchInRect : { KEEP(*(.patch.touch_in_rect)) }
   .patch.song_notes kPadRequestData + 0x98 : { KEEP(*(.patch.song_notes)) }
@@ -23,9 +24,7 @@ SECTIONS {
   .patch.touch_projection0 kTouchScreen2DLayer0 + 0x1CC : { KEEP(*(.patch.touch_projection0)) }
   .patch.base_b_ring kTopHudUpdateButtons + 0x40 : { KEEP(*(.patch.base_b_ring)) }
   .patch.base_b_item kTopHudDraw + 0x458 : { KEEP(*(.patch.base_b_item)) }
-  .patch.item_grid_update kItemMenuUpdate + kItemMenuUpdateItemsCall : { KEEP(*(.patch.item_grid_update)) }
-  .patch.item_menu_draw_model kItemMenuDraw + kItemMenuDrawModelCall : { KEEP(*(.patch.item_menu_draw_model)) }
-  .patch.item_menu_draw kItemMenuDraw + kItemMenuDrawLayout40Call : { KEEP(*(.patch.item_menu_draw)) }
+  .patch.item_menu_draw kItemMenuDraw : { KEEP(*(.patch.item_menu_draw)) }
   .patch.item_place_cursor kItemMenuPlaceCursor : { KEEP(*(.patch.item_place_cursor)) }
   .patch.base_camera kGameplayUpdate + 0xA8 : { KEEP(*(.patch.base_camera)) }
   .patch.gear_menu_init kGearMenuInit : { KEEP(*(.patch.gear_menu_init)) }

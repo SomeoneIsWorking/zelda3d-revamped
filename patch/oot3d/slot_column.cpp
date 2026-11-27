@@ -21,10 +21,13 @@
 #include <stdint.h>
 
 namespace z3dmods::oot3d {
+
+// The game's HudItemButtons_UpdateAmmo, from hooks.s.
+void itemButtonsGame(void *buttons);
+
 namespace {
 
 using SetIconFn = void (*)(void *layout, int32_t node, int32_t item);
-using LayoutFn = void (*)(void *layout);
 using TextureGetFn = void *(*)(int32_t slot);
 using ResetFn = void (*)();
 using MbstowcsFn = uint32_t (*)(uint16_t *wide, const char *text, uint32_t length);
@@ -239,16 +242,21 @@ void buildSlotColumn() {
   slotColumn.build();
 }
 
-// ItemMenu_Update's rebuild of the grid's quads (hooks.s item_grid_update). The grid's icons take
-// their offsets in the rebuild; a count sets its digits' own offsets there, so they go after it.
-void updateItemGrid(void *grid) {
-  const auto layout = reinterpret_cast<uintptr_t>(grid);
+// HudItemButtons_UpdateAmmo, overridden. On the item screen's grid its button nodes go off the
+// screen: the icons take their offsets in the rebuild, and a count sets its digits' own offsets
+// there, so they go after it.
+void updateItemButtons(void *buttons) {
+  const auto layout = reinterpret_cast<uintptr_t>(buttons);
+  if (layout != guest::read<uintptr_t>(kItemMenu + kItemMenuItems)) {
+    itemButtonsGame(buttons);
+    return;
+  }
   for (const int32_t node : kButtonNodes) {
     moveOff(quadsOf(layout), node);
   }
   const auto letters = guest::read<uintptr_t>(kItemMenu + kItemMenuButtonLetters);
   moveAllOff(letters + kItemButtonLettersBatch);
-  guest::function<LayoutFn>(kHudItemButtonsUpdateAmmo)(grid);
+  itemButtonsGame(buttons);
   for (const int32_t node : kButtonNodes) {
     const auto count =
         guest::read<uintptr_t>(layout + kHudItemButtonsCounts + node * sizeof(uint32_t));
@@ -264,10 +272,8 @@ void updateItemGrid(void *grid) {
   slotColumn.update(alpha, -kWideMargin);
 }
 
-// ItemMenu_Draw's draw of the layout at +0x40 (hooks.s item_menu_draw): the column goes under it.
-void drawItemColumn(void *layout) {
+void drawSlotColumn() {
   slotColumn.draw();
-  guest::function<LayoutFn>(kHudItemButtonsDraw)(layout);
 }
 
 // The One Screen's draw of the ocarina's screen on the top screen, from its HUD draw (hooks.s

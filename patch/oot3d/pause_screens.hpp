@@ -10,6 +10,9 @@ void initItemMenu();
 void initGearMenu();
 void initMapMenu();
 void initSaveMenu();
+// ItemMenu_Draw, overridden (hooks.s): the game's pieces in its order, our inventory under the
+// screen's model and the slot column under the layout at +0x40.
+void drawItemMenu();
 // Touch_InRect, overridden (hooks.s touch_in_rect): whether the stylus is in the rect in the
 // phase; while a pause screen is open, BACK's and its tabs' rects are where we draw them.
 int touchInRect(int x, int y, int width, int height, int phase);
