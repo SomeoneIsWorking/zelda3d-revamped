@@ -30,6 +30,8 @@
 - `tools/z3dmods/bgcheck.py`: the room a scene's collision has in the game: the grid and memory `BgCheck_Allocate` gives a scene (its tables read from the code at the decomp's addresses), the list nodes the triangles take, and the limits `install` refuses a stepped scene over.
 - `tools/z3dmods/ips.py`: IPS parse, apply and build.
 - `tools/z3dmods/bps.py`: BPS info and apply, with source and target CRC checks.
+- `tools/z3dmods/ground_uv.py`: floors whose texture the model lays as a patchwork of turned and mirrored cells, given texture coordinates from world x and z at install.
+- `tools/z3dmods/model_render.py`: a room mesh drawn textured from above, from the model and an image alone, to check texture coordinates without the emulator.
 - `tools/z3dmods/install.py`: installs a `sets/<game>.json` set into Azahar's `load/`, with an install record.
 - `tools/z3dmods/azahar_config.py`: global `qt-config.ini` edits.
 - `tools/z3dmods/azahar.py`: the headless Azahar session (Gamescope, XTest keys, RPC RAM and frames, config restore).

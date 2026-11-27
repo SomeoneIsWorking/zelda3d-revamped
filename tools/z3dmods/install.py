@@ -12,7 +12,28 @@ import struct
 from dataclasses import dataclass
 from pathlib import Path
 
-from z3dmods import azahar_config, bgcheck, bps, ctr, games, hud, hud_icons, ips, lzs, options, pack_fixes, patch_build, set_inputs, source_check, stairs, stairs_stone, symbols, text, zsi
+from z3dmods import (
+    azahar_config,
+    bgcheck,
+    bps,
+    ctr,
+    games,
+    ground_uv,
+    hud,
+    hud_icons,
+    ips,
+    lzs,
+    options,
+    pack_fixes,
+    patch_build,
+    set_inputs,
+    source_check,
+    stairs,
+    stairs_stone,
+    symbols,
+    text,
+    zsi,
+)
 from z3dmods.app_keys import AppKeys
 from z3dmods.config import Config
 from z3dmods.texture_pack import TexturePack
@@ -168,17 +189,39 @@ def _layer(cfg: Config, game: GameSet, code: bytes, base_exheader: bytes, mods: 
                                                               ours.link, inputs))
 
 
-def _stepped_rooms(rom: ctr.Ncch, base_romfs: Path | None, named: str, pack: TexturePack | None,
-                   rules: bgcheck.Rules, style) -> tuple[dict[str, bytes], dict[str, bgcheck.Use]]:
+def _read_romfs(files: ctr.Romfs, base_romfs: Path | None, path: str) -> bytes:
+    """A RomFS file unpacked, from the base mod's copy when it replaces it."""
+    base = base_romfs / path if base_romfs else None
+    return lzs.unpacked(base.read_bytes() if base and base.exists() else files.read(path))
+
+
+def _rooms(rom: ctr.Ncch, base_romfs: Path | None) -> dict[str, bytes]:
+    """Every room file, unpacked, the base mod's copy where it replaces one."""
+    files = rom.romfs()
+    return {path: _read_romfs(files, base_romfs, path) for path in files.files if stairs.scene_of(path)}
+
+
+def _floored_rooms(rooms: dict[str, bytes]) -> dict[str, bytes]:
+    """Every room with a patchwork floor, its floors mapped by position (ground_uv)."""
+    out = {}
+    for path, data in rooms.items():
+        mapped, textures = ground_uv.room(data)
+        if textures:
+            out[path] = mapped
+    return out
+
+
+def _stepped_rooms(rom: ctr.Ncch, base_romfs: Path | None, floored: dict[str, bytes], named: str,
+                   pack: TexturePack | None, rules: bgcheck.Rules,
+                   style) -> tuple[dict[str, bytes], dict[str, bgcheck.Use]]:
     """Every room with stair ramps drawn in `style` (stairs.Painted or stairs_stone.Stone), and its
-    scene with the collision on those ramps stepped; a file the base mod replaces is stepped from
-    its copy. With them, what each stepped scene's collision takes of the game's room for it; a
-    scene over that is refused."""
+    scene with the collision on those ramps stepped; a room is stepped from its `floored` copy, else
+    the base mod's, else the game's. With them, what each stepped scene's collision takes of the
+    game's room for it; a scene over that is refused."""
     files = rom.romfs()
 
     def read(path: str) -> bytes:
-        base = base_romfs / path if base_romfs else None
-        return lzs.unpacked(base.read_bytes() if base and base.exists() else files.read(path))
+        return floored[path] if path in floored else _read_romfs(files, base_romfs, path)
 
     out = {}
     drawn: dict[str, list[stairs.Ramp]] = {}
@@ -226,6 +269,8 @@ def install(cfg: Config, game: GameSet) -> Path:
         raise RuntimeError(f"{game.title_id}: stairs want the patch whose options.toml switches them")
     stairs_layers = options.layers(cfg.repo, game.patch, STAIRS_OPTION) if game.stairs else ()
     code = _apply(game.base["code_patch"], code_patch.read_bytes(), vanilla) if game.patch else vanilla
+    game_rooms = _rooms(rom, base_romfs)
+    floored = _floored_rooms(game_rooms)
     # Each size of steps is a layer of its own.
     rooms: dict[str, dict[str, bytes]] = {}
     rules = bgcheck.Rules(game.patch, symbols.load(cfg.repo, game.patch), code) if game.stairs else None
@@ -233,7 +278,7 @@ def install(cfg: Config, game: GameSet) -> Path:
     stone = stairs_stone.StoneTextures(pack)
     for layer in stairs_layers:
         style = stairs_stone.Stone(layer.rise, stone) if layer.style == "stone" else stairs.Painted(layer.rise)
-        rooms[layer.folder], uses = _stepped_rooms(rom, base_romfs, game.stairs, pack, rules, style)
+        rooms[layer.folder], uses = _stepped_rooms(rom, base_romfs, floored, game.stairs, pack, rules, style)
         for scene, use in uses.items():
             print(f"{layer.label} {scene}: {use}")
     for name, steps in sorted(stone.chosen.items()):
@@ -251,7 +296,7 @@ def install(cfg: Config, game: GameSet) -> Path:
     textures = cfg.textures_dir(game.title_id) if game.textures or menus or letters or stone.pack_images else None
     staged = [(folder, _staging(folder)) for folder in (mods, textures) if folder is not None]
     try:
-        _build_mods(cfg, game, rom, pack, code, root, base_romfs, staged[0][1], rooms, words)
+        _build_mods(cfg, game, rom, pack, code, root, base_romfs, staged[0][1], floored, rooms, words)
         if textures is not None:
             _build_textures(game, texture_root, menus, keyboard, letters, stone.pack_images, fixes, staged[1][1])
         # Every refusal comes before the first file is taken out.
@@ -284,9 +329,10 @@ def _text(cfg: Config, game: GameSet, rom: ctr.Ncch, base_romfs: Path | None,
 
 
 def _build_mods(cfg: Config, game: GameSet, rom: ctr.Ncch, pack: TexturePack | None, code: bytes, root: Path,
-                base_romfs: Path | None, mods: Path, rooms: dict[str, dict[str, bytes]],
+                base_romfs: Path | None, mods: Path, floored: dict[str, bytes], rooms: dict[str, dict[str, bytes]],
                 words: dict[str, bytes]) -> None:
-    """The game's mods folder, whole, with its record. `rooms` are the stepped files by layer folder."""
+    """The game's mods folder, whole, with its record. `floored` are the rooms whose patchwork
+    floors ground_uv mapped by position, `rooms` the stepped files by layer folder."""
     if game.patch:
         _layer(cfg, game, code, (root / game.base["exheader"]).read_bytes(), mods, set(rooms))
     else:
@@ -294,7 +340,7 @@ def _build_mods(cfg: Config, game: GameSet, rom: ctr.Ncch, pack: TexturePack | N
         shutil.copyfile(root / game.base["exheader"], mods / "exheader.bin")
     if base_romfs:
         _copy_tree(base_romfs, mods / "romfs")
-    for path, data in words.items():
+    for path, data in [*floored.items(), *words.items()]:
         target = mods / "romfs" / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)

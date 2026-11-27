@@ -38,6 +38,36 @@ lines. Two boots compared with the same steps, HEAD against the change, both sho
 The harness runs before those boots were not valid tests: the state kept the old room in RAM, and a
 state from before the install read stale RomFS offsets (`docs/app.md`, harness user data).
 
-Next: probe the changed ground from a daytime boot, to measure what each side of a remaining line
-reads after the snap. Either the snap missed those corners, or the cause is something other than
-the inset.
+## Cause
+
+Drawn offline with `model_render` (the mesh from above, the model's own coordinates, no emulator),
+the lines are in the model. The cells are not only offset: a triangle's cell is turned, mirrored
+or scaled against its neighbour's. In `s04_yuka_01r`, 330 of 1143 shared edges run the texture
+differently on their two sides. The inset was a small part of it.
+
+## Fix
+
+`tools/z3dmods/ground_uv.py`, run by `install` on every room: a floor laid as such a patchwork gets
+new texture coordinates from its vertices' world x and z, at the mesh's own median texels per world
+unit. Every shared edge then reads the same texels on both sides, and the hardware's repeat tiles
+the texture across the floor. A mesh qualifies when:
+
+- 90% of its area faces up (or down, for ceilings) within 40°;
+- at least 10% of its shared edges disagree;
+- it wraps with `GL_REPEAT` on both axes, and no other shape shares its coordinates;
+- its game texture is ground: opaque (flowers and vines are decals), alike across both axes (a
+  road strip, dirt between grass, is not), and seamless across its wrap.
+
+That maps 53 textures in 75 OoT3D rooms and 79 in 98 MM3D rooms.
+
+Proof:
+
+- `model_render` of the installed bytes, before against after: Kokiri Forest's grass with the pack
+  shows no line. Dodongo's Cavern, Ice Cavern, Hyrule Field and MM3D's paths are clean too.
+- Fresh boots to the report's spot, HEAD against the fix with the same steps
+  (`scratch/runs/boot-head`, `boot-planar`): HEAD's diagonal texture breaks are gone.
+
+Still there, and not this defect: straight changes of tone along some triangle edges, in HEAD and
+the fix alike. They are the room's baked vertex lighting, interpolated per triangle.
+
+The Deku Tree vines (`deku-vines.md`) are walls, which this does not map; they are still open.

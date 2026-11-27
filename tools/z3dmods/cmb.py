@@ -16,6 +16,11 @@ MAJORA = 10
 COMPONENTS = {0x1400: ("b", 1), 0x1401: ("B", 1), 0x1402: ("h", 2), 0x1403: ("H", 2),
               0x1404: ("i", 4), 0x1405: ("I", 4), 0x1406: ("f", 4)}
 ATTRIBUTE_ARRAY = 0
+# A material's texture bindings: one per slot from 0x10, the wrap modes (GL enums) at +0x08.
+BINDING = 0x10
+BINDING_SIZE = 0x18
+BINDING_WRAP = 0x08
+GL_REPEAT = 0x2901
 UNSIGNED_SHORT = 0x1403
 # OoT3D sign-extends a primitive's 16-bit index count into the draw's vertex count.
 MAX_PRIMITIVE_INDICES = 0x7FFF
@@ -159,6 +164,16 @@ class Cmb:
             return None
         base = start + texture.offset
         return self.data[base:base + texture.size]
+
+    def wrap(self, material: int, slot: int) -> tuple[int, int]:
+        """The material's wrap modes in s and t for the texture bound in `slot`."""
+        table = struct.unpack_from("<I", self.data, self.layout.materials)[0]
+        entry = table + 0x0C + material * self.layout.material_size + BINDING + slot * BINDING_SIZE
+        return struct.unpack_from("<HH", self.data, entry + BINDING_WRAP)
+
+    def attribute_at(self, shape: Shape, name: str) -> int:
+        """Offset of the shape's attribute record for a slice: start, then scale at +4."""
+        return shape.offset + SEPD_ATTRIBUTES + self.layout.slices.index(name) * ATTRIBUTE_SIZE
 
     def indices(self, shape: Shape) -> list[int]:
         out: list[int] = []
@@ -341,7 +356,7 @@ def _materials(data: bytes, offset: int, layout: Layout) -> list[tuple[int, int,
     out = []
     for i in range(count):
         entry = offset + 0x0C + i * layout.material_size
-        out.append(tuple(struct.unpack_from("<h", data, entry + 0x10 + j * 0x18)[0] for j in range(3)))
+        out.append(tuple(struct.unpack_from("<h", data, entry + BINDING + j * BINDING_SIZE)[0] for j in range(3)))
     return out
 
 
