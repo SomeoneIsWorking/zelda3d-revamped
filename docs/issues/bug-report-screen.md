@@ -5,3 +5,5 @@ the bug report screen"
 
 The in-game report (B) is drawn by the app's own `BugReportScreen` on the menu canvas; it is to be
 Lucent's RmlUi bug report. Backspace, meant to delete typed text, leaves the screen.
+
+User, 2026-11-27 (Fedora): "The existing bug report also takes a while to open"
