@@ -31,3 +31,13 @@ with the pack on and off.
 
 No layout error like the chest's was found in the vine textures. Still open: which faces sample the
 sprite column's empty top rows, so whether any plant is missing in play.
+
+## The user's memory of it
+
+User, 2026-11-27 (Fedora), after the shots above looked fine:
+
+> your screenshot looks fine but I remember seeing misaligned segments, like the grass issue I
+> reported earlier, if that's fixed maybe this is fixed too
+
+So the vine defect is probably the same as `ground-texture-seams.md`: segments that don't line up
+where the faces meet, rather than a texture drawn off the game's layout.
