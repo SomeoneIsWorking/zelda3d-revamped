@@ -28,6 +28,16 @@ changes the result.
   (`gTouchCamera2D`), not four calls in the layers; `TouchScreen2D_Begin`'s pass on that camera is
   widened too, so file select's sky keeps its aspect.
 - OoT3D text: `TextRenderer_Init` is overridden to pass the static glyph texture's mode.
-- Open: the rest of both games' `hooks.s` sites that are not entry overrides are call hooks and
-  literal patches inside functions: cutscene skip, camera, text, The One Screen's `base_*` sites
-  and others. Each becomes an override of its function, one function at a time.
+- Open, OoT3D game code: each site is inside a function that has to be written whole in C++ to
+  become an override. `TextRenderer_AddGlyph` (560 bytes, `static_glyph_cell`),
+  `TextRenderer_FillStaticGlyphTexture` (780, `static_cell_glyph`), `PadMgr_RequestPadData` (960,
+  `song_notes`), `TopHud_UpdateButtons` (1016, `base_b_ring`), `TopHud_Draw` (1328, `base_b_item`),
+  `Message_LayoutText` (2904, Quick Text's `text_element` and `instant_off`) and `Target_Draw`
+  (3052, `arrow_turn_*`).
+- Open, The One Screen: the ten `base_*` sites patch The One Screen's own code (MIT). Their owner
+  is a fork of The One Screen built from source with our changes, installed in place of its
+  released `code.ips`.
+- Open, MM3D: about 30 call hooks in the screens' draw and update functions (items, masks, gear,
+  map, ocarina, title, file select, the minimap, the message window, actors, cutscenes,
+  `Input_ReadTouch`, `Target_Draw`); each screen's draw becomes an override of the whole function,
+  as OoT3D's `ItemMenu_Draw` did.
