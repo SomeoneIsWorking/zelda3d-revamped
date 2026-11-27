@@ -68,13 +68,18 @@ struct AppConfig {
   // Z3D_TEST_PAD=1, the input tests alone: the loopback channel that makes and drives their
   // gamepad (test_pad.hpp).
   bool testPad = false;
+  // Hidden, or Z3D_SILENT=1 (the tools' windowed runs): no sound reaches the host.
+  bool silent = false;
+  // Hidden, or Z3D_UNPACED=1 (a tool's windowed run that measures no pacing): no frame limit and
+  // no vsync.
+  bool unpaced = false;
 
   // z3d --keys
   // z3d --user <dir> (--rom <3ds> [--layout l] [--textures] [--options <json>] [--option
   // <id>=<value>]... [--assets <dir>] | --library <json> --font <ttf> --assets <dir>)
   //     [--title t] [--app-id id] [--resolution n] [--hidden] [--dump-textures] [--record <dir>]
   //     [--tools <program> [<argument>]...]
-  // Environment: Z3D_TEST_PAD.
+  // Environment: Z3D_TEST_PAD, Z3D_SILENT, Z3D_UNPACED.
   [[nodiscard]] static AppConfig parse(int argc, char **argv);
 };
 

@@ -61,14 +61,16 @@ MM3D_SLOT_2 = (0.6 + 0.4 * 0.51, 0.25 + 0.5 * 0.54)
 
 class Session:
     def __init__(self, out: Path, args: list[str], keys: AppKeys, env: dict[str, str] | None = None,
-                 program: str = "z3d", size: tuple[int, int] = (WIDTH, HEIGHT)) -> None:
+                 program: str = "z3d", size: tuple[int, int] = (WIDTH, HEIGHT), unpaced: bool = False) -> None:
         """`program` is the one Gamescope starts whose environment names the display: the app,
-        or what stands between Gamescope and it. `keys` are the app's bindings."""
+        or what stands between Gamescope and it. `keys` are the app's bindings. An `unpaced` app
+        runs with no frame limit or vsync."""
         self.out = out
         self._keys = keys
         self._size = size
         self._args = args
         self._program = program
+        self._unpaced = unpaced
         self._extra_env = env or {}
         self._gamescope: subprocess.Popen | None = None
         self._env: dict[str, str] = {}
@@ -79,6 +81,9 @@ class Session:
         args = self._args
         env = {k: v for k, v in os.environ.items() if k not in ("WAYLAND_DISPLAY", "DISPLAY")}
         env[config.TEST_PAD_ENV] = "1"
+        env[config.SILENT_ENV] = "1"
+        if self._unpaced:
+            env[config.UNPACED_ENV] = "1"
         env.update(self._extra_env)
         self.out.mkdir(parents=True, exist_ok=True)
         log = (self.out / "gamescope.log").open("wb")
@@ -1783,6 +1788,12 @@ DIRECT_GAME = {"hotswap": "mm3d", "slots": "oot3d", "slots-small": "oot3d", "slo
                "interp-textures-mm3d": "mm3d", "interp-turn": "oot3d", "interp-turn-mm3d": "mm3d", "aim-smooth": "oot3d", "report": "oot3d", "settings": "oot3d", "file-fade": "oot3d", "pause-wide": "oot3d", "files-mm3d": "mm3d",
                "interp-scenes": "oot3d", "interp-scenes-mm3d": "mm3d"}
 # The direct scenarios that record every present into presents/ (app --record).
+# Scenarios that judge states by log lines and shots alone, not by how far the game ran in a time:
+# the app runs them as fast as it can.
+UNPACED = ("report", "settings", "options", "options-oot3d", "menu-pad", "picker", "setup", "setup-archive",
+           "setup-different-mod", "setup-missing-mod", "setup-wrong-dump", "first-run", "hotswap", "slots",
+           "slots-small", "slots-mm3d", "slots-mm3d-small", "oot3d", "mm3d", "files-mm3d", "pause-wide",
+           "masks-mm3d", "notebook-mm3d")
 RECORDED = ("interp-textures", "interp-textures-mm3d", "interp-turn", "interp-turn-mm3d", "aim-smooth", "interp-scenes",
             "interp-scenes-mm3d")
 # The window of a scenario that is not WIDTH by HEIGHT.
@@ -1837,8 +1848,8 @@ def _session(cfg: Config, scenario: str, out: Path) -> Session:
             program = [str(launcher), "--roms", str(home / "ROM" / "3DS"), "--mods", str(home / "Empty")]
             return Session(out, desktop_container.command(cfg, out, [launcher, *dumps],
                                                           {config.APP_DATA_ENV: str(user)}, program), keys,
-                           program=desktop_container.PROGRAM)
-        return Session(out, [str(launcher)], keys, {config.APP_DATA_ENV: str(user), "HOME": str(home)})
+                           program=desktop_container.PROGRAM, unpaced=scenario in UNPACED)
+        return Session(out, [str(launcher)], keys, {config.APP_DATA_ENV: str(user), "HOME": str(home)}, unpaced=scenario in UNPACED)
     app.seed_user(cfg, user, fresh=True)
     if scenario in PREPARE:
         PREPARE[scenario](cfg, user, out)
@@ -1851,15 +1862,15 @@ def _session(cfg: Config, scenario: str, out: Path) -> Session:
             args = app.launch_args(cfg, GameSet.named(cfg.repo, name), user, 1) + [
                 "--title", play.TITLES[name], "--app-id", play.DESKTOP_ID, "--record", str(out / "presents")]
         return Session(out, args, keys,
-                       size=SIZES.get(scenario, (WIDTH, HEIGHT)))
+                       size=SIZES.get(scenario, (WIDTH, HEIGHT)), unpaced=scenario in UNPACED)
     if scenario in PICKER:
         files = FILES[scenario](cfg, out) if scenario in FILES else cfg
         # The picker's tools are a program of their own: they are told the test's downloads.
-        return Session(out, play.launch_args(files, None, user), keys, {config.MOD_SOURCES_ENV: str(files.mod_sources)})
+        return Session(out, play.launch_args(files, None, user), keys, {config.MOD_SOURCES_ENV: str(files.mod_sources)}, unpaced=scenario in UNPACED)
     entry = Path.home() / ".local/share/applications" / f"{play.DESKTOP_ID}.desktop"
     if not entry.exists():
         raise RuntimeError(f"{entry} is missing; run z3dmods shortcut")
-    return Session(out, shlex.split(shortcut.desktop_exec(entry)), keys, {config.APP_DATA_ENV: str(user)})
+    return Session(out, shlex.split(shortcut.desktop_exec(entry)), keys, {config.APP_DATA_ENV: str(user)}, unpaced=scenario in UNPACED)
 
 
 def run(cfg: Config, scenario: str) -> Path:

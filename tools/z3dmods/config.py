@@ -101,6 +101,10 @@ APP_DATA_ENV = "Z3D_APP_DATA"
 MOD_SOURCES_ENV = "Z3D_MOD_SOURCES"
 # Opens the app's loopback channel for the input tests' gamepad (app/src/test_pad.hpp).
 TEST_PAD_ENV = "Z3D_TEST_PAD"
+# The app plays no sound: set for every run a tool makes.
+SILENT_ENV = "Z3D_SILENT"
+# No frame limit or vsync: set for a tool's run that measures no pacing.
+UNPACED_ENV = "Z3D_UNPACED"
 # Runs an app built elsewhere, such as against a core checkout with uncommitted changes.
 APP_BINARY_ENV = "Z3D_APP_BINARY"
 SESSION_KEYS = ("WAYLAND_DISPLAY", "DISPLAY", "XAUTHORITY", "XDG_SESSION_TYPE")

@@ -27,6 +27,8 @@ constexpr std::array kLayouts{
 constexpr uint32_t kMaxResolution = 10;
 
 constexpr const char *kTestPadVariable = "Z3D_TEST_PAD";
+constexpr const char *kSilentVariable = "Z3D_SILENT";
+constexpr const char *kUnpacedVariable = "Z3D_UNPACED";
 
 std::pair<std::string, uint8_t> parseOption(const std::string &text) {
   const size_t equals = text.find('=');
@@ -124,6 +126,10 @@ AppConfig AppConfig::parse(int argc, char **argv) {
   }
   const char *testPad = std::getenv(kTestPadVariable);
   config.testPad = testPad != nullptr && std::string_view(testPad) == "1";
+  const char *silent = std::getenv(kSilentVariable);
+  config.silent = config.hidden || (silent != nullptr && std::string_view(silent) == "1");
+  const char *unpaced = std::getenv(kUnpacedVariable);
+  config.unpaced = config.hidden || (unpaced != nullptr && std::string_view(unpaced) == "1");
   const bool picker =
       !config.library.empty() && !config.font.empty() && !config.assets.empty() && !config.hidden;
   if (config.userDir.empty() || config.game.has_value() == picker) {

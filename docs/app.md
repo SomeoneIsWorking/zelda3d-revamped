@@ -490,8 +490,11 @@ objects. Rebuild the app: `ninja -C build/app`.
   X11, from SDL3's window properties). A frame ends when the renderer calls
   `GameWindow::PollEvents`, which counts it, pumps SDL events and reads the host pad. `shot` frames
   come from the renderer's screenshot path (XRGB rows), requested before the last frame of a `run`.
-- Sound: the core's own sink (cubeb) when windowed, the null sink when hidden. The windowed loop is
-  paced by the core's frame limiter at 100%.
+- Sound: the core's own sink (cubeb) when windowed, the null sink when hidden or with
+  `Z3D_SILENT=1` (`AppConfig::silent`). The windowed loop is paced by the core's frame limiter at
+  100% and vsync; hidden or with `Z3D_UNPACED=1` (`AppConfig::unpaced`) it runs unpaced: no limiter,
+  no vsync, and custom textures load before the frame that needs them. Input tests set `Z3D_SILENT`
+  always and `Z3D_UNPACED` for the scenarios in `input_test.UNPACED`.
 - Input: every 3DS button, both sticks and the motion device are `engine:z3d` devices on one
   shared pad state; touch is the window's `engine:emu_window`.
 - User data: the core keeps it in `<user>/Azahar/` (its user path); `app.py` seeds it with copies

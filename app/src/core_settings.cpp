@@ -56,11 +56,11 @@ void applyCoreSettings(const AppConfig &config) {
   auto &values = Settings::values;
   values.graphics_api = Settings::GraphicsAPI::Vulkan;
   values.dump_textures = config.dumpTextures;
-  values.frame_limit = config.hidden ? 0.0 : kRealTime;
-  values.use_vsync = !config.hidden;
+  values.frame_limit = config.unpaced ? 0.0 : kRealTime;
+  values.use_vsync = !config.unpaced;
   // A tool run outpaces asynchronous texture loading; each frame waits for its textures instead.
-  values.async_custom_loading = !config.hidden;
-  values.output_type = config.hidden ? AudioCore::SinkType::Null : AudioCore::SinkType::Auto;
+  values.async_custom_loading = !config.unpaced;
+  values.output_type = config.silent ? AudioCore::SinkType::Null : AudioCore::SinkType::Auto;
   values.enable_audio_stretching = false;
   values.current_input_profile = PadInput::profile();
   // Every system module is HLE; the core looks each one up by name.
