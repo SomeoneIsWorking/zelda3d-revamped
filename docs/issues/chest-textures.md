@@ -50,3 +50,15 @@ and the strip's rows moved onto the game's (knots fitted against the game's text
 out. The report's state now shows the lid's band with its silver plates and the dark corner, as
 the game draws it, at the pack's resolution; the far chest is unchanged. The pack's own art in the
 strip below row 72 (a framed panel where the game has a latch on stone) is kept as drawn.
+
+User, 2026-11-27 (Fedora): "Can you overlay the textures together and check for mismatches".
+
+## Remaining mismatches
+Overlaid after the fix (edges of the game's in red, the pack's in green; 16-texel blocks matched
+on strong edges; row profiles of the front panel): the middle column now lines up. Left:
+- the whole front panel's lines sit 1 texel high in the pack: highlight rows 46, 59, 76-77 and 121
+  in the game's are 45, 58, 75-76 and 120 in the pack's;
+- the latch (rows 80 to 100, columns 24 to 48) sits about 3 texels high;
+- the bottom arch (columns 78 to 104, rows 94 to 128) is drawn on a different curve;
+- the right strip below row 72 is different art (a framed panel where the game has a latch on
+  stone).
