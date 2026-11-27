@@ -1,8 +1,8 @@
 // Our inventory. The item screen keeps its book, BACK, tabs, cursor and items, drawn by its model
 // and layouts over two layouts of ours from the screen's sheet (menu_pieces.hpp, drawn by
 // tools/z3dmods/menu_art.py): a slate panel nine-sliced around the grid and a rounded cell under
-// each of its items. hooks.s moves the screen's own panel and tabs' bar off the screen, BACK into
-// the bottom left corner; the grid's place is item_grid.cpp's.
+// each of its items. pause_screens.cpp moves the screen's own panel and tabs' bar off the screen,
+// BACK into the bottom left corner; the grid's place is item_grid.cpp's.
 #include "inventory_screen.hpp"
 
 #include "../common/guest.hpp"
@@ -10,8 +10,7 @@
 #include "item_grid.hpp"
 #include "menu_layout.hpp"
 #include "menu_pieces.hpp"
-#include "pause_screens.hpp"
-#include "pause_tabs.hpp"
+#include "pause_quads.hpp"
 #include "symbols.hpp"
 
 #include <stdint.h>
@@ -64,7 +63,6 @@ public:
     each([&](const MenuLayout &layout) {
       layout.sheet(sheet, sheetSize[0], sheetSize[1]);
     });
-    turnItemTabs(screen);
     for (uint32_t cell = 0; cell < kCells; ++cell) {
       cells_.cell(cell, {kMenuPieceCell.u, kMenuPieceCell.v},
                   {kMenuPieceCell.width, kMenuPieceCell.height});

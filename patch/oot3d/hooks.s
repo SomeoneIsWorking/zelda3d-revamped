@@ -59,54 +59,6 @@
     mov r0, #0
 .section .expect.base_hud, "", %progbits
     .word 0xC3A00001 @ movgt r0, #1
-@ File select's BACK button (quads 173 and 174, its lit frame 118 to 120; decomp
-@ docs/file_select.md): 40 pixels left of the touch screen, into the top screen's corner, which
-@ top_touch_screen.cpp and base_file_select_* bring into view.
-.section .patch.back_lit, "a", %progbits
-    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
-.section .expect.back_lit, "", %progbits
-    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
-.section .patch.back_button, "a", %progbits
-    .float -40.0, 204.0, 0.0, 204.0
-.section .expect.back_button, "", %progbits
-    .float 0.0, 204.0, 40.0, 204.0
-@ The pause screens' BACK and BACK lit (decomp docs/pause.md), the same way.
-.section .patch.item_back_lit, "a", %progbits
-    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
-.section .expect.item_back_lit, "", %progbits
-    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
-.section .patch.item_back, "a", %progbits
-    .float -40.0, 204.0, 0.0, 204.0
-.section .expect.item_back, "", %progbits
-    .float 0.0, 204.0, 40.0, 204.0
-@ The item screen's panel and the tabs' bar, off the screen: inventory_screen.cpp draws our panel.
-.section .patch.item_panel, "a", %progbits
-    .float 1004.0, 0.0, 1128.0, 0.0
-.section .expect.item_panel, "", %progbits
-    .float 4.0, 0.0, 128.0, 0.0
-.section .patch.item_tab_bar, "a", %progbits
-    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
-.section .expect.item_tab_bar, "", %progbits
-    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
-@ The Map tab's cell from a texel lower: its top row took in the Gear tab's art just above it in the
-@ sheet, a thin line over the tab that the tabs' bar hid.
-.section .patch.item_map_tab_cell, "a", %progbits
-    .float 138.0, 223.0
-.section .expect.item_map_tab_cell, "", %progbits
-    .float 138.0, 222.0
-.section .patch.item_map_tab_cell_size, "a", %progbits
-    .float 54.0, 33.0
-.section .expect.item_map_tab_cell_size, "", %progbits
-    .float 54.0, 34.0
-@ The item screen's column and its four buttons' frames, off the screen: slot_column.cpp draws its own.
-.section .patch.item_column, "a", %progbits
-    .float 1256.0, 0.0
-    .float 1264.0, 0.0, 1272.0, 0.0, 1264.0, 184.0, 1272.0, 184.0, 1266.0, 2.0, 1266.0, 186.0
-    .float 1272.0, 70.0, 1296.0, 70.0, 1274.0, 72.0, 1260.0, 122.0, 1284.0, 122.0, 1262.0, 124.0
-.section .expect.item_column, "", %progbits
-    .float 256.0, 0.0
-    .float 264.0, 0.0, 272.0, 0.0, 264.0, 184.0, 272.0, 184.0, 266.0, 2.0, 266.0, 186.0
-    .float 272.0, 70.0, 296.0, 70.0, 274.0, 72.0, 260.0, 122.0, 284.0, 122.0, 262.0, 124.0
 @ The grid's place and the game's cursor and stylus on it, ours in item_grid.cpp.
 .section .patch.item_node_position, "ax", %progbits
     b _ZN7z3dmods5oot3d16itemNodePositionEiPfS1_
@@ -124,37 +76,33 @@
     b _ZN7z3dmods5oot3d15updateItemTouchEi
 .section .expect.item_update_touch, "", %progbits
     .word 0xE92D4FF0 @ push {r4-r11, lr}
+@ The menus' builders overridden: the game's build, then our layout (pause_screens.cpp,
+@ top_touch_screen.cpp). Each *Game in the text below runs the game's own.
+.section .patch.item_menu_init, "ax", %progbits
+    b _ZN7z3dmods5oot3d12initItemMenuEv
+.section .expect.item_menu_init, "", %progbits
+    .word 0xE92D43F0 @ push {r4-r9, lr}
+.section .patch.gear_menu_init, "ax", %progbits
+    b _ZN7z3dmods5oot3d12initGearMenuEv
+.section .expect.gear_menu_init, "", %progbits
+    .word 0xE92D43F0 @ push {r4-r9, lr}
+.section .patch.map_menu_init, "ax", %progbits
+    b _ZN7z3dmods5oot3d11initMapMenuEv
+.section .expect.map_menu_init, "", %progbits
+    .word 0xE92D4010 @ push {r4, lr}
+.section .patch.save_menu_init, "ax", %progbits
+    b _ZN7z3dmods5oot3d12initSaveMenuEv
+.section .expect.save_menu_init, "", %progbits
+    .word 0xE92D5FF0 @ push {r4-r12, lr}
+.section .patch.file_choose_init_quads, "ax", %progbits
+    b _ZN7z3dmods5oot3d19initFileChooseQuadsEv
+.section .expect.file_choose_init_quads, "", %progbits
+    .word 0xE92D5FF0 @ push {r4-r12, lr}
 @ Touch_InRect overridden: BACK and the tabs where the pause screens draw them (pause_screens.cpp).
 .section .patch.touch_in_rect, "ax", %progbits
     b _ZN7z3dmods5oot3d11touchInRectEiiiii
 .section .expect.touch_in_rect, "", %progbits
     .word 0xE92D0070 @ push {r4, r5, r6}
-@ PauseMenus_Init's call of GearMenu_Init: the gear screen's tabs turned down the left edge once it
-@ is built (pause_screens.cpp).
-.section .patch.gear_menu_init, "ax", %progbits
-    bl _ZN7z3dmods5oot3d12initGearMenuEv
-.section .expect.gear_menu_init, "", %progbits
-    .word 0xEB004524 @ bl GearMenu_Init
-@ The gear screen's tabs' bar, off the screen as item_tab_bar.
-.section .patch.gear_tab_bar, "a", %progbits
-    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
-.section .expect.gear_tab_bar, "", %progbits
-    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
-@ PauseMenus_Init's call of MapMenu_Init: the map's tabs turned down the left edge once it is built
-@ (pause_screens.cpp).
-.section .patch.map_menu_init, "ax", %progbits
-    bl _ZN7z3dmods5oot3d11initMapMenuEv
-.section .expect.map_menu_init, "", %progbits
-    .word 0xEB0053E9 @ bl MapMenu_Init
-@ The map's tabs' bars, under tabs that are down the left edge now: off the screen, as item_tab_bar.
-.section .patch.map_tab_bar, "a", %progbits
-    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
-.section .expect.map_tab_bar, "", %progbits
-    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
-.section .patch.map_other_tab_bar, "a", %progbits
-    .float 1064.0, 202.0, 1072.0, 202.0, 1248.0, 202.0
-.section .expect.map_other_tab_bar, "", %progbits
-    .float 64.0, 202.0, 72.0, 202.0, 248.0, 202.0
 @ ItemMenu_Update's rebuild of the grid's quads.
 .section .patch.item_grid_update, "ax", %progbits
     bl _ZN7z3dmods5oot3d14updateItemGridEPv
@@ -170,43 +118,6 @@
     bl _ZN7z3dmods5oot3d14drawItemColumnEPv
 .section .expect.item_menu_draw, "", %progbits
     .word 0xEBFB0AC8 @ bl HudItemButtons_Draw
-@ ItemMenu_Init's last call: the slots' layouts are built after the screen's.
-.section .patch.item_menu_init, "ax", %progbits
-    bl _ZN7z3dmods5oot3d13resetItemMenuEv
-.section .expect.item_menu_init, "", %progbits
-    .word 0xEBF9FF2F @ bl ItemMenu_Reset
-.section .patch.gear_back_lit, "a", %progbits
-    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
-.section .expect.gear_back_lit, "", %progbits
-    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
-.section .patch.gear_back, "a", %progbits
-    .float -40.0, 204.0, 0.0, 204.0
-.section .expect.gear_back, "", %progbits
-    .float 0.0, 204.0, 40.0, 204.0
-.section .patch.map_back_lit, "a", %progbits
-    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0, -40.0, 208.0, -40.0, 224.0
-.section .expect.map_back_lit, "", %progbits
-    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0, 0.0, 208.0, 0.0, 224.0
-.section .patch.map_back, "a", %progbits
-    .float -40.0, 204.0, 0.0, 204.0
-.section .expect.map_back, "", %progbits
-    .float 0.0, 204.0, 40.0, 204.0
-.section .patch.map_other_back_lit, "a", %progbits
-    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
-.section .expect.map_other_back_lit, "", %progbits
-    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
-.section .patch.map_other_back, "a", %progbits
-    .float -40.0, 204.0, 0.0, 204.0
-.section .expect.map_other_back, "", %progbits
-    .float 0.0, 204.0, 40.0, 204.0
-.section .patch.save_back_lit, "a", %progbits
-    .float -40.0, 202.0, 10.0, 202.0, -40.0, 204.0
-.section .expect.save_back_lit, "", %progbits
-    .float 0.0, 202.0, 50.0, 202.0, 0.0, 204.0
-.section .patch.save_back, "a", %progbits
-    .float -40.0, 206.0, 0.0, 206.0
-.section .expect.save_back, "", %progbits
-    .float 0.0, 206.0, 40.0, 206.0
 @ The touch screen's 2D layers (TouchScreen2D_BeginLayer0 to 3): each one's projection, widened
 @ while file select is up.
 .section .patch.touch_projection0, "ax", %progbits
@@ -370,3 +281,24 @@ quick_text_instant_off:
     pop {r0-r3, r12, lr}
     bne kMessageLayoutText + 0xAEC
     b kMessageLayoutText + 0x2E0
+@ The game's builders: each one's first instruction, then the rest of it.
+.global _ZN7z3dmods5oot3d12itemMenuGameEv
+_ZN7z3dmods5oot3d12itemMenuGameEv:
+    push {r4, r5, r6, r7, r8, r9, lr}
+    b kItemMenuInit + 4
+.global _ZN7z3dmods5oot3d12gearMenuGameEv
+_ZN7z3dmods5oot3d12gearMenuGameEv:
+    push {r4, r5, r6, r7, r8, r9, lr}
+    b kGearMenuInit + 4
+.global _ZN7z3dmods5oot3d11mapMenuGameEv
+_ZN7z3dmods5oot3d11mapMenuGameEv:
+    push {r4, lr}
+    b kMapMenuInit + 4
+.global _ZN7z3dmods5oot3d12saveMenuGameEv
+_ZN7z3dmods5oot3d12saveMenuGameEv:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, r12, lr}
+    b kSaveMenuInit + 4
+.global _ZN7z3dmods5oot3d14fileChooseGameEv
+_ZN7z3dmods5oot3d14fileChooseGameEv:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, r12, lr}
+    b kFileChooseInitQuads + 4

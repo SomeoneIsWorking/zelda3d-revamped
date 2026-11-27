@@ -1,7 +1,10 @@
-// A pause screen's tabs (Gear, Map, Items) turned a quarter clockwise down the left edge, their
-// open sides on the screen's edge, and where it draws BACK and them for its hit tests (decomp
-// docs/pause.md). Each screen layout's batch is turned once, after the game builds it.
+// A pause screen layout's quads our way, once the game builds them (decomp docs/pause.md): BACK in
+// the top screen's corner, the tabs' bar off the screen and the tabs (Gear, Map, Items) turned a
+// quarter clockwise down the left edge, their open sides on the screen's edge; and where it draws
+// BACK and the tabs for its hit tests.
 #pragma once
+
+#include "menu_quads.hpp"
 
 #include <stdint.h>
 
@@ -20,15 +23,18 @@ struct Rect {
 inline constexpr uint32_t kQuadCorners = 4;
 inline constexpr uint32_t kCornerFloats = 3;
 
-// A screen layout's tables and where its tabs and BACK are in them.
+// A screen layout's tables and where its tabs, their bar and BACK are in them.
 struct PauseLayout {
-  uintptr_t positions;
-  uintptr_t sizes;
+  QuadTables tables;
   // Gear's, Map's and Items' faces from here, and their frames, three each, from `frames`.
   uint32_t faces;
   uint32_t frames;
-  // BACK's two quads from here.
+  // The tabs' bar's three quads from here.
+  uint32_t bar;
+  // BACK's two quads from here, and lit, `backLitQuads` of them from `backLit`.
   uint32_t back;
+  uint32_t backLit;
+  uint32_t backLitQuads;
 };
 
 // A place and size in the touch screen's pixels.
@@ -39,10 +45,10 @@ struct Box {
   float height;
 };
 
-class PauseTabs {
+class PauseQuads {
 public:
-  // Turns the tabs of `batch`, built from `layout`'s tables.
-  void turn(uintptr_t batch, const PauseLayout &layout);
+  // Places the quads of `batch`, built from `layout`'s tables, our way.
+  void build(uintptr_t batch, const PauseLayout &layout);
   // Whether `asked`, a hit test's rect, is a tab's where the game drew it, and then where we draw
   // that tab, in `drawn`.
   [[nodiscard]] bool tab(const Rect &asked, Box &drawn) const;
@@ -51,6 +57,8 @@ public:
 
 private:
   static constexpr uint32_t kTabs = 3;
+  static constexpr uint32_t kBarQuads = 3;
+  static constexpr uint32_t kBackQuads = 2;
 
   [[nodiscard]] static Box tableQuad(const PauseLayout &layout, uint32_t quad);
   static void turnQuad(uintptr_t batch, const PauseLayout &layout, uint32_t quad, const Box &tab,

@@ -1,4 +1,4 @@
-#include "pause_tabs.hpp"
+#include "pause_quads.hpp"
 
 #include "../common/guest.hpp"
 #include "game.hpp"
@@ -18,16 +18,16 @@ inline constexpr uint32_t kTurnedFrom[kQuadCorners] = {2, 0, 3, 1};
 
 } // namespace
 
-Box PauseTabs::tableQuad(const PauseLayout &layout, uint32_t quad) {
-  const auto *at = reinterpret_cast<const float *>(layout.positions);
-  const auto *size = reinterpret_cast<const float *>(layout.sizes);
+Box PauseQuads::tableQuad(const PauseLayout &layout, uint32_t quad) {
+  const auto *at = reinterpret_cast<const float *>(layout.tables.positions);
+  const auto *size = reinterpret_cast<const float *>(layout.tables.sizes);
   return {at[2 * quad], at[2 * quad + 1], size[2 * quad], size[2 * quad + 1]};
 }
 
 // Quad `quad` of a tab whose quads span `tab` in the tables, turned with the tab onto `turned`:
 // the tab's bottom, its open side, faces left.
-void PauseTabs::turnQuad(uintptr_t batch, const PauseLayout &layout, uint32_t quad, const Box &tab,
-                         const Box &turned) {
+void PauseQuads::turnQuad(uintptr_t batch, const PauseLayout &layout, uint32_t quad, const Box &tab,
+                          const Box &turned) {
   const Box was = tableQuad(layout, quad);
   const float x = turned.x + tab.y + tab.height - was.y - was.height;
   const float y = turned.y + was.x - tab.x;
@@ -52,9 +52,12 @@ void PauseTabs::turnQuad(uintptr_t batch, const PauseLayout &layout, uint32_t qu
   }
 }
 
-// In the order they ran along the bottom, from the left edge.
-void PauseTabs::turn(uintptr_t batch, const PauseLayout &layout) {
+// The tabs in the order they ran along the bottom, from the left edge.
+void PauseQuads::build(uintptr_t batch, const PauseLayout &layout) {
   layout_ = layout;
+  shiftQuads(batch, layout.tables, {layout.back, kBackQuads}, kCorneredBack);
+  shiftQuads(batch, layout.tables, {layout.backLit, layout.backLitQuads}, kCorneredBack);
+  shiftQuads(batch, layout.tables, {layout.bar, kBarQuads}, kOffScreen);
   const float first = tableQuad(layout, layout.faces).x;
   for (uint32_t index = 0; index < kTabs; ++index) {
     const Box tab = tableQuad(layout, layout.faces + index);
@@ -68,7 +71,7 @@ void PauseTabs::turn(uintptr_t batch, const PauseLayout &layout) {
 }
 
 // The game hit-tests a tab with its face's place across and its size.
-bool PauseTabs::tab(const Rect &asked, Box &drawn) const {
+bool PauseQuads::tab(const Rect &asked, Box &drawn) const {
   for (uint32_t index = 0; index < kTabs; ++index) {
     const Box face = tableQuad(layout_, layout_.faces + index);
     if (static_cast<int32_t>(face.x) == asked.x &&
@@ -81,10 +84,10 @@ bool PauseTabs::tab(const Rect &asked, Box &drawn) const {
   return false;
 }
 
-Box PauseTabs::back() const {
+Box PauseQuads::back() const {
   const Box back = tableQuad(layout_, layout_.back);
   const Box end = tableQuad(layout_, layout_.back + 1);
-  return {back.x, back.y, end.x + end.width - back.x, back.height};
+  return {back.x + kCorneredBack, back.y, end.x + end.width - back.x, back.height};
 }
 
 } // namespace z3dmods::oot3d

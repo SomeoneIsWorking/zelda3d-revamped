@@ -1,0 +1,23 @@
+# Overrides instead of memory patches
+
+User, 2026-11-26 (Fedora): "Replace these patches with overrides", "I mean override functions
+instead of memory patching", "I don't like memory patches", "I think instead of patching memory to
+move items, we instead override the function that builds the menu and make it build the menu in
+the way we want instead".
+
+A change to the game's behaviour is a function of ours that replaces the game's at its entry
+(`hooks.s`: a branch at the first instruction, checked against the game's word), never a patched
+literal, table entry or call site in the middle of a function. Where ours keeps the game's work,
+it runs the game's through a trampoline (the first instruction, then a branch to the second) and
+changes the result.
+
+## Where it stands
+- OoT3D pause screens: done. `ItemMenu_Init`, `GearMenu_Init`, `MapMenu_Init`, `SaveMenu_Init` and
+  file select's `FileChoose_InitQuads` are overridden (`pause_screens.cpp`, `top_touch_screen.cpp`):
+  the game's builder runs, then `QuadBatch_SetRects` places BACK, the tabs, the bar, the panel and
+  the column ours. No table is patched. The grid's cursor and stylus are the overridden
+  `ItemMenu_NodePosition`, `ItemMenu_PlaceCursor`, `ItemMenu_UpdateCursor`, `ItemMenu_UpdateTouch`
+  and `Touch_InRect` (`item_grid.cpp`, `pause_screens.cpp`).
+- Open: the rest of both games' `hooks.s` sites that are not entry overrides are call hooks and
+  literal patches inside functions: cutscene skip, camera, text, The One Screen's `base_*` sites
+  and others. Each becomes an override of its function, one function at a time.

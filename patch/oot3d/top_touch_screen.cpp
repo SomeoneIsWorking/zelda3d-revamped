@@ -3,16 +3,25 @@
 // pause screen is up its viewport takes the whole top screen (hooks.s base_file_select_*,
 // base_touch_viewport) and the touch screen's projection spans x -40 to 360 to match: everything
 // stays where it was, the backdrop is spread over the width, and what is moved past the touch
-// screen's edges (BACK, hooks.s back_*, <screen>_back*) shows (decomp docs/file_select.md,
-// docs/pause.md).
+// screen's edges shows: BACK, cornered by FileChoose_InitQuads, overridden here, and by the pause
+// screens (pause_screens.cpp; decomp docs/file_select.md, docs/pause.md).
 #include "../common/guest.hpp"
 #include "game.hpp"
+#include "menu_quads.hpp"
 #include "symbols.hpp"
 
 #include <stdint.h>
 
 namespace z3dmods::oot3d {
+
+// The game's FileChoose_InitQuads, from hooks.s.
+void fileChooseGame();
+
 namespace {
+
+// File select's BACK's two quads and BACK lit's three.
+inline constexpr uint32_t kBackQuads = 2;
+inline constexpr uint32_t kBackLitQuads = 3;
 
 using SetMatricesFn = void (*)(void *camera, float *projection, const float *view);
 using ViewportFn = void (*)(int x, int y, int width, int height);
@@ -96,6 +105,16 @@ void drawBackdrop(void *model) {
   draw(model);
   guest::write(model, kScaleX, scale);
   guest::write(model, kOffsetX, offset);
+}
+
+// FileChoose_InitQuads, overridden (hooks.s file_choose_init_quads): file select's quads as the
+// game builds them as it opens, BACK cornered.
+void initFileChooseQuads() {
+  fileChooseGame();
+  const auto batch = guest::read<uintptr_t>(kFileChoose + kFileChooseQuads);
+  const QuadTables tables{kFileChoose + kFileChooseQuadPositions, kFileChooseQuadSizes};
+  shiftQuads(batch, tables, {kFileChooseQuadBack, kBackQuads}, kCorneredBack);
+  shiftQuads(batch, tables, {kFileChooseQuadBackLit, kBackLitQuads}, kCorneredBack);
 }
 
 } // namespace z3dmods::oot3d

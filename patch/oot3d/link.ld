@@ -30,34 +30,14 @@ SECTIONS {
   .patch.item_place_cursor kItemMenuPlaceCursor : { KEEP(*(.patch.item_place_cursor)) }
   .patch.play_update kGameplayUpdate + 0x9C : { KEEP(*(.patch.play_update)) }
   .patch.base_camera kGameplayUpdate + 0xA8 : { KEEP(*(.patch.base_camera)) }
-  .patch.gear_menu_init kPauseMenusInit + kPauseMenusGearMenuInitCall : { KEEP(*(.patch.gear_menu_init)) }
-  .patch.map_menu_init kPauseMenusInit + kPauseMenusMapMenuInitCall : { KEEP(*(.patch.map_menu_init)) }
+  .patch.gear_menu_init kGearMenuInit : { KEEP(*(.patch.gear_menu_init)) }
+  .patch.save_menu_init kSaveMenuInit : { KEEP(*(.patch.save_menu_init)) }
   .patch.static_cell_glyph kTextRendererFillStatic + 0x80 : { KEEP(*(.patch.static_cell_glyph)) }
-  .patch.item_menu_init kItemMenuInit + kItemMenuInitLastCall : { KEEP(*(.patch.item_menu_init)) }
+  .patch.map_menu_init kMapMenuInit : { KEEP(*(.patch.map_menu_init)) }
+  .patch.file_choose_init_quads kFileChooseInitQuads : { KEEP(*(.patch.file_choose_init_quads)) }
+  .patch.item_menu_init kItemMenuInit : { KEEP(*(.patch.item_menu_init)) }
   .patch.arrow_turn_move kTargetDraw + kArrowTurnMove : { KEEP(*(.patch.arrow_turn_move)) }
   .patch.arrow_turn_convert kTargetDraw + kArrowTurnConvert : { KEEP(*(.patch.arrow_turn_convert)) }
-  /* File select's quad places (hooks.s back_lit, back_button), two floats a quad. */
-  .patch.back_lit kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBackLit * 8 : { KEEP(*(.patch.back_lit)) }
-  .patch.back_button kFileChoose + kFileChooseQuadPositions + kFileChooseQuadBack * 8 : { KEEP(*(.patch.back_button)) }
-  /* The pause screens' (hooks.s <screen>_back_lit, <screen>_back). */
-  .patch.item_back_lit kItemMenuQuadPositions + kItemMenuQuadBackLit * 8 : { KEEP(*(.patch.item_back_lit)) }
-  .patch.item_panel kItemMenuQuadPositions + kItemMenuQuadPanel * 8 : { KEEP(*(.patch.item_panel)) }
-  .patch.item_tab_bar kItemMenuQuadPositions + kItemMenuQuadTabBar * 8 : { KEEP(*(.patch.item_tab_bar)) }
-  .patch.item_map_tab_cell kItemMenuQuadUvs + (kItemMenuQuadTabs + 1) * 8 : { KEEP(*(.patch.item_map_tab_cell)) }
-  .patch.item_map_tab_cell_size kItemMenuQuadUvSizes + (kItemMenuQuadTabs + 1) * 8 : { KEEP(*(.patch.item_map_tab_cell_size)) }
-  .patch.item_column kItemMenuQuadPositions + kItemMenuQuadColumn * 8 : { KEEP(*(.patch.item_column)) }
-  .patch.item_back kItemMenuQuadPositions + kItemMenuQuadBack * 8 : { KEEP(*(.patch.item_back)) }
-  .patch.gear_back_lit kGearMenuQuadPositions + kGearMenuQuadBackLit * 8 : { KEEP(*(.patch.gear_back_lit)) }
-  .patch.gear_back kGearMenuQuadPositions + kGearMenuQuadBack * 8 : { KEEP(*(.patch.gear_back)) }
-  .patch.gear_tab_bar kGearMenuQuadPositions + kGearMenuQuadTabBar * 8 : { KEEP(*(.patch.gear_tab_bar)) }
-  .patch.map_tab_bar kMapMenuQuadPositions + kMapMenuQuadTabBar * 8 : { KEEP(*(.patch.map_tab_bar)) }
-  .patch.map_other_tab_bar kMapMenuOtherQuadPositions + kMapMenuOtherQuadTabBar * 8 : { KEEP(*(.patch.map_other_tab_bar)) }
-  .patch.map_back_lit kMapMenuQuadPositions + kMapMenuQuadBackLit * 8 : { KEEP(*(.patch.map_back_lit)) }
-  .patch.map_back kMapMenuQuadPositions + kMapMenuQuadBack * 8 : { KEEP(*(.patch.map_back)) }
-  .patch.map_other_back_lit kMapMenuOtherQuadPositions + kMapMenuOtherQuadBackLit * 8 : { KEEP(*(.patch.map_other_back_lit)) }
-  .patch.map_other_back kMapMenuOtherQuadPositions + kMapMenuOtherQuadBack * 8 : { KEEP(*(.patch.map_other_back)) }
-  .patch.save_back_lit kSaveMenuQuadPositions + kSaveMenuQuadBackLit * 8 : { KEEP(*(.patch.save_back_lit)) }
-  .patch.save_back kSaveMenuQuadPositions + kSaveMenuQuadBack * 8 : { KEEP(*(.patch.save_back)) }
   /* The One Screen 891b60e's payload (decomp docs/hud.md). Ocarina_Draw's songs transform: the
      top screen's width it centres the song list in. */
   .patch.base_song_list_width 0x610EB0 : { KEEP(*(.patch.base_song_list_width)) }

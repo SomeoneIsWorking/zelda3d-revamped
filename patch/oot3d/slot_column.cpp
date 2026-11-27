@@ -5,9 +5,11 @@
 // device in use (slot_places.hpp). The ring and the labels are cells of the message text's prompt
 // sheet, loaded again here, which the texture pack draws (sets/hud) and whose keyboard image it
 // swaps in while the keyboard is in use. On the item screen the column replaces the game's own and
-// its four buttons, whose quads go off the screen (hooks.s item_column) with the items on them,
-// their counts and their letters; the cursor stays on the grid (hooks.s item_cursor_*). Decomp
+// its four buttons, whose quads go off the screen (pause_screens.cpp) with the items on them,
+// their counts and their letters; the cursor stays on the grid (item_grid.cpp). Decomp
 // docs/pause.md.
+#include "slot_column.hpp"
+
 #include "../common/guest.hpp"
 #include "game.hpp"
 #include "inventory_screen.hpp"
@@ -233,10 +235,7 @@ constinit SlotColumn slotColumn;
 
 } // namespace
 
-// ItemMenu_Init's last call (hooks.s item_menu_init): the screen is built.
-void resetItemMenu() {
-  guest::function<ResetFn>(kItemMenuReset)();
-  buildInventoryScreen();
+void buildSlotColumn() {
   slotColumn.build();
 }
 

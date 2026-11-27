@@ -70,7 +70,7 @@ and "I don't want these fake overlay things either, everything must be RE based"
   (`patch/oot3d/inventory_screen.cpp`, `tools/z3dmods/menu_art.py`). The book shows behind it, the tabs are turned a quarter down the left edge with their
   open sides on the screen's edge ("rotate the tabs on the bottom 90 and place them on the left";
   hung along the top their open sides floated), the gear and map screens' tabs the same ("Map
-  should have the same tab layout"; `patch/oot3d/pause_tabs.cpp`, `pause_screens.cpp`), BACK stays
+  should have the same tab layout"; `patch/oot3d/pause_screens.cpp` overrides each screen's builder, runs the game's and then places its quads, "override the function that builds the menu", `pause_quads.cpp`), BACK stays
   in the bottom left corner and the grid fills the space up to the slot column (`item_grid.cpp` overrides the four functions that
   know the grid's place, `ItemMenu_NodePosition`, `ItemMenu_PlaceCursor`, `ItemMenu_UpdateCursor`
   and `ItemMenu_UpdateTouch`; decomp `docs/pause.md`). `Touch_InRect`
