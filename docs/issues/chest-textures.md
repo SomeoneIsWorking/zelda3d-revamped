@@ -32,3 +32,21 @@ the game's layout for this same texture.
 User, 2026-11-27 (Fedora), measuring the middle column whole at 78.5 in the game's against 67.5 in
 the pack's: "I don't know how this could happen or how someone would make this mistake, it doesn't
 feel right, maybe we try another pack".
+
+## Cause
+The pack's chest atlas (`ENVIRONMENT/tex1_128x128_648826B7F68E056C_13_mip0.png`) is drawn off the
+game's layout of the texture from column 72 rightward: the middle column (arches and plank) is 23
+texels wide against the game's 28, the dark gap after it 6 against 8, and the strip right of it
+starts 6 texels early, 20 wide against 14, with its dark band and stone 5 texels high (stone from
+row 67 against 72). The game samples the image at its own coordinates, so the lid's band took the
+column's edge and the corner by the lid took the strip's stone. A per-texel probe (red and green
+the texel's x and y, divided by a white run for the lighting) showed the corner reading texels
+x 116 to 125, rows 67 to 71: dark in the game's, stone in the pack's.
+
+## Fix
+`tools/z3dmods/pack_fixes.py` rebuilds the image from the pack's file on install with its columns
+and the strip's rows moved onto the game's (knots fitted against the game's texture,
+`sets/pack-fixes/henriko-oot3d-5.0a.toml`), into `z3dmods-pack-fixes/` with the pack's copy left
+out. The report's state now shows the lid's band with its silver plates and the dark corner, as
+the game draws it, at the pack's resolution; the far chest is unchanged. The pack's own art in the
+strip below row 72 (a framed panel where the game has a latch on stone) is kept as drawn.

@@ -68,6 +68,7 @@ layout hotkey). The set does not set it, because of the per-game leak above.
 | Licence | None stated; free, "as is" |
 | Layout | `user/load/textures/0004000000033500/` (2162 files, legacy hash: `pack.json` `use_new_hash: false`, `flip_png_files: true`) into `load/textures/0004000000033500/`. The zip also carries its own `load/mods` (code and romfs for RTG's single-screen mod); not installed, The One Screen is the base |
 | Needs | `[Utility] custom_textures=true` (the set's `azahar_global`); the pack's guide says to keep Preload Custom Textures off, which the player's config already has |
+| Fixed | Images drawn off the game's layout, moved back onto it at install (`sets/pack-fixes/henriko-oot3d-5.0a.toml`, `pack_fixes.py`) under `z3dmods-pack-fixes/`: the treasure chest |
 | Shown | Harness, same state with textures on and off at 3x: the house sign and wood are the pack's, The One Screen's Xbox HUD labels are unchanged (no overlap) |
 
 Hooks it owns (our patch must not touch them): 0x452390 and 0x452434 (before/after the play update),

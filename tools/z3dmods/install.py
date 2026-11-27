@@ -12,7 +12,7 @@ import struct
 from dataclasses import dataclass
 from pathlib import Path
 
-from z3dmods import azahar_config, bgcheck, bps, ctr, games, hud, hud_icons, ips, lzs, options, patch_build, set_inputs, source_check, stairs, stairs_stone, symbols, text, zsi
+from z3dmods import azahar_config, bgcheck, bps, ctr, games, hud, hud_icons, ips, lzs, options, pack_fixes, patch_build, set_inputs, source_check, stairs, stairs_stone, symbols, text, zsi
 from z3dmods.app_keys import AppKeys
 from z3dmods.config import Config
 from z3dmods.texture_pack import TexturePack
@@ -23,6 +23,7 @@ EXHEADER_BSS_SIZE = 0x3C
 HUD_FOLDER = "z3dmods-hud"
 STAIRS_FOLDER = "z3dmods-stairs"
 TEXT_FOLDER = "z3dmods-text"
+PACK_FIXES_FOLDER = "z3dmods-pack-fixes"
 # The pack's variant the core shows while the player last used the keyboard (app/src/hud.cpp).
 KEYBOARD_VARIANT = Path("variants") / "keyboard"
 STAGING = ".z3dmods-new"
@@ -243,6 +244,8 @@ def install(cfg: Config, game: GameSet) -> Path:
                        if game.hud else ({}, {}))
 
     words, letters = _text(cfg, game, rom, base_romfs, pack)
+    fixes = (pack_fixes.build(texture_root, cfg.repo / "sets" / game.textures["fixes"])
+             if texture_root and game.textures and "fixes" in game.textures else {})
 
     mods = cfg.mods_dir(game.title_id)
     textures = cfg.textures_dir(game.title_id) if game.textures or menus or letters or stone.pack_images else None
@@ -250,7 +253,7 @@ def install(cfg: Config, game: GameSet) -> Path:
     try:
         _build_mods(cfg, game, rom, pack, code, root, base_romfs, staged[0][1], rooms, words)
         if textures is not None:
-            _build_textures(game, texture_root, menus, keyboard, letters, stone.pack_images, staged[1][1])
+            _build_textures(game, texture_root, menus, keyboard, letters, stone.pack_images, fixes, staged[1][1])
         # Every refusal comes before the first file is taken out.
         recorded = [_recorded(folder) for folder, _ in staged]
         for (folder, staging), files in zip(staged, recorded):
@@ -310,11 +313,16 @@ def _build_mods(cfg: Config, game: GameSet, rom: ctr.Ncch, pack: TexturePack | N
 
 def _build_textures(game: GameSet, texture_root: Path | None, menus: dict[str, bytes],
                     keyboard: dict[str, bytes], letters: dict[str, bytes], steps: dict[str, bytes],
-                    textures: Path) -> None:
-    """The game's textures folder, whole, with its record. `steps` are the stone stairs' textures."""
+                    fixes: dict[str, bytes], textures: Path) -> None:
+    """The game's textures folder, whole, with its record. `steps` are the stone stairs' textures,
+    `fixes` the pack's images moved onto the game's layout (pack_fixes)."""
     if texture_root:
         # Azahar keeps one texture per hash: ours stand in for the pack's copies of the same name.
-        _copy_tree(texture_root, textures, frozenset(menus))
+        _copy_tree(texture_root, textures, frozenset(menus) | frozenset(fixes))
+    for name, png in fixes.items():
+        target = textures / PACK_FIXES_FOLDER / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(png)
     for name, png in menus.items():
         target = textures / HUD_FOLDER / name
         target.parent.mkdir(parents=True, exist_ok=True)

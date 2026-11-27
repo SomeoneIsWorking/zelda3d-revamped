@@ -1,0 +1,13 @@
+# Henriko Magnifico OoT3D 4K 5.0a, 1080p variant: images drawn off the game's layout
+# (tools/z3dmods/pack_fixes.py).
+
+# The treasure chest (docs/issues/chest-textures.md): the middle column is drawn narrow and the
+# strip right of it wide and 5 texels high, so the lid's band took the column's edge and the
+# corner by the lid took the strip's stone.
+[[image]]
+file = "ENVIRONMENT/tex1_128x128_648826B7F68E056C_13_mip0.png"
+columns = [[0, 0], [72, 72], [79, 78], [103, 106], [109, 114], [128, 128]]
+
+[[image.band]]
+from = 114
+rows = [[0, 0], [57.5, 62], [67, 72], [128, 128]]

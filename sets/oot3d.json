@@ -24,7 +24,8 @@
     "name": "Henriko Magnifico OoT3D 4K 5.0a, 1080p variant (free, no licence stated)",
     "from": "https://henrikomagnifico.com/zelda-ocarina-of-time-3d-4k (5.0a, the 1080p download)",
     "folder": "0004000000033500",
-    "sha256": "06102c372abf4e315fd7095cc36744b8f06e4d76eab358080e46521895793c85"
+    "sha256": "06102c372abf4e315fd7095cc36744b8f06e4d76eab358080e46521895793c85",
+    "fixes": "pack-fixes/henriko-oot3d-5.0a.toml"
   },
   "azahar_global": {
     "Utility": {
