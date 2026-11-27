@@ -71,7 +71,14 @@ User, 2026-11-27 (Fedora), after `9a05250`: a screenshot of the grass with a sha
 line, brighter and yellower on one side, darker on the other, the grass's grain differing across it.
 That is the line called vertex lighting below; the note was wrong, it is still open.
 
-Still there, and not this defect (wrong, see above): straight changes of tone along some triangle edges, in HEAD and
-the fix alike. They are the room's baked vertex lighting, interpolated per triangle.
+The line is where two ground textures meet. At the report's spot, a probe that turned the pack's
+`s04_yuka_01r` grey left a V-shaped region in its own grass: room 2's floor (`spot04_2`, mesh 2,
+`s04_ha_01x`), whose edge is the line. A grid probe shows `s04_yuka_01r` itself running unbroken.
+The two images differ in the game's own art (mean colour 49,60,7 against 23,29,8), and the line
+shows in the game without the pack too, blurred. The patchwork fix cannot touch it: the two sides
+are different images.
+
+Fixing it means a blend across the edge: a strip of one texture faded over the other, which needs
+new geometry and an alpha-blended material at every such edge, or one of the two images replaced.
 
 The Deku Tree vines (`deku-vines.md`) are walls, which this does not map; they are still open.
