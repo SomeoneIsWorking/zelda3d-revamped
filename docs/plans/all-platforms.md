@@ -19,8 +19,7 @@ controller (hotswap)". The rules are the `release` and `android` skills.
    folder in `Contents/Resources`, Homebrew's libraries, the core and the Vulkan loader with
    MoltenVK's ICD in its `lib/` named `@rpath/<file>`, ad-hoc signed, `z3d-macos-arm64.zip`.
    Shown on the Mac with no Homebrew on PATH: no Homebrew mapping in the running app, OoT3D's set
-   made from the dump, OoT3D at 59.8 presents and 29.9 ticks a second. The heavy queue's Mac
-   worker takes only `repo/psx` jobs, so the Mac session builds it.
+   made from the dump, OoT3D at 59.8 presents and 29.9 ticks a second. The Mac session builds it.
 2. Windows `.exe`: cross-built on Linux (`z3dmods package --windows`, `tools/z3dmods/package_windows.py`)
    with llvm-mingw and the libraries from `shared/target-platform`; never on hosted CI (release
    skill). `z3d/` holds the launcher `z3d.exe` (`app/launcher/windows_launcher.cpp`) and

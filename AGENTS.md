@@ -54,7 +54,7 @@ Ocarina of Time 3D (USA, 0004000000033500) and Majora's Mask 3D (USA, 0004000000
   llvm-mingw from `~/repo/shared/target-platform` (pinned in `sources.py`; its libraries under
   `~/dev/target-platform`), `build/package/windows/z3d` and `z3d-windows-x86_64.zip`; its tools'
   import check runs under Wine.
-  `--jobs N` matches its ninja runs to heavy.py's `--cores N`.
+  `--jobs N` sets its ninja jobs.
 - `uv run --frozen z3dmods sources`: on a machine without them, clones the checkouts a package is
   built from (the core, Lucent, setup-ui, RmlUi, port-assets) at their pinned revisions and
   downloads the AppImage runtime.

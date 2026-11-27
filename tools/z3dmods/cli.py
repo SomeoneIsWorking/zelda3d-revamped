@@ -143,7 +143,7 @@ def main() -> None:
     played.set_defaults(run=play_game)
     packed = commands.add_parser("package", help="build the z3d package: on Linux its folder and the AppImage of it, on macOS z3d.app and its zip; --windows cross-builds the Windows one")
     packed.add_argument("--out", type=Path, help="the folder to make; build/package/z3d without it")
-    packed.add_argument("--jobs", type=int, default=0, help="parallel build jobs, as many as heavy.py's --cores; ninja's own count without it")
+    packed.add_argument("--jobs", type=int, default=0, help="parallel build jobs; ninja's own count without it")
     packed.add_argument("--windows", action="store_true",
                         help="the Windows package instead, cross-built here: build/package/windows/z3d and its zip")
     packed.set_defaults(run=build_package)

@@ -43,7 +43,7 @@ class Config:
     # A package (package.py), whose sets its picker keeps up with it; a checkout's are the
     # maintainer's to install.
     packaged: bool = False
-    # Builds' parallel jobs, to match a heavy.py reservation; 0 leaves it to ninja.
+    # Builds' parallel jobs; 0 leaves it to ninja.
     jobs: int = 0
 
     def rom(self, title_id: str) -> Path:
