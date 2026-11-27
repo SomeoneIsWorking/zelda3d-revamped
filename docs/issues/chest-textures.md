@@ -21,3 +21,10 @@ User, 2026-11-27 (Fedora), measuring the two atlases side by side (each at 512 p
 panel spans 144 in the game's and 146.5 in the pack's, the middle column's arch 33 against 27.5 and
 its plank 69 against 58.5. The pack's middle column is drawn about 15% narrower than the game's, so
 everything right of the front panel sits off the game's layout, not only the right quarter.
+
+User, 2026-11-27 (Fedora): "this, 27.5 vs 33 looks to be the worst offender here, this pack is
+probably not meant for this version of the game". Against it: the core takes a pack file whose name
+is the hash of the game texture's bytes (this pack: the legacy hash, `use_new_hash` false), and
+replacing `648826B7F68E056C` with a probe changed the chest, so the game's texture is byte for byte
+the one the pack was made from; the pack's folder is this title id (USA). The art was redrawn off
+the game's layout for this same texture.
