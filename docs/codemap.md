@@ -3,6 +3,7 @@
 - `tools/z3dmods/cli.py`: the `z3dmods` commands; composes the modules below.
 - `tools/z3dmods/config.py`: the one reader of the environment and the local settings: a checkout's `env-assets/local.json`, or a package's layout and the player's `folders.json`.
 - `shared/setup-ui` (beside this repo's parent, consumed by `app/CMakeLists.txt` like Lucent): the first-run screen every port shows; RmlUi from the `RmlUi` checkout beside it.
+- `shared/bug-report` (consumed the same way): the RmlUi bug report form on `lucent::bug_report`.
 - `tools/z3dmods/ctr.py`: decrypted CCI/NCCH/exheader/ExeFS/RomFS reading and `.code` LZ decompression.
 - `tools/z3dmods/zsi.py`: OoT3D and MM3D room files: header commands, their CMB models, replacing a model and moving what follows. Scene files: the collision's vertices and triangles, read and written.
 - `tools/z3dmods/cmb.py`: CMB models, OoT3D's version 6 and MM3D's 10: textures, materials, meshes, vertices; rewriting one shape's geometry.
@@ -45,7 +46,7 @@
 - `tools/z3dmods/desktop_container.py`: a container of the oldest distribution the package runs on (`packaging/Containerfile.desktop`), where the input test starts the AppImage.
 - `tools/z3dmods/host_install.py`: `z3dmods shortcut --host`: the package in another machine's `~/Games/z3d`, the player's data there kept and copied aside, with its shortcuts.
 - `tools/z3dmods/package.py`: `z3dmods package`: the Linux package folder (an AppDir): app, every library it links but the C and C++ runtimes, a relocatable Python with the locked wheels, the tools, sets, prebuilt patches and glyphs, assets, the source's commits (`SOURCE.txt`) and the licences of what is not ours (`licenses/`); and the AppImage of that folder. Refuses a package that needs a newer glibc than the container's or names this machine's folders.
-- `tools/z3dmods/sources.py`: the checkouts the app is built from besides this one (the core, Lucent, setup-ui, RmlUi, port-assets) and the AppImage runtime: where each lives, the revision `z3dmods sources` fetches where one is missing, and the commit a build names as its source.
+- `tools/z3dmods/sources.py`: the checkouts the app is built from besides this one (the core, Lucent, setup-ui, bug-report, RmlUi, port-assets) and the AppImage runtime: where each lives, the revision `z3dmods sources` fetches where one is missing, and the commit a build names as its source.
 - `.github/workflows/release.yml`: the hosted build of the package, by hand or from a release tag (plans/packed-app.md, "The release"); `packaging/Containerfile.glyphs` is its ImageMagick.
 - `docs/releases/<tag>.md`: a release's notes.
 - `tools/z3dmods/packed.py`: the package's entry point (`python -m z3dmods.packed`): `play` over the player's dump folder, and what the picker runs: `folders` (takes a folder the player chose, keeps it in `folders.json`, writes the library) and `setup`.
@@ -79,7 +80,8 @@
   - `prompt_art`: the port-assets set and file of each pad glyph, key cap and mouse button a prompt draws, and their loader.
   - `tool_process`: one run of the tools as a child process: its printed lines and its refusal.
   - `set_install`: whether a game's set in the user folder is the one the tools make now (missing, or made from other inputs), and the tools' setup run on the player's dump when it is not.
-  - `bug_report_screen`: B's bug report: holds the game, captures screens, state, log and facts into a `lucent::bug_report` draft, and the form for the player's words.
+  - `bug_report_screen`: B's bug report: holds the game, captures screens, state, log and facts into a `lucent::bug_report` draft, the state on a worker, and the shared RmlUi form (`shared/bug-report`) for the player's words.
+  - `rml_host`: RmlUi on the menu canvas's renderer (RmlUi's own SDL backends), a context the window's size, the menu font.
   - `menu_canvas`: the SDL renderer and outline font the picker and its screens draw with between games, and their hint lines (pad glyphs or key caps by the last device).
   - `folder_setup`: the first run's questions (dump folder, mods folder) on the shared setup screen (`shared/setup-ui`), answered in the folder browser and taken by the tools.
   - `folder_browser`: the in-window folder chooser, by pad, keys or mouse.

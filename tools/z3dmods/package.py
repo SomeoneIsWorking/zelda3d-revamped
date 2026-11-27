@@ -71,7 +71,7 @@ SOURCE = """z3d links Azahar's core (GPL-2.0-or-later), so this build as a whole
 this build was made from:
   https://github.com/SomeoneIsWorking/zelda3d-revamped at {revision}
 {sources}
-azahar is the core, with its submodules; lucent, setup-ui and RmlUi are built into bin/z3d;
+azahar is the core, with its submodules; lucent, setup-ui, bug-report and RmlUi are built into bin/z3d;
 port-assets is assets/ and what prebuilt/glyphs/ is drawn from.
 lib/ holds SDL3, SDL3_ttf and SDL3_image built from the release tarballs that
 packaging/Containerfile names, and Ubuntu 24.04's own builds of the rest (apt source <package>).
@@ -80,7 +80,7 @@ LICENSES = """The licences of what this package holds that is not ours.
 
 azahar/             the core, lib/libazahar_core.so: license.txt (GPL-2.0), and under externals/
                     the libraries its source tree carries, of which the core builds in a part
-lucent/, setup-ui/, RmlUi/
+lucent/, setup-ui/, bug-report/, RmlUi/
                     built into bin/z3d
 SDL3/, SDL3_ttf/, SDL3_image/
                     lib/libSDL3*.so

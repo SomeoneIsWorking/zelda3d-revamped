@@ -17,8 +17,8 @@ from z3dmods import app, config
 from z3dmods.config import Config
 
 # The shared checkouts app/CMakeLists.txt builds from, under the home folder.
-HOME_CHECKOUTS = {"lucent": "repo/lucent", "setup-ui": "repo/shared/setup-ui", "RmlUi": "repo/RmlUi",
-                  "target-platform": "repo/shared/target-platform"}
+HOME_CHECKOUTS = {"lucent": "repo/lucent", "setup-ui": "repo/shared/setup-ui", "bug-report": "repo/shared/bug-report",
+                  "RmlUi": "repo/RmlUi", "target-platform": "repo/shared/target-platform"}
 # The AppImage runtime (github.com/AppImage/type2-runtime, MIT): the program a squashfs image of
 # the package folder is appended to.
 RUNTIME_RELEASE = "20251108"
@@ -52,6 +52,8 @@ SOURCES = (
            _home("lucent")),
     Source("setup-ui", "https://github.com/SomeoneIsWorking/setup-ui", "6798b0bf014a0e3c73a010566939bf44cb8259ed",
            _home("setup-ui")),
+    Source("bug-report", "https://github.com/SomeoneIsWorking/bug-report", "9ccbdb75243cb2883eb666ecace8e0b8160f4f19",
+           _home("bug-report")),
     Source("RmlUi", "https://github.com/mikke89/RmlUi", "ba95ffe8bfb6370efb2cdcca927eaad4710c5413", _home("RmlUi")),
     Source("port-assets", "https://github.com/SomeoneIsWorking/port-assets",
            "485524f30ffc7288c4bb716562f898bd07e524f6", lambda cfg: cfg.port_assets),

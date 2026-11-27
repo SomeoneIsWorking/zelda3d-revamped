@@ -421,6 +421,7 @@ void PadInput::readHost() {
       circle[binding.axis] += binding.push;
     }
   }
+  MenuPad padMenu;
   bool padHeld = false;
   bool chord = false;
   auto &cStick = state.sticks[Settings::NativeAnalog::CStick];
@@ -484,12 +485,18 @@ void PadInput::readHost() {
     padHeld = padHeld || std::abs(axis(pad, SDL_GAMEPAD_AXIS_LEFTX)) > kStickMoved ||
               std::abs(axis(pad, SDL_GAMEPAD_AXIS_LEFTY)) > kStickMoved;
     for (const MenuButton &binding : kMenuButtons) {
-      menu.*binding.held = menu.*binding.held || SDL_GetGamepadButton(pad, binding.pad);
+      padMenu.*binding.held = padMenu.*binding.held || SDL_GetGamepadButton(pad, binding.pad);
     }
-    menu.left = menu.left || axis(pad, SDL_GAMEPAD_AXIS_LEFTX) < -kStickMoved;
-    menu.right = menu.right || axis(pad, SDL_GAMEPAD_AXIS_LEFTX) > kStickMoved;
-    menu.up = menu.up || axis(pad, SDL_GAMEPAD_AXIS_LEFTY) < -kStickMoved;
-    menu.down = menu.down || axis(pad, SDL_GAMEPAD_AXIS_LEFTY) > kStickMoved;
+    padMenu.left = padMenu.left || axis(pad, SDL_GAMEPAD_AXIS_LEFTX) < -kStickMoved;
+    padMenu.right = padMenu.right || axis(pad, SDL_GAMEPAD_AXIS_LEFTX) > kStickMoved;
+    padMenu.up = padMenu.up || axis(pad, SDL_GAMEPAD_AXIS_LEFTY) < -kStickMoved;
+    padMenu.down = padMenu.down || axis(pad, SDL_GAMEPAD_AXIS_LEFTY) > kStickMoved;
+  }
+  for (const MenuButton &binding : kMenuButtons) {
+    menu.*binding.held = menu.*binding.held || padMenu.*binding.held;
+  }
+  for (bool MenuPad::*held : {&MenuPad::left, &MenuPad::right, &MenuPad::up, &MenuPad::down}) {
+    menu.*held = menu.*held || padMenu.*held;
   }
   for (size_t i = 0; i < state.buttons.size(); ++i) {
     state.buttons[i] = ((held >> i) & 1U) != 0;
@@ -510,6 +517,7 @@ void PadInput::readHost() {
     chord = false;
   }
   menu_ = menu;
+  padMenu_ = padMenu;
   slots_ = slots;
   chord_ = chord;
   // The keyboard wins a frame both are held in: it is the one in the player's hands last.

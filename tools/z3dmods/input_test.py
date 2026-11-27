@@ -1666,8 +1666,9 @@ def _settings(session: Session, pad: Gamepad) -> None:
 
 def _report(session: Session, pad: Gamepad) -> None:
     """OoT3D in play: the report key holds the game for the bug report form; Escape cancels and
-    leaves nothing; a second report typed and saved with Ctrl+Enter is a folder with the report,
-    both screens, the state and the core's log; any key then lets the game play on."""
+    leaves nothing; a second report typed (Backspace taking back a letter, not leaving) and saved
+    with Ctrl+Enter is a folder with the report, both screens, the state and the core's log, and
+    the game plays on."""
     _oot3d_file_1(session)
     session.key("window", "report")
     session.expect("[report] open", 10)
@@ -1677,7 +1678,8 @@ def _report(session: Session, pad: Gamepad) -> None:
     session.wait(1)
     session.key("window", "report")
     session.expect("[report] open", 10)
-    session.type("Link walks into the wall")
+    session.type("Link walks into the wallx")
+    session.press(["BackSpace"])
     session.press(["Tab"])
     session.type("Pressed B to test")
     session.wait(0.5)
@@ -1694,7 +1696,6 @@ def _report(session: Session, pad: Gamepad) -> None:
         raise RuntimeError(f"the report says {report['summary']!r} / {report['description']!r}")
     if any(p.name.endswith(".draft") for p in folder.parent.iterdir()):
         raise RuntimeError("a draft was left behind")
-    session.press(["space"])
     session.wait(2)
     session.shot("playing")
 

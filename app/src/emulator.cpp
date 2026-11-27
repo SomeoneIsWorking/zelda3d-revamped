@@ -225,7 +225,10 @@ void Emulator::codeChanged() {
   }
 }
 
-bool Emulator::drainAsync() {
+// Savestates are unsafe while kernel async operations (file I/O) are in flight or a draw section
+// runs inside a replay window.
+bool Emulator::settle() {
+  makeCurrent();
   const auto start = std::chrono::steady_clock::now();
   while (system_.KernelRunning() &&
          (system_.Kernel().AreAsyncOperationsPending() || system_.Replay().WindowOpen())) {
@@ -239,10 +242,14 @@ bool Emulator::drainAsync() {
 }
 
 std::optional<std::vector<uint8_t>> Emulator::saveState() {
-  makeCurrent();
-  if (!drainAsync()) {
+  if (!settle()) {
     return std::nullopt;
   }
+  return serializeState();
+}
+
+std::optional<std::vector<uint8_t>> Emulator::serializeState() {
+  makeCurrent();
   try {
     return system_.SaveStateBuffer();
   } catch (const std::exception &error) {
@@ -252,8 +259,7 @@ std::optional<std::vector<uint8_t>> Emulator::saveState() {
 }
 
 bool Emulator::loadState(std::vector<uint8_t> state) {
-  makeCurrent();
-  if (!drainAsync()) {
+  if (!settle()) {
     return false;
   }
   watches_->clear();

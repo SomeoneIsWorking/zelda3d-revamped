@@ -105,9 +105,12 @@ when an option changes the layout, resolution or textures. `Player::run` starts 
 or button the game reads is still held from the screen before, so the key that closed a screen
 never reaches the game. Enter is the game's Start (Pause in play), LB with View its Select (the
 map in play); Alt with a key is the window's alone.
-B on the keyboard in a game holds it for a bug report (`BugReportScreen`): the menu canvas shows both screens
-as they were with a form for a one-line summary and what the player did; Ctrl+Enter or Start saves
-it, Escape or B drops it. The report is a `lucent::bug_report` folder under
+B on the keyboard in a game holds it for a bug report (`BugReportScreen`): the shared RmlUi form
+(`shared/bug-report`'s `bug_report::Form`, on `RmlHost`: RmlUi's own SDL_Renderer and SDL platform
+backends on the menu canvas's renderer) shows the picture as it was with a one-line summary and
+what the player did. The keyboard is the form's alone (Backspace edits; Escape cancels;
+Ctrl+Enter saves); a pad's Start saves and its B cancels (`PadInput::padMenu`). The state is
+written on a worker while the form is up and attached when it saves. The report is a `lucent::bug_report` folder under
 `<user>/bug-reports/<stamp>-<summary>/`: `report.json` and `README.md` (the words, the run's facts:
 game, title id, set inputs, patch and textures on or off, every option, frames run, window and
 frame sizes, platform), `screens.png`, `state.state` (the emulator's state at that frame, which

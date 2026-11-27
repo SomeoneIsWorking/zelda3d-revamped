@@ -96,7 +96,7 @@ void play(const AppConfig &config, GameWindow &window, PadInput &pad, Emulator &
       const MenuCanvas canvas(window, config.font, config.assets);
       if (left == Player::Left::Report) {
         const ReportedRun run{title, game, options, mods.patchOn(), mods.texturesOn()};
-        (void)BugReportScreen(canvas, window, pad, emulator, config.userDir, run).run();
+        (void)BugReportScreen(canvas, window, pad, emulator, config, run).run();
       } else {
         const GameSetup before = options.setup();
         (void)OptionsMenu(canvas, window, pad, options, title, false).run();

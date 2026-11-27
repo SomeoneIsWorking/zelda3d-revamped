@@ -192,6 +192,10 @@ public:
   [[nodiscard]] const MenuPad &menu() const {
     return menu_;
   }
+  // menu() from the pads alone, for a screen whose keyboard types text.
+  [[nodiscard]] const MenuPad &padMenu() const {
+    return padMenu_;
+  }
 
 private:
   // The 3DS buttons a game's mod set reads for each verb: NativeButton bits by Verb.
@@ -205,6 +209,7 @@ private:
 
   std::shared_ptr<PadState> state_;
   MenuPad menu_;
+  MenuPad padMenu_;
   std::vector<SDL_Gamepad *> pads_;
   const GameVerbs *game_ = nullptr;
   PadMode mode_ = PadMode::ByName;

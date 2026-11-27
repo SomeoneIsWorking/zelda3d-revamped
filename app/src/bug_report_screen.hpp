@@ -1,27 +1,32 @@
 // The bug report a player makes from a running game (kReportKey): the game held where it was, and
 // a lucent::bug_report draft of what it showed (both screens), a state that returns to it, the
-// core's log and the run's facts, with a form on the menu canvas for the player's words. A saved
-// report is <user>/bug-reports/<stamp>-<summary>/ (report.json, README.md and the files); a
-// cancelled one leaves nothing. The game plays on from the same frame afterwards.
+// core's log and the run's facts, with the shared RmlUi form (bug_report::Form) for the player's
+// words. The state is written on a worker while the form is up. A saved report is
+// <user>/bug-reports/<stamp>-<summary>/ (report.json, README.md and the files); a cancelled one
+// leaves nothing. The game plays on from the same frame afterwards.
 #pragma once
 
-#include "menu_canvas.hpp"
+#include "rml_host.hpp"
 
 #include <lucent/bug_report.h>
 
-#include <cstdint>
 #include <filesystem>
+#include <future>
 #include <optional>
 #include <string>
 
-struct SDL_Texture;
-union SDL_Event;
+namespace bug_report {
+class Form;
+} // namespace bug_report
 
 namespace z3d::app {
 
 class Emulator;
 class GameOptions;
+struct AppConfig;
 class GameWindow;
+class MenuCanvas;
+class PadInput;
 struct GameSetup;
 
 // What a report says about the run beside what the emulator holds.
@@ -35,47 +40,35 @@ struct ReportedRun {
 
 class BugReportScreen {
 public:
-  // Captures into a new draft under `<userDir>/bug-reports`; the emulator's frame() is the frame
-  // the report shows.
+  // Captures into a new draft under `<config.userDir>/bug-reports`; the emulator's frame() is the
+  // frame the report shows. The emulator must not step until the screen is gone.
   BugReportScreen(const MenuCanvas &canvas, GameWindow &window, const PadInput &pad,
-                  Emulator &emulator, const std::filesystem::path &userDir, const ReportedRun &run);
+                  Emulator &emulator, const AppConfig &config, const ReportedRun &run);
   ~BugReportScreen();
   BugReportScreen(const BugReportScreen &) = delete;
   BugReportScreen &operator=(const BugReportScreen &) = delete;
   BugReportScreen(BugReportScreen &&) = delete;
   BugReportScreen &operator=(BugReportScreen &&) = delete;
 
-  // Until the player saves (then until they read where it went) or cancels, or the window closes:
-  // the saved report's folder, if one was saved.
+  // Until the player saves or cancels, or the window closes: the saved report's folder, if one
+  // was saved.
   [[nodiscard]] std::optional<std::filesystem::path> run();
 
   static constexpr const char *kFolder = "bug-reports";
 
 private:
-  enum class Field : uint8_t { Summary, Description };
-
   void capture(Emulator &emulator, const std::filesystem::path &userDir, const ReportedRun &run);
-  // What the form does with one event; true once the player asked to save.
-  [[nodiscard]] bool edit(const SDL_Event &event);
-  void save();
-  void draw();
-  // A line of text from the top left of `place`, place.h tall, wrapped at place.w when it is not
-  // 0; its height.
-  float text(const std::string &line, Rgb color, SDL_FRect place) const;
-  [[nodiscard]] std::string &field();
+  // Waits for the worker's state and attaches it once it is written.
+  void attachState(lucent::bug_report::Draft &draft);
+  [[nodiscard]] std::optional<std::filesystem::path> save(lucent::bug_report::Draft &draft,
+                                                          bug_report::Form &form);
 
-  const MenuCanvas &canvas_;
   GameWindow &window_;
   const PadInput &pad_;
+  RmlHost host_;
   std::optional<lucent::bug_report::Draft> draft_;
-  SDL_Texture *frame_ = nullptr;
-  float frameAspect_ = 1.0F;
-  Field field_ = Field::Summary;
-  lucent::bug_report::PlayerText words_;
-  // Why the draft could not be made or saved, shown to the player.
-  std::string problem_;
-  std::optional<std::filesystem::path> saved_;
-  bool cancelled_ = false;
+  // Whether the worker wrote the state file.
+  std::future<bool> state_;
 };
 
 } // namespace z3d::app

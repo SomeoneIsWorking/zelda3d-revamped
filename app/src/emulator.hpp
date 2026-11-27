@@ -91,6 +91,10 @@ public:
   [[nodiscard]] uint8_t systemLanguage() const;
 
   [[nodiscard]] std::optional<std::vector<uint8_t>> saveState();
+  // saveState in two halves: settle() steps until a state is safe to take, on the window's
+  // thread; serializeState() then takes it on any thread, while nothing else steps this emulator.
+  [[nodiscard]] bool settle();
+  [[nodiscard]] std::optional<std::vector<uint8_t>> serializeState();
   [[nodiscard]] bool loadState(std::vector<uint8_t> state);
 
   [[nodiscard]] const Frame &frame() const {
@@ -115,9 +119,6 @@ private:
   // The core reaches the system it works on through Core::System::GetInstance.
   void makeCurrent();
   void step();
-  // Savestates are unsafe while kernel async operations (file I/O) are in flight or a draw section
-  // runs inside a replay window.
-  [[nodiscard]] bool drainAsync();
 
   std::chrono::steady_clock::time_point pacedSince_ = std::chrono::steady_clock::now();
   std::unique_ptr<Core::System> owned_;

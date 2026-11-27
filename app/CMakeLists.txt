@@ -21,6 +21,12 @@ find_package(SDL3_image REQUIRED CONFIG)
 # The shared first-run screen (RmlUi from the checkout beside it), after SDL3.
 set(SETUP_UI_ROOT "$ENV{HOME}/repo/shared/setup-ui" CACHE PATH "Shared setup-ui checkout")
 add_subdirectory("${SETUP_UI_ROOT}" "${CMAKE_BINARY_DIR}/setup-ui" EXCLUDE_FROM_ALL)
+# The shared bug report form, on the same RmlUi and Lucent.
+set(BUG_REPORT_ROOT "$ENV{HOME}/repo/shared/bug-report" CACHE PATH "Shared bug-report checkout")
+add_subdirectory("${BUG_REPORT_ROOT}" "${CMAKE_BINARY_DIR}/bug-report" EXCLUDE_FROM_ALL)
+# RmlUi's own SDL_Renderer and SDL platform backends, from the RmlUi checkout setup-ui builds.
+get_target_property(Z3D_RMLUI_SOURCE RmlUi::Core SOURCE_DIR)
+set(Z3D_RMLUI_BACKENDS "${Z3D_RMLUI_SOURCE}/../../Backends")
 
 add_executable(z3d
   src/main.cpp
@@ -31,6 +37,9 @@ add_executable(z3d
   src/game_options.cpp
   src/options_menu.cpp
   src/bug_report_screen.cpp
+  src/rml_host.cpp
+  ${Z3D_RMLUI_BACKENDS}/RmlUi_Renderer_SDL.cpp
+  ${Z3D_RMLUI_BACKENDS}/RmlUi_Platform_SDL.cpp
   src/title_picker.cpp
   src/menu_canvas.cpp
   src/prompt_art.cpp
@@ -64,7 +73,9 @@ add_executable(z3d
   src/mod_swap.cpp
   src/player.cpp)
 target_sources(z3d PRIVATE $<IF:$<BOOL:${WIN32}>,src/term_signal_windows.cpp,src/term_signal_posix.cpp>)
-target_link_libraries(z3d PRIVATE AzaharCore::azahar_core lucent SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image setup_ui::setup_ui)
+target_link_libraries(z3d PRIVATE AzaharCore::azahar_core lucent SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image setup_ui::setup_ui bug_report::bug_report)
+target_include_directories(z3d PRIVATE "${Z3D_RMLUI_BACKENDS}")
+target_compile_definitions(z3d PRIVATE RMLUI_SDL_VERSION_MAJOR=3)
 target_compile_options(z3d PRIVATE -Wall -Wextra -Werror)
 if(WIN32)
   # The game's window with no console; SDL_main.h gives it WinMain.
