@@ -17,6 +17,7 @@ from z3dmods import (
     host_install,
     input_test,
     install,
+    pack_check,
     package,
     package_mac,
     package_windows,
@@ -80,6 +81,17 @@ def play_game(args: argparse.Namespace) -> None:
 
 def input_check(args: argparse.Namespace) -> None:
     print(input_test.run(config.load(), args.scenario))
+
+
+def check_pack(args: argparse.Namespace) -> None:
+    cfg = config.load()
+    game = install.GameSet.named(cfg.repo, args.game)
+    checked = pack_check.run(args.dump, cfg.textures_dir(game.title_id), args.out, args.worst)
+    for item in checked:
+        if item.off:
+            moves = sorted({(dx, dy) for _, _, dx, dy in item.off})
+            print(f"{item.share:5.0%} {len(item.off):3d}/{item.blocks:<3d} {item.pack.relative_to(cfg.textures_dir(game.title_id))} {moves}")
+    print(f"{len(checked)} textures checked, overlays of the worst {args.worst} in {args.out}")
 
 
 def build_package(args: argparse.Namespace) -> None:
@@ -152,6 +164,12 @@ def main() -> None:
     probe = commands.add_parser("inputtest", help="the windowed app in a headless Gamescope, driven by real key and mouse events and the app's test pad")
     probe.add_argument("scenario", choices=sorted(input_test.SCENARIOS))
     probe.set_defaults(run=input_check)
+    checks = commands.add_parser("packcheck", help="list the installed texture pack's images that sit off the game's layout of a run's dumped textures, worst first, with edge overlays")
+    checks.add_argument("game", choices=["oot3d", "mm3d"])
+    checks.add_argument("dump", type=Path, help="a texture dump: scratch/harness/<game>/Azahar/dump/textures after a run with --dump-textures --no-textures")
+    checks.add_argument("--out", type=Path, default=Path("scratch/packcheck"), help="where the overlays go (default: scratch/packcheck)")
+    checks.add_argument("--worst", type=int, default=12, help="how many overlays to write (default: 12)")
+    checks.set_defaults(run=check_pack)
     links = commands.add_parser("shortcut", help="add the desktop shortcut that opens the app's title picker")
     links.add_argument("--host", help="install the app, the sets and its saves on this ssh host instead, in Games/z3d of its home folder")
     links.set_defaults(run=install_shortcuts)
