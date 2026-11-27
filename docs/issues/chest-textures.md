@@ -28,3 +28,7 @@ is the hash of the game texture's bytes (this pack: the legacy hash, `use_new_ha
 replacing `648826B7F68E056C` with a probe changed the chest, so the game's texture is byte for byte
 the one the pack was made from; the pack's folder is this title id (USA). The art was redrawn off
 the game's layout for this same texture.
+
+User, 2026-11-27 (Fedora), measuring the middle column whole at 78.5 in the game's against 67.5 in
+the pack's: "I don't know how this could happen or how someone would make this mistake, it doesn't
+feel right, maybe we try another pack".
