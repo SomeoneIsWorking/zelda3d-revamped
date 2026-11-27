@@ -67,7 +67,11 @@ Proof:
 - Fresh boots to the report's spot, HEAD against the fix with the same steps
   (`scratch/runs/boot-head`, `boot-planar`): HEAD's diagonal texture breaks are gone.
 
-Still there, and not this defect: straight changes of tone along some triangle edges, in HEAD and
+User, 2026-11-27 (Fedora), after `9a05250`: a screenshot of the grass with a sharp diagonal
+line, brighter and yellower on one side, darker on the other, the grass's grain differing across it.
+That is the line called vertex lighting below; the note was wrong, it is still open.
+
+Still there, and not this defect (wrong, see above): straight changes of tone along some triangle edges, in HEAD and
 the fix alike. They are the room's baked vertex lighting, interpolated per triangle.
 
 The Deku Tree vines (`deku-vines.md`) are walls, which this does not map; they are still open.
