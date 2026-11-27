@@ -16,3 +16,8 @@ has stone and a framed wood panel, and its wood panel beside the band's plates (
 framed wider than the game's. Faces mapped there take the pack's stone and panel: the grey patch on
 the corner and the panel that looks like a block on the lid. The geometry is the same both ways (a
 probe texture of coloured cells shows a plain box). The cause is the pack's art in that quarter.
+
+User, 2026-11-27 (Fedora), measuring the two atlases side by side (each at 512 pixels): the front
+panel spans 144 in the game's and 146.5 in the pack's, the middle column's arch 33 against 27.5 and
+its plank 69 against 58.5. The pack's middle column is drawn about 15% narrower than the game's, so
+everything right of the front panel sits off the game's layout, not only the right quarter.
