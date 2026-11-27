@@ -505,6 +505,11 @@ objects. Rebuild the app: `ninja -C build/app`.
   the core's pin needs them made again; OoT3D's interpolation states from file 1 of the player's
   copy: `wait:15 start wait:3 a wait:3 a wait:8 warp:0xEE wait:5 savestate:kf warp:0x165 wait:5
   savestate:fire warp:0xAD wait:5 savestate:alley loadstate:kf warp:0xDB wait:2 savestate:kak`.
+  A state also holds the game's RomFS index from its boot: after an install changes the size of a
+  file the game reads (a stairs layer's room or scene), loading an older state reads other files at
+  stale offsets and the game faults (`ZAR_SetupZARInfo`, then an FS fatal error); make the state
+  again from a boot. A state also keeps the current room's model in RAM, so a changed room file
+  shows only after a warp into another scene and back.
   `z3dmods play` seeds `~/.local/share/z3d-mods/` once and keeps
   it: the app's saves are its own, apart from standalone Azahar's. The core's log is
   `<user>/Azahar/log/z3d_core.log`.
