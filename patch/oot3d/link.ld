@@ -7,7 +7,7 @@ SECTIONS {
   .patch.static_glyph_cell kTextRendererAddGlyph + 0x150 : { KEEP(*(.patch.static_glyph_cell)) }
   .patch.cutscene_interpreter kCutsceneInterpreter : { KEEP(*(.patch.cutscene_interpreter)) }
   .patch.camera_update kCameraUpdate : { KEEP(*(.patch.camera_update)) }
-  .patch.glyph_texture_mode kTextRendererInit + 0x13C : { KEEP(*(.patch.glyph_texture_mode)) }
+  .patch.text_renderer_init kTextRendererInit : { KEEP(*(.patch.text_renderer_init)) }
   .patch.text_element kMessageLayoutText + 0xA8 : { KEEP(*(.patch.text_element)) }
   .patch.instant_off kMessageLayoutText + 0x1B8 : { KEEP(*(.patch.instant_off)) }
   .patch.play_update kPlayUpdate : { KEEP(*(.patch.play_update)) }

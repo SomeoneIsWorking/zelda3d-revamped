@@ -6,6 +6,12 @@
 #include <stdint.h>
 
 namespace z3dmods::oot3d {
+
+// The game's TextRenderer_Init, from hooks.s; `mode` is its glyph texture's.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): TextRenderer_Init's own arguments.
+void textRendererGame(void *renderer, void *a1, void *a2, uint32_t a3, uint32_t mode, uint32_t a5,
+                      uint32_t a6, uint32_t a7);
+
 namespace {
 
 using FindGlyphFn = int (*)(void *font, uint32_t character, void *glyph);
@@ -43,9 +49,11 @@ uint32_t cellCharacter(const void *font, uint32_t cell) {
 
 } // namespace
 
-// TextRenderer_Init's mode for its glyph texture (hooks.s).
-uint32_t glyphTextureMode() {
-  return kGlyphTextureStatic;
+// TextRenderer_Init, overridden: the game's, with the static glyph texture for every renderer.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): TextRenderer_Init's own arguments.
+void initTextRenderer(void *renderer, void *a1, void *a2, uint32_t a3, uint32_t /*mode*/,
+                      uint32_t a5, uint32_t a6, uint32_t a7) {
+  textRendererGame(renderer, a1, a2, a3, kGlyphTextureStatic, a5, a6, a7);
 }
 
 // TextRenderer_AddGlyph's static branch (hooks.s): the cell a character is drawn from.

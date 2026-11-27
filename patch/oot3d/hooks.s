@@ -160,11 +160,12 @@
     bl song_notes
 .section .expect.song_notes, "", %progbits
     .word 0xE1A08000 @ mov r8, r0
-@ TextRenderer_Init: every renderer keeps its font in the static glyph texture (font_atlas.cpp).
-.section .patch.glyph_texture_mode, "ax", %progbits
-    bl glyph_texture_mode
-.section .expect.glyph_texture_mode, "", %progbits
-    .word 0xE1A0100B @ mov r1, r11
+@ TextRenderer_Init overridden: every renderer keeps its font in the static glyph texture
+@ (font_atlas.cpp).
+.section .patch.text_renderer_init, "ax", %progbits
+    b _ZN7z3dmods5oot3d16initTextRendererEPvS1_S1_jjjjj
+.section .expect.text_renderer_init, "", %progbits
+    .word 0xE92D5FF0 @ push {r4-r12, lr}
 @ TextRenderer_AddGlyph's static branch: the cell of the character in r7, into r5.
 .section .patch.static_glyph_cell, "ax", %progbits
     mov r0, r4
@@ -213,12 +214,6 @@ song_list_width:
     vpop {d0-d3}
     vmov s6, r0
     pop {r0-r5, r12, pc}
-@ r0 to r3 are set after the site.
-glyph_texture_mode:
-    push {r4, lr}
-    bl _ZN7z3dmods5oot3d16glyphTextureModeEv
-    mov r1, r0
-    pop {r4, pc}
 song_notes:
     push {r0, lr}
     bl _ZN7z3dmods5oot3d13nextSongNotesEv
@@ -288,3 +283,7 @@ _ZN7z3dmods5oot3d15itemButtonsGameEPv:
 _ZN7z3dmods5oot3d15setMatricesGameEPvPfPKf:
     push {r4, lr}
     b kCamera2DSetMatrices + 4
+.global _ZN7z3dmods5oot3d16textRendererGameEPvS1_S1_jjjjj
+_ZN7z3dmods5oot3d16textRendererGameEPvS1_S1_jjjjj:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, r12, lr}
+    b kTextRendererInit + 4
