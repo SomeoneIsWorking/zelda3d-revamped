@@ -11,6 +11,10 @@ Without one, an item's frame is its id.
 `[art]` names the HUD's sheet (`sheet`) and each piece's rectangle in the sheet's own pixels
 (`<name> = [x, y, w, h]`).
 
+A piece or icon from the pack's copy keeps only the pack's ink joined to the game's own art in that
+cell: the pack's upscaled art spills a few pixels over the game's cell edges, and a cut taking a
+neighbour's spill in draws it as a line down the HUD.
+
 `[words]` names the sheet of the A button's words: cells of `cell` pixels from `first`, `rows` to
 a column, counted down each column; an action's number is its word's cell. `count` is how many
 cells are words and `none` the number that shows no word (the decomp's defines). `{language}` in
@@ -26,25 +30,54 @@ from pathlib import Path
 from z3dmods import ctr, ctxb, gar, symbols, system_config
 from z3dmods.texture_pack import TexturePack
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 
+# Alpha above this is the pack's ink when telling a cell's art from a neighbour's spill, and how
+# far (an odd square, in the pack's pixels) ink reaches to join the ink near it and keep its fainter edge.
+SPILL_INK = 8
+SOFT_EDGE = 5
+_FILLED, _JOINED = 255, 128
 # Where the loader maps the code image.
 IMAGE_BASE = 0x00100000
 # An icon's longest side as installed; a HUD button is never drawn larger.
 LARGEST = 256
 
 
-def _sheet(romfs: ctr.Romfs, pack: TexturePack | None, name: str) -> tuple[Image.Image, float]:
-    """A romfs sheet, the pack's copy when it has one, and how many of its pixels one of the game's is."""
-    archive, gar_mark, inside = name.partition(".gar/")
-    file = gar.files(romfs.read(archive + ".gar"))[inside] if gar_mark else romfs.read(archive)
-    vanilla, gl_format, data = ctxb.image(file)
-    sheet = (pack.replacement(vanilla, data, gl_format) if pack else None) or vanilla
-    return sheet, sheet.width / vanilla.width
+class _Sheet:
+    """A romfs sheet: the game's own and the pack's copy when it has one."""
+
+    def __init__(self, romfs: ctr.Romfs, pack: TexturePack | None, name: str) -> None:
+        archive, gar_mark, inside = name.partition(".gar/")
+        file = gar.files(romfs.read(archive + ".gar"))[inside] if gar_mark else romfs.read(archive)
+        vanilla, gl_format, data = ctxb.image(file)
+        self.vanilla = vanilla.convert("RGBA")
+        self.image = ((pack.replacement(vanilla, data, gl_format) if pack else None) or vanilla).convert("RGBA")
+        # How many of the image's pixels one of the game's is.
+        self.scale = self.image.width / vanilla.width
+
+    def cut(self, left: int, top: int, width: int, height: int) -> Image.Image:
+        """A cell of the game's pixels, from the image."""
+        return self.image.crop(tuple(round(side * self.scale) for side in (left, top, left + width, top + height)))
+
+    def art(self, left: int, top: int, width: int, height: int) -> Image.Image:
+        """A cell with only the ink joined to the game's own art in it, and that ink's soft edge."""
+        cell = self.cut(left, top, width, height)
+        if self.scale == 1:
+            return cell
+        ink = (cell.getchannel("A").point(lambda alpha: _FILLED if alpha > SPILL_INK else 0)
+               .filter(ImageFilter.MaxFilter(SOFT_EDGE)))
+        game = self.vanilla.crop((left, top, left + width, top + height)).getchannel("A")
+        for y in range(height):
+            for x in range(width):
+                at = (min(int((x + 0.5) * self.scale), cell.width - 1), min(int((y + 0.5) * self.scale), cell.height - 1))
+                if game.getpixel((x, y)) and ink.getpixel(at) == _FILLED:
+                    ImageDraw.floodfill(ink, at, _JOINED)
+        joined = ink.point(lambda value: 255 if value == _JOINED else 0)
+        return Image.composite(cell, Image.new("RGBA", cell.size, (0, 0, 0, 0)), joined)
 
 
-def _png(sheet: Image.Image, scale: float, left: int, top: int, width: int, height: int) -> bytes:
-    icon = sheet.crop(tuple(round(side * scale) for side in (left, top, left + width, top + height)))
+def _png(sheet: _Sheet, left: int, top: int, width: int, height: int) -> bytes:
+    icon = sheet.art(left, top, width, height)
     icon.thumbnail((LARGEST, LARGEST), Image.Resampling.LANCZOS)
     buffer = io.BytesIO()
     icon.save(buffer, "PNG")
@@ -57,8 +90,8 @@ def build(repo: Path, game: str, romfs: ctr.Romfs, pack: TexturePack | None, cod
     tables = tomllib.loads(path.read_text()) if path.exists() else {}
     out = {}
     if (art := tables.get("art")) is not None:
-        sheet, scale = _sheet(romfs, pack, art["sheet"])
-        out.update({name: _png(sheet, scale, *box) for name, box in art.items() if name != "sheet"})
+        sheet = _Sheet(romfs, pack, art["sheet"])
+        out.update({name: _png(sheet, *box) for name, box in art.items() if name != "sheet"})
     if (table := tables.get("icons")) is not None:
         out.update(_items(repo, game, romfs, pack, code, table))
     if (table := tables.get("words")) is not None:
@@ -77,13 +110,13 @@ def _words(decomp: symbols.Decomp, romfs: ctr.Romfs, pack: TexturePack | None, t
            prefix: str) -> dict[str, bytes]:
     """`<prefix><number>`: each action word of the sheet `name`, its cell cut to the ink's width at the
     cell's height."""
-    sheet, scale = _sheet(romfs, pack, name)
+    sheet = _Sheet(romfs, pack, name)
     (left, top), (width, height) = table["first"], table["cell"]
     none = decomp.define(table["none"])
     words = {}
     for number in range(decomp.define(table["count"])):
         x, y = left + number // table["rows"] * width, top + number % table["rows"] * height
-        cell = sheet.crop(tuple(round(side * scale) for side in (x, y, x + width, y + height))).convert("RGBA")
+        cell = sheet.cut(x, y, width, height)
         ink = cell.getchannel("A").point(lambda alpha: 255 if alpha > INK else 0).getbbox()
         if number == none or ink is None:
             continue
@@ -98,7 +131,7 @@ def _words(decomp: symbols.Decomp, romfs: ctr.Romfs, pack: TexturePack | None, t
 def _items(repo: Path, game: str, romfs: ctr.Romfs, pack: TexturePack | None, code: bytes,
            table: dict) -> dict[str, bytes]:
     decomp = symbols.load(repo, game)
-    sheet, scale = _sheet(romfs, pack, table["sheet"])
+    sheet = _Sheet(romfs, pack, table["sheet"])
     width, height = table["frame"]
     if "frames" in table:
         start = symbols.global_(decomp, table["frames"]) - IMAGE_BASE
@@ -111,6 +144,6 @@ def _items(repo: Path, game: str, romfs: ctr.Romfs, pack: TexturePack | None, co
     for item, frame in enumerate(frames):
         if frame == none or frame >= table["icons"]:
             continue
-        icons[str(item)] = _png(sheet, scale, frame % table["columns"] * width, frame // table["columns"] * height,
+        icons[str(item)] = _png(sheet, frame % table["columns"] * width, frame // table["columns"] * height,
                                 width, height)
     return icons
