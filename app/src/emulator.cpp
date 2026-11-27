@@ -278,6 +278,16 @@ VideoCore::GPU &Emulator::gpu() {
   return system_.GPU();
 }
 
+WindowLoan::WindowLoan(Emulator &emulator) {
+  Settings::values.present_to_window = false;
+  emulator.gpu().Renderer().ReleaseWindow();
+}
+
+WindowLoan::~WindowLoan() {
+  // The game's next frame makes its swapchain again.
+  Settings::values.present_to_window = true;
+}
+
 std::string Pacing::text() const {
   const auto per = [](double part, double whole) {
     return whole > 0.0 ? part / whole : 0.0;

@@ -91,6 +91,8 @@ void play(const AppConfig &config, GameWindow &window, PadInput &pad, Emulator &
         lucent::warn("z3d", "no menu font (--font): no screen over the game");
         continue;
       }
+      // On Wayland a second presenter on the window's surface is a protocol error.
+      const WindowLoan loan(emulator);
       const MenuCanvas canvas(window, config.font, config.assets);
       if (left == Player::Left::Report) {
         const ReportedRun run{title, game, options, mods.patchOn(), mods.texturesOn()};

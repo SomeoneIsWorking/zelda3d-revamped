@@ -129,4 +129,16 @@ private:
   std::vector<std::function<void()>> frameObservers_;
 };
 
+// The window lent to a screen drawn over a running game: until the loan ends the core neither
+// presents to it nor holds a swapchain on it, so the screen's renderer is its only presenter.
+class WindowLoan {
+public:
+  explicit WindowLoan(Emulator &emulator);
+  ~WindowLoan();
+  WindowLoan(const WindowLoan &) = delete;
+  WindowLoan &operator=(const WindowLoan &) = delete;
+  WindowLoan(WindowLoan &&) = delete;
+  WindowLoan &operator=(WindowLoan &&) = delete;
+};
+
 } // namespace z3d::app

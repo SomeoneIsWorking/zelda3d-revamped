@@ -478,6 +478,11 @@ objects. Rebuild the app: `ninja -C build/app`.
   screen read back each frame. It is turned on as the picker closes and the core takes the window
   on its next frame, after the canvas is gone; the cores shut down (`System::Shutdown`) before the
   picker opens again.
+- A screen over a running game (options, bug report) holds a `WindowLoan` for as long as its
+  canvas lives: presenting is off and the core's swapchain is released (`ReleaseWindow`, the
+  fork) before the canvas's renderer makes its own. Wayland allows one presenter per surface
+  (a second `wp_fifo_v1` is a protocol error that drops the connection). The game's next frame
+  after the loan makes its swapchain again.
 - Rendering: the core's own Vulkan renderer presents to the window's native surface (Wayland or
   X11, from SDL3's window properties). A frame ends when the renderer calls
   `GameWindow::PollEvents`, which counts it, pumps SDL events and reads the host pad. `shot` frames
