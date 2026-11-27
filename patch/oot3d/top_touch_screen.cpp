@@ -14,6 +14,9 @@
 
 namespace z3dmods::oot3d {
 
+// The game's Camera2D_SetMatrices, from hooks.s.
+void setMatricesGame(void *camera, float *projection, const float *view);
+
 // The game's FileChoose_InitQuads, from hooks.s.
 void fileChooseGame();
 
@@ -23,7 +26,6 @@ namespace {
 inline constexpr uint32_t kBackQuads = 2;
 inline constexpr uint32_t kBackLitQuads = 3;
 
-using SetMatricesFn = void (*)(void *camera, float *projection, const float *view);
 using ViewportFn = void (*)(int x, int y, int width, int height);
 using DrawFn = void (*)(void *model);
 
@@ -56,16 +58,16 @@ bool widened() {
 
 } // namespace
 
-// The touch screen layers' calls of Camera2D_SetMatrices (TouchScreen2D_BeginLayer0 to 3).
+// Camera2D_SetMatrices, overridden: the touch screen's camera widened.
 void touchProjection(void *camera, float *projection, const float *view) {
-  if (widened()) {
+  if (camera == reinterpret_cast<void *>(kTouchCamera2D) && widened()) {
     // Clip y of x is the game's of x' = (x + margin) * 320 / 400, so x -40 to 360 spans what
     // 0 to 320 did.
     constexpr float squeeze = kTouchWidth / kTopWidth;
     projection[kClipYOffset] += projection[kClipYScale] * kWideMargin * squeeze;
     projection[kClipYScale] *= squeeze;
   }
-  guest::function<SetMatricesFn>(kCamera2DSetMatrices)(camera, projection, view);
+  setMatricesGame(camera, projection, view);
 }
 
 // The viewport a file select fade is drawn through: The One Screen spreads the fade's touch-screen

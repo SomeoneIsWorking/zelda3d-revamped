@@ -16,12 +16,9 @@ SECTIONS {
   .patch.item_update_cursor kItemMenuUpdateCursor : { KEEP(*(.patch.item_update_cursor)) }
   .patch.item_buttons_update kHudItemButtonsUpdateAmmo : { KEEP(*(.patch.item_buttons_update)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
+  .patch.camera2d_set_matrices kCamera2DSetMatrices : { KEEP(*(.patch.camera2d_set_matrices)) }
   .patch.touch_in_rect kTouchInRect : { KEEP(*(.patch.touch_in_rect)) }
   .patch.song_notes kPadRequestData + 0x98 : { KEEP(*(.patch.song_notes)) }
-  .patch.touch_projection3 kTouchScreen2DLayer3 + 0x1B8 : { KEEP(*(.patch.touch_projection3)) }
-  .patch.touch_projection2 kTouchScreen2DLayer2 + 0x1F0 : { KEEP(*(.patch.touch_projection2)) }
-  .patch.touch_projection1 kTouchScreen2DLayer1 + 0x1C4 : { KEEP(*(.patch.touch_projection1)) }
-  .patch.touch_projection0 kTouchScreen2DLayer0 + 0x1CC : { KEEP(*(.patch.touch_projection0)) }
   .patch.base_b_ring kTopHudUpdateButtons + 0x40 : { KEEP(*(.patch.base_b_ring)) }
   .patch.base_b_item kTopHudDraw + 0x458 : { KEEP(*(.patch.base_b_item)) }
   .patch.item_menu_draw kItemMenuDraw : { KEEP(*(.patch.item_menu_draw)) }

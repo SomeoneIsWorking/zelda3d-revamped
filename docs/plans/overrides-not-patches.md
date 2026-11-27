@@ -24,6 +24,9 @@ changes the result.
 - OoT3D item screen: `ItemMenu_Draw` is ours, the game's pieces in its order with our inventory
   and slot column between them, and `HudItemButtons_UpdateAmmo` is overridden to move the grid's
   button nodes off the screen when the layout is the item screen's.
+- OoT3D file select: `Camera2D_SetMatrices` is overridden and widens the touch screen's camera
+  (`gTouchCamera2D`), not four calls in the layers; `TouchScreen2D_Begin`'s pass on that camera is
+  widened too, so file select's sky keeps its aspect.
 - Open: the rest of both games' `hooks.s` sites that are not entry overrides are call hooks and
   literal patches inside functions: cutscene skip, camera, text, The One Screen's `base_*` sites
   and others. Each becomes an override of its function, one function at a time.

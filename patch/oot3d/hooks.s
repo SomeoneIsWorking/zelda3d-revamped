@@ -104,24 +104,12 @@
     b _ZN7z3dmods5oot3d12drawItemMenuEv
 .section .expect.item_menu_draw, "", %progbits
     .word 0xE92D4070 @ push {r4-r6, lr}
-@ The touch screen's 2D layers (TouchScreen2D_BeginLayer0 to 3): each one's projection, widened
-@ while file select is up.
-.section .patch.touch_projection0, "ax", %progbits
-    bl _ZN7z3dmods5oot3d15touchProjectionEPvPfPKf
-.section .expect.touch_projection0, "", %progbits
-    .word 0xEBFC163B @ bl Camera2D_SetMatrices
-.section .patch.touch_projection1, "ax", %progbits
-    bl _ZN7z3dmods5oot3d15touchProjectionEPvPfPKf
-.section .expect.touch_projection1, "", %progbits
-    .word 0xEBFC1CE7 @ bl Camera2D_SetMatrices
-.section .patch.touch_projection2, "ax", %progbits
-    bl _ZN7z3dmods5oot3d15touchProjectionEPvPfPKf
-.section .expect.touch_projection2, "", %progbits
-    .word 0xEBFC2006 @ bl Camera2D_SetMatrices
-.section .patch.touch_projection3, "ax", %progbits
-    bl _ZN7z3dmods5oot3d15touchProjectionEPvPfPKf
-.section .expect.touch_projection3, "", %progbits
-    .word 0xEBFC2569 @ bl Camera2D_SetMatrices
+@ Camera2D_SetMatrices overridden: the touch screen's projection widened while file select is up
+@ (top_touch_screen.cpp).
+.section .patch.camera2d_set_matrices, "ax", %progbits
+    b _ZN7z3dmods5oot3d15touchProjectionEPvPfPKf
+.section .expect.camera2d_set_matrices, "", %progbits
+    .word 0xE92D4010 @ push {r4, lr}
 @ The One Screen's file select on the top screen: framebuffer rows 0 to 400, not 40 to 360,
 @ for the projection top_touch_screen.cpp widens to match.
 .section .patch.base_file_select_row, "ax", %progbits
@@ -296,3 +284,7 @@ _ZN7z3dmods5oot3d10cameraGameEPvS1_:
 _ZN7z3dmods5oot3d15itemButtonsGameEPv:
     push {r4, r5, r6, r7, r8, r9, r10, r11, lr}
     b kHudItemButtonsUpdateAmmo + 4
+.global _ZN7z3dmods5oot3d15setMatricesGameEPvPfPKf
+_ZN7z3dmods5oot3d15setMatricesGameEPvPfPKf:
+    push {r4, lr}
+    b kCamera2DSetMatrices + 4
