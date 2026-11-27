@@ -1,18 +1,41 @@
-// Gameplay_Update's call of Play_Update, with our per-frame features in front of it.
+// Play_Update, overridden: our per-frame features in front of the game's.
 #include "play_update.hpp"
-
-#include "../common/guest.hpp"
-#include "symbols.hpp"
 
 namespace z3dmods::oot3d {
 
-using PlayUpdateFn = void (*)(void *play);
+// The game's Play_Update, from hooks.s.
+void playGame(void *play);
 
-// Called instead of Play_Update by Gameplay_Update (hooks.s).
+namespace {
+
+class PlayUpdate {
+public:
+  void update(void *play) {
+    updateSlotItems(play);
+    updateAutosave(play);
+    updating_ = true;
+    playGame(play);
+    updating_ = false;
+  }
+
+  bool updating() const {
+    return updating_;
+  }
+
+private:
+  bool updating_ = false;
+};
+
+constinit PlayUpdate playUpdate;
+
+} // namespace
+
 void updatePlay(void *play) {
-  updateSlotItems(play);
-  updateAutosave(play);
-  guest::function<PlayUpdateFn>(kPlayUpdate)(play);
+  playUpdate.update(play);
+}
+
+bool playUpdating() {
+  return playUpdate.updating();
 }
 
 } // namespace z3dmods::oot3d

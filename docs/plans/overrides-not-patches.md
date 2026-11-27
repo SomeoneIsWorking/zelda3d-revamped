@@ -18,6 +18,9 @@ changes the result.
   the column ours. No table is patched. The grid's cursor and stylus are the overridden
   `ItemMenu_NodePosition`, `ItemMenu_PlaceCursor`, `ItemMenu_UpdateCursor`, `ItemMenu_UpdateTouch`
   and `Touch_InRect` (`item_grid.cpp`, `pause_screens.cpp`).
+- OoT3D play: the cutscene interpreter (the Start skip), `Play_Update` (our per-frame features in
+  front of the game's) and `Camera_Update` (the free camera after the game's) are overridden in
+  place of their call sites.
 - Open: the rest of both games' `hooks.s` sites that are not entry overrides are call hooks and
   literal patches inside functions: cutscene skip, camera, text, The One Screen's `base_*` sites
   and others. Each becomes an override of its function, one function at a time.

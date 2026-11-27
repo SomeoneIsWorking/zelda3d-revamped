@@ -32,8 +32,8 @@ to the end (flags, items, time of day, entrance, music), with no other change.
   layout as a `Game` trait. The functions, globals and offsets it uses are generated from the game's
   decomp (`patch/<game>/symbols.toml`, `tools/z3dmods/symbols.py`); the RE behind them is in
   `decomp/oot3d/docs/cutscene.md` and `decomp/mm3d/docs/cutscene.md`.
-- OoT3D: `patch/oot3d/` replaces the interpreter at its two call sites in
-  `CutsceneHandler_RunScript`. Start counts in normal play, after the first second of the cutscene
+- OoT3D: `patch/oot3d/` overrides the interpreter, which only `CutsceneHandler_RunScript` calls,
+  and runs the game's from the override. Start counts in normal play, after the first second of the cutscene
   (the game's own title-demo minimum), with no transition pending.
 - MM3D: `patch/mm3d/` replaces the interpreter at its three call sites (`Cutscene_BeginScript`,
   `CutsceneHandler_StartScript`, `CutsceneHandler_RunScript`). The title screen's demo is a

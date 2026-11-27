@@ -5,17 +5,16 @@ INCLUDE symbols.ld
 SECTIONS {
   /* Fixed sites in address order. */
   .patch.static_glyph_cell kTextRendererAddGlyph + 0x150 : { KEEP(*(.patch.static_glyph_cell)) }
+  .patch.cutscene_interpreter kCutsceneInterpreter : { KEEP(*(.patch.cutscene_interpreter)) }
+  .patch.camera_update kCameraUpdate : { KEEP(*(.patch.camera_update)) }
   .patch.glyph_texture_mode kTextRendererInit + 0x13C : { KEEP(*(.patch.glyph_texture_mode)) }
   .patch.text_element kMessageLayoutText + 0xA8 : { KEEP(*(.patch.text_element)) }
   .patch.instant_off kMessageLayoutText + 0x1B8 : { KEEP(*(.patch.instant_off)) }
-  .patch.draw_camera kGameplayDraw + 0x808 : { KEEP(*(.patch.draw_camera)) }
-  .patch.update_camera kPlayUpdate + 0x1540 : { KEEP(*(.patch.update_camera)) }
+  .patch.play_update kPlayUpdate : { KEEP(*(.patch.play_update)) }
   .patch.item_node_position kItemMenuNodePosition : { KEEP(*(.patch.item_node_position)) }
   .patch.item_update_touch kItemMenuUpdateTouch : { KEEP(*(.patch.item_update_touch)) }
   .patch.item_update_cursor kItemMenuUpdateCursor : { KEEP(*(.patch.item_update_cursor)) }
   .patch.save_entry kSramWriteSave : { KEEP(*(.patch.save_entry)) }
-  .patch.interpreter_catchup kCutsceneRunScript + 0xF0 : { KEEP(*(.patch.interpreter_catchup)) }
-  .patch.interpreter_tail kCutsceneRunScript + 0x120 : { KEEP(*(.patch.interpreter_tail)) }
   .patch.touch_in_rect kTouchInRect : { KEEP(*(.patch.touch_in_rect)) }
   .patch.song_notes kPadRequestData + 0x98 : { KEEP(*(.patch.song_notes)) }
   .patch.touch_projection3 kTouchScreen2DLayer3 + 0x1B8 : { KEEP(*(.patch.touch_projection3)) }
@@ -28,7 +27,6 @@ SECTIONS {
   .patch.item_menu_draw_model kItemMenuDraw + kItemMenuDrawModelCall : { KEEP(*(.patch.item_menu_draw_model)) }
   .patch.item_menu_draw kItemMenuDraw + kItemMenuDrawLayout40Call : { KEEP(*(.patch.item_menu_draw)) }
   .patch.item_place_cursor kItemMenuPlaceCursor : { KEEP(*(.patch.item_place_cursor)) }
-  .patch.play_update kGameplayUpdate + 0x9C : { KEEP(*(.patch.play_update)) }
   .patch.base_camera kGameplayUpdate + 0xA8 : { KEEP(*(.patch.base_camera)) }
   .patch.gear_menu_init kGearMenuInit : { KEEP(*(.patch.gear_menu_init)) }
   .patch.save_menu_init kSaveMenuInit : { KEEP(*(.patch.save_menu_init)) }

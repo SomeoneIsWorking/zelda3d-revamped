@@ -8,9 +8,12 @@
 #include <stdint.h>
 
 namespace z3dmods::oot3d {
+
+// The game's cutscene interpreter, from hooks.s.
+void cutsceneGame(void *play, void *cutscene, const void *script);
+
 namespace {
 
-using InterpreterFn = void (*)(void *play, void *cutscene, const void *script);
 using CloseTextboxFn = void (*)(void *play);
 using MessageStateFn = int32_t (*)();
 
@@ -20,7 +23,7 @@ struct Game {
   }
 
   static void interpret(void *play, void *cutscene, const void *script) {
-    guest::function<InterpreterFn>(kCutsceneInterpreter)(play, cutscene, script);
+    cutsceneGame(play, cutscene, script);
   }
 
   static bool running(const void *cutscene) {
@@ -86,7 +89,7 @@ constinit CutsceneSkip<Game> skip;
 
 } // namespace
 
-// Called instead of the interpreter from its two call sites (link.ld).
+// The cutscene interpreter, overridden (hooks.s).
 void stepCutscene(void *play, void *cutscene, const void *script) {
   skip.step(play, cutscene, script);
 }

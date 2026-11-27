@@ -8,11 +8,16 @@
 #include "../common/guest.hpp"
 #include "../common/mouse_look.hpp"
 #include "options.hpp"
+#include "play_update.hpp"
 #include "symbols.hpp"
 
 #include <stdint.h>
 
 namespace z3dmods::oot3d {
+
+// The game's Camera_Update, from hooks.s.
+void cameraGame(void *out, void *camera);
+
 namespace {
 
 struct Vec3 {
@@ -27,7 +32,6 @@ struct Angles {
   int16_t roll;
 };
 
-using CameraUpdateFn = void (*)(Angles *out, void *camera);
 using BgCheckFn = int32_t (*)(void *camera, const Vec3 *from, void *colChk);
 using LookAtFn = void (*)(void *view, Vec3 *eye, Vec3 *at, Vec3 *up);
 
@@ -43,7 +47,8 @@ float sine(float x) {
     x = -kTau / 2.0F - x;
   }
   const float x2 = x * x;
-  return x * (1.0F + x2 * (-1.0F / 6.0F + x2 * (1.0F / 120.0F + x2 * (-1.0F / 5040.0F + x2 / 362880.0F))));
+  return x * (1.0F +
+              x2 * (-1.0F / 6.0F + x2 * (1.0F / 120.0F + x2 * (-1.0F / 5040.0F + x2 / 362880.0F))));
 }
 
 float sinS(int16_t angle) {
@@ -89,9 +94,10 @@ float length(const Vec3 &a) {
 
 class FreeCamera {
 public:
-  // `step` is false when the game redoes the update for a draw: the stick moves the orbit once a frame.
+  // `step` is false when the game redoes the update for a draw: the stick moves the orbit once a
+  // frame.
   void update(Angles *out, void *camera, bool step) {
-    guest::function<CameraUpdateFn>(kCameraUpdate)(out, camera);
+    cameraGame(out, camera);
     // Taken every frame, so a turn made while the orbit cannot follow it is dropped.
     const LookTurn look = step ? takeLook() : LookTurn{};
     StickPosition stick;
@@ -159,7 +165,8 @@ private:
   }
 
   static int16_t clampPitch(int32_t pitch) {
-    return static_cast<int16_t>(pitch < kPitchMin ? kPitchMin : (pitch > kPitchMax ? kPitchMax : pitch));
+    return static_cast<int16_t>(pitch < kPitchMin ? kPitchMin
+                                                  : (pitch > kPitchMax ? kPitchMax : pitch));
   }
 
   // The camera function the game runs for this setting and mode, as Camera_Update picks it.
@@ -170,8 +177,8 @@ private:
     if ((guest::read<uint32_t>(entry + kCameraSettingValidModes) & (1U << mode)) == 0) {
       return -1;
     }
-    return guest::read<int16_t>(guest::read<uintptr_t>(entry + kCameraSettingModes) + mode * kCameraModeSize +
-                                kCameraModeFunction);
+    return guest::read<int16_t>(guest::read<uintptr_t>(entry + kCameraSettingModes) +
+                                mode * kCameraModeSize + kCameraModeFunction);
   }
 
   // Link's own follow camera, on the ground, in a jump or pulling up onto a ledge; every other
@@ -189,10 +196,12 @@ private:
         guest::read<uintptr_t>(play, kPlayCameras) != reinterpret_cast<uintptr_t>(camera)) {
       return false;
     }
-    if (guest::read<uint8_t>(play, kPlayCutscene + kCsState) != 0 || guest::read<int8_t>(play, kPlayTransitionTrigger) != 0) {
+    if (guest::read<uint8_t>(play, kPlayCutscene + kCsState) != 0 ||
+        guest::read<int8_t>(play, kPlayTransitionTrigger) != 0) {
       return false;
     }
-    return guest::read<int16_t>(camera, kCamStatus) == kCamStatActive && follows(cameraFunction(camera));
+    return guest::read<int16_t>(camera, kCamStatus) == kCamStatActive &&
+           follows(cameraFunction(camera));
   }
 
   // The eye on the orbit, kept in front of walls; the view gets the game's quake offset on top.
@@ -236,14 +245,18 @@ constinit FreeCamera freeCamera;
 
 } // namespace
 
-// Called instead of Camera_Update for the active camera: by Play_Update, and by Gameplay_Draw
-// when it redoes the update (link.ld).
-void updateActiveCamera(void *out, void *camera) {
-  freeCamera.update(static_cast<Angles *>(out), camera, true);
-}
-
-void redrawActiveCamera(void *out, void *camera) {
-  freeCamera.update(static_cast<Angles *>(out), camera, false);
+// Camera_Update, overridden. Play_Update runs it for every camera and Gameplay_Draw again for the
+// active one; the orbit steps once a frame, in Play_Update's.
+void updateCamera(void *out, void *camera) {
+  auto *play = reinterpret_cast<void *>(guest::read<uintptr_t>(camera, kCamPlay));
+  if (play == nullptr ||
+      guest::read<uintptr_t>(reinterpret_cast<uintptr_t>(play) + kPlayCameras +
+                             guest::read<int16_t>(play, kPlayActiveCamera) * sizeof(uint32_t)) !=
+          reinterpret_cast<uintptr_t>(camera)) {
+    cameraGame(out, camera);
+    return;
+  }
+  freeCamera.update(static_cast<Angles *>(out), camera, playUpdating());
 }
 
 } // namespace z3dmods::oot3d

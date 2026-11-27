@@ -20,8 +20,9 @@ The app feeds the host's right stick to the 3DS C-stick and the triggers to ZL/Z
   or scripted camera settings hand the view back. L recenters behind Link because Z-targeting does.
   Options: on/off, invert X, invert Y (`patch/oot3d/options.toml`); a Master Quest file's mirrored
   world turns the stick's x around.
-- Hooks: both `bl Camera_Update` calls for the active camera (`Play_Update`, and `Gameplay_Draw`'s
-  repeat). The One Screen ships an orbit camera of its own on a hook after `Play_Update`; our patch
+- Hooks: `Camera_Update` is overridden; the game's runs first, and for the active camera the
+  orbit follows, stepping in `Play_Update`'s call and only placed again in `Gameplay_Draw`'s repeat
+  (`play_update.cpp` says which). The One Screen ships an orbit camera of its own on a hook after `Play_Update`; our patch
   takes that hook back so only one camera places the eye (docs/mods.md).
 - The OoT3D Randomizer's free camera (no licence for its own code), Ocarina ReFramed (GPL-3.0) and
   Roberto-Nessy's Free Cam (no licence) are evidence only. RE: decomp/oot3d `docs/camera.md`.

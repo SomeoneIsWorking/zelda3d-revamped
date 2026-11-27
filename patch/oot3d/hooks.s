@@ -1,15 +1,10 @@
 .syntax unified
 .arm
-@ Cutscene update: the catch-up loop's interpreter call.
-.section .patch.interpreter_catchup, "ax", %progbits
-    bl _ZN7z3dmods5oot3d12stepCutsceneEPvS1_PKv
-.section .expect.interpreter_catchup, "", %progbits
-    .word 0xEBFE8ED6 @ bl 0x2C5BA0
-@ Cutscene update: the per-frame tail call into the interpreter.
-.section .patch.interpreter_tail, "ax", %progbits
+@ The cutscene interpreter overridden: the Start skip, then the game's (cutscene_skip.cpp).
+.section .patch.cutscene_interpreter, "ax", %progbits
     b _ZN7z3dmods5oot3d12stepCutsceneEPvS1_PKv
-.section .expect.interpreter_tail, "", %progbits
-    .word 0xEAFE8ECA @ b 0x2C5BA0
+.section .expect.cutscene_interpreter, "", %progbits
+    .word 0xE92D4FF0 @ push {r4-r11, lr}
 @ Message layout: before each element is parsed, the text object, next character and index.
 .section .patch.text_element, "ax", %progbits
     bl quick_text_element
@@ -20,20 +15,16 @@
     .word quick_text_instant_off
 .section .expect.instant_off, "", %progbits
     .word 0x002E06C8
-@ Gameplay_Draw and Play_Update: the active camera's update.
-.section .patch.draw_camera, "ax", %progbits
-    bl _ZN7z3dmods5oot3d18redrawActiveCameraEPvS1_
-.section .expect.draw_camera, "", %progbits
-    .word 0xEBFFD5B1 @ bl 0x2D84C4
-.section .patch.update_camera, "ax", %progbits
-    bl _ZN7z3dmods5oot3d18updateActiveCameraEPvS1_
-.section .expect.update_camera, "", %progbits
-    .word 0xEBFFD047 @ bl 0x2D84C4
-@ Gameplay_Update: the play update.
+@ Camera_Update overridden: the free camera after the game's update (free_camera.cpp).
+.section .patch.camera_update, "ax", %progbits
+    b _ZN7z3dmods5oot3d12updateCameraEPvS1_
+.section .expect.camera_update, "", %progbits
+    .word 0xE92D4FF0 @ push {r4-r11, lr}
+@ Play_Update overridden: our per-frame features, then the game's (play_update.cpp).
 .section .patch.play_update, "ax", %progbits
-    bl _ZN7z3dmods5oot3d10updatePlayEPv
+    b _ZN7z3dmods5oot3d10updatePlayEPv
 .section .expect.play_update, "", %progbits
-    .word 0xEBFA428C @ bl 0x2E2E60
+    .word 0xE92D4FF0 @ push {r4-r11, lr}
 @ Sram_WriteSave's first instruction: every save passes here.
 .section .patch.save_entry, "ax", %progbits
     b save_entry
@@ -302,3 +293,15 @@ _ZN7z3dmods5oot3d12saveMenuGameEv:
 _ZN7z3dmods5oot3d14fileChooseGameEv:
     push {r4, r5, r6, r7, r8, r9, r10, r11, r12, lr}
     b kFileChooseInitQuads + 4
+.global _ZN7z3dmods5oot3d12cutsceneGameEPvS1_PKv
+_ZN7z3dmods5oot3d12cutsceneGameEPvS1_PKv:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, lr}
+    b kCutsceneInterpreter + 4
+.global _ZN7z3dmods5oot3d8playGameEPv
+_ZN7z3dmods5oot3d8playGameEPv:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, lr}
+    b kPlayUpdate + 4
+.global _ZN7z3dmods5oot3d10cameraGameEPvS1_
+_ZN7z3dmods5oot3d10cameraGameEPvS1_:
+    push {r4, r5, r6, r7, r8, r9, r10, r11, lr}
+    b kCameraUpdate + 4
