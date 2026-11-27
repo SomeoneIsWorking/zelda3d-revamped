@@ -146,11 +146,12 @@ void initItemMenu() {
   itemMenuGame();
   const auto batch = guest::read<uintptr_t>(kItemMenu + kItemMenuQuads);
   const QuadTables tables{kItemMenuQuadPositions, kItemMenuQuadSizes};
+  // Before the tabs turn: setting a cell sets its quad's UVs as the game laid them, unturned.
+  trimMapTabCell(batch);
   itemQuads.build(batch, {tables, kItemMenuQuadTabs, kItemMenuQuadTabFrames, kItemMenuQuadTabBar,
                           kItemMenuQuadBack, kItemMenuQuadBackLit, kBackLitQuads});
   shiftQuads(batch, tables, {kItemMenuQuadPanel, kPanelQuads}, kOffScreen);
   shiftQuads(batch, tables, {kItemMenuQuadColumn, kColumnQuads}, kOffScreen);
-  trimMapTabCell(batch);
   buildInventoryScreen();
   buildSlotColumn();
 }
